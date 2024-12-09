@@ -1,0 +1,22 @@
+/* Sidebar styles */
+.sidebar {
+    padding: 15px;
+    box-sizing: border-box;
+    min-width: 200px;
+    max-width: 600px;
+}
+
+.resizer {
+    width: 5px;
+    cursor: col-resize;
+    background-color: #ccc;
+}
+
+.resizer:hover {
+    background-color: #888;
+}
+
+.mainContent {
+    flex-grow: 1;
+    padding: 16px;
+}

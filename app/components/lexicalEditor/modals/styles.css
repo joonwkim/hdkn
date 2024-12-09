@@ -1,0 +1,15 @@
+.file-input {
+    display: none;
+}
+
+.custom-file-label {
+    cursor: pointer;
+}
+.error {
+    font-size: smaller;
+    color: red;
+}
+
+.validUrl {
+    font-size: smaller;
+}

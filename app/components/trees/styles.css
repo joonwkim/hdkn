@@ -1,0 +1,91 @@
+.nodeList {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+.nodeWrapper {
+    position: relative;
+}
+
+.nodeItem {
+    cursor: pointer;
+    padding: 5px 0;
+}
+
+/* Chevron icon styles */
+.chevron {
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+/* Three dots and context menu */
+.threeDots {
+    position: relative;
+    cursor: pointer;
+}
+
+.dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-dialog-centered {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.dialog h4 {
+    margin-bottom: 10px;
+}
+
+.indent-0 {
+    margin-left: 0rem;
+}
+
+.indent-1 {
+    margin-left: 1.25rem;
+}
+
+.indent-2 {
+    margin-left: 2.5rem;
+}
+
+.indent-3 {
+    margin-left: 3.75rem;
+}
+
+.indent-4 {
+    margin-left: 5rem;
+}
+
+.indent-5 {
+    margin-left: 6.25rem;
+}
+
+.indent-6 {
+    margin-left: 7.5rem;
+}
+
+.indent-7 {
+    margin-left: 8.75rem;
+}
+
+.indent-8 {
+    margin-left: 10rem;
+}
+.selectedLeafNodeDark {
+    background-color: #34495e;
+}
+
+.selectedLeafNodeLight {
+    background-color: #e0f7fa;
+}

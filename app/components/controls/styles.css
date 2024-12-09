@@ -1,0 +1,27 @@
+.btn-toolbar .divider {
+    width: 1px !important;
+    height: 30px;
+    background-color: #eee;
+    margin: 0 4px;
+}
+
+.btn-toolbar {
+    cursor: not-allowed;
+    border-bottom: 1px solid #ddd;
+}
+
+.btn-toolbar button:disabled {
+    pointer-events: none;
+    /* Ensures the button remains disabled */
+}
+
+.btn-outline-secondary.active,
+.btn-outline-secondary:active,
+.btn-outline-secondary:hover {
+    background-color: #e1e3e4;
+    /* Light color on hover */
+    border-color: #e1e3e4;
+    /* Optional: matching border color */
+    color: #000;
+    /* Text color on hover */
+}

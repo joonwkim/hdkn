@@ -1,0 +1,34 @@
+.authPage {
+  display: grid;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  place-items: center;
+  position: relative;
+  width: 100%
+}
+
+
+.authPage>div {
+  text-align: center
+}
+
+
+.emailError {
+  color: red;
+  font-size: 8pt;
+}
+.loginForm {
+  width: 22rem;
+  border-color: gray;
+  padding: 2rem;
+}
+.loginLabel {
+  font-size: 9pt;
+  color: darkblue;
+  margin-bottom: 1rem;
+}
+.loginRegist {
+  margin-left: 9pt;
+  font-size: 9pt;
+}

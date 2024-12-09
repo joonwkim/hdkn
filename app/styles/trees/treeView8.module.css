@@ -1,0 +1,67 @@
+.nodeItem {
+    position: relative;
+    margin-left: 10px;
+}
+
+.actions {
+    display: none;
+}
+
+.nodeItem:hover .actions {
+    display: block;
+}
+
+.chevron {
+    cursor: pointer;
+}
+
+.contextMenu {
+    position: absolute;
+    background-color: var(--bs-light);
+    border: 1px solid var(--bs-dark);
+    z-index: 1000;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.contextMenu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.contextMenu li {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.contextMenu li:hover {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+.dialog {
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 20px;
+    z-index: 1050;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dialogContent {
+    display: flex;
+    flex-direction: column;
+}
+
+.dialogActions {
+    margin-top: 10px;
+}
+
+.dialog input {
+    margin-bottom: 10px;
+    padding: 5px;
+}
