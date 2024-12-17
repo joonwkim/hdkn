@@ -416,7 +416,7 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
                         const editorState = activeEditor.getEditorState();
                         const serializedState = JSON.stringify(editorState);
                         saveDocument(serializedState);
-                        // console.log('serializedState:', serializedState)
+                        console.log('serializedState:', serializedState)
                      });
                     // const content = await saveLexicalFile(activeEditor);
                     // if (!content) throw new Error('Failed to get content from editor');

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { debounce } from 'lodash-es';
 import './styles.css'
 
@@ -26,7 +26,7 @@ const EmbedYoutubeModal = ({ onClick }: { onClick: (payload: { value: string }) 
             }
         }
     };
-    const handleChange = (event) => {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const inputUrl = event.target.value;
         setUrl(inputUrl);
         validateText(inputUrl)

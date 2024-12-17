@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react';
 import { TreeNode } from '../../types/treeMenu';
 import './styles.css'

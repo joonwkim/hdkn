@@ -1,4 +1,3 @@
-import { error } from 'console';
 import nodemailer from 'nodemailer';
 
 export const sendMail = (email: string, message: string) => {
@@ -36,6 +35,7 @@ export const sendMail = (email: string, message: string) => {
 
         return true;
     } catch (error) {
+        console.log('error: ', error)
         return false;
     }
 

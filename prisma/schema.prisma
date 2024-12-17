@@ -26,13 +26,16 @@ model TreeNode {
 
 model LexicalDocument {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  title     String   @unique
+  title     String   
   url       String?
   content   String // JSON content as a string
+  author    User     @relation(fields: [userId], references: [id], onDelete:Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
+  userId    String   @db.ObjectId
 
+  @@unique([userId, title])
+}
 
 model Todo {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -58,14 +61,16 @@ model User {
   emailVerified DateTime?
   password      String?
   image         String?
-  roles         Role[]
-  isActive      Boolean   @default(true)
-  terms         Boolean   @default(true)
-  googleLogin   Boolean   @default(false)
-  provider      String?
-  refreshToken  String[]
+
+  isActive     Boolean  @default(true)
+  terms        Boolean  @default(true)
+  googleLogin  Boolean  @default(false)
+  provider     String?
+  refreshToken String[]
 
   notificationCount Int @default(0)
+
+  userRoles UserRole[]
 
   profile Profile?
 
@@ -74,17 +79,18 @@ model User {
 
   membershipProcessedBys MembershipRequest[] @relation("membershipProcessedBys")
   membershipRequestedBys MembershipRequest[] @relation("membershipRequestedBys")
-  
-  bulletinBoard          BulletinBoard[]
-  bulletinComment                BulletinComment[]
+
+  bulletinBoard   BulletinBoard[]
+  bulletinComment BulletinComment[]
 
   userGroups        UserGroup[]
   messages          Message[]
   messageRecipients MessageRecipient[]
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
   bulletinCommentVotes BulletinCommentVote[]
+  LexicalDocument      LexicalDocument[]
 }
 
 model BulletinCommentVote {
@@ -94,7 +100,7 @@ model BulletinCommentVote {
   forked       Boolean      @default(false)
 
   comment   BulletinComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  commentId String  @db.ObjectId
+  commentId String          @db.ObjectId
 
   bulletinCommentVoter   User   @relation(fields: [bulletinCommentVoterId], references: [id])
   bulletinCommentVoterId String @db.ObjectId
@@ -298,9 +304,9 @@ model BulletinBoard {
   writerId String @db.ObjectId
   writer   User   @relation(fields: [writerId], references: [id])
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  bulletinComments  BulletinComment[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  bulletinComments BulletinComment[]
 }
 
 model BulletinComment {
@@ -313,15 +319,15 @@ model BulletinComment {
   bulletinBoardId String        @db.ObjectId
   bulletinBoard   BulletinBoard @relation(fields: [bulletinBoardId], references: [id])
 
-  commentWriterId    String @db.ObjectId
-  commentWriter User   @relation(fields: [commentWriterId], references: [id])
+  commentWriterId String @db.ObjectId
+  commentWriter   User   @relation(fields: [commentWriterId], references: [id])
 
-  parentBulletinCommentId String?   @db.ObjectId
+  parentBulletinCommentId String?           @db.ObjectId
   parentBulletinComment   BulletinComment?  @relation("CommentParentChildren", fields: [parentBulletinCommentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children        BulletinComment[] @relation("CommentParentChildren")
+  children                BulletinComment[] @relation("CommentParentChildren")
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
   bulletinCommentVotes BulletinCommentVote[]
 }
 
@@ -404,7 +410,19 @@ model Tag {
   knowHows   Knowhow[] @relation(fields: [knowHowIds], references: [id])
 }
 
-enum Role {
-  USER
-  ADMIN
+model Role {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  roleName  String     @unique
+  userRoles UserRole[]
+}
+
+model UserRole {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  roleId String @db.ObjectId
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId])
 }

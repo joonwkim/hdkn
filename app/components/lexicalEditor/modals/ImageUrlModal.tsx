@@ -1,16 +1,17 @@
 'use client'
 // import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import React, { useState } from 'react'
+import { InsertImagePayload } from '../plugins/ToolbarPlugin';
 // import { $createImageNode } from '../nodes/ImageNode';
 // import { $insertNodes } from 'lexical';
-import CustomImageNode from '../nodes/CustomImageNode';
-import { $createNodeSelection, $getRoot, $getSelection, $insertNodes, $setSelection } from 'lexical';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { InsertImagePayload } from '../plugins/ToolbarPlugin org';
+// import CustomImageNode from '../nodes/CustomImageNode';
+// import { $createNodeSelection, $getRoot, $getSelection, $insertNodes, $setSelection } from 'lexical';
+// import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+// import { InsertImagePayload } from '../plugins/ToolbarPlugin org';
 
 const ImageUrlModal = ({ onClick }: { onClick: (payload: InsertImagePayload) => void, }) => {
 
-    const [editor] = useLexicalComposerContext();
+    // const [editor] = useLexicalComposerContext();
     const [formData, setFormData] = useState({ url: '', referrer: '' });
     const [isUrlValid, setIsUrlValid] = useState(false);
 

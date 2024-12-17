@@ -1,8 +1,8 @@
-import { GoogleUser } from '@/app/auth/types';
 import prisma from '@/prisma/prisma';
-import { MembershipRequestStatus } from '@prisma/client';
 import bcrypt from "bcrypt";
 import { getHashedPassword } from '../lib/password';
+import { Prisma, User } from '@prisma/client';
+import { GoogleUser } from '../auth/types';
 
 export async function getUsers() {
     try {
@@ -24,37 +24,45 @@ export async function isUserRegistered(email: string): Promise<boolean> {
     return await getUserByEmail(email) != null;
 }
 
-export async function isPasswordValid(email: string, password: string): Promise<boolean> {
+export async function isPasswordValid(email: string, password: string): Promise<boolean | undefined> {
     try {
         if (!email || !password) return false;
-        var user: any = await getUserByEmail(email);
-        const result = await bcrypt.compare(password, user.password).catch((e) => false);
-        return result;
-    } catch (error: any) {
-        const errorMessage = error.response.data.message;
-        throw error;
+        const user: User | null = await getUserByEmail(email);
+        if (user?.password) {
+            const result = await bcrypt.compare(password, user.password).catch(() => false);
+            return result;
+        }
+
+    } catch (error) {
+        console.log('isPasswordValid error:', error)
+        return false;
     }
 }
 
-export async function createUser(input: any) {
+export async function createUser(input: Prisma.UserCreateInput): Promise<User | null> {
     try {
-
         const user = await prisma.user.create({ data: input });
-        return { user };
+        return user
     }
     catch (error) {
-        return ('user not created');
+        console.log('error: ', error)
+        return null
     }
 }
 
-export async function getUserByEmail(emailInput: string) {
+export async function getUserByEmail(emailInput: string): Promise<User | null> {
     try {
-        const user = await prisma.user.findFirst({
+        const user: User | null = await prisma.user.findFirst({
             where: {
                 email: emailInput,
             },
             include: {
                 // knowHows:true,
+                userRoles: {
+                    include: {
+                        role: true,
+                    }
+                },
                 votes: true,
                 membershipProcessedBys: {
                     include: {
@@ -70,17 +78,10 @@ export async function getUserByEmail(emailInput: string) {
                 },
             }
         });
-
-        if (user) {
-            const requests = user.membershipProcessedBys.filter(s => s.membershipRequestStatus === MembershipRequestStatus.REQUESTED);
-            user.notificationCount = requests.length;
-            const approvedRequests = user.membershipRequestedBys.filter(s => s.membershipRequestStatus === MembershipRequestStatus.APPROVED)
-            user.notificationCount += approvedRequests.length;
-        }
-
         return user;
     } catch (error) {
-        return ({ error });
+        console.log('error: ', error)
+        return null;
     }
 }
 
@@ -102,7 +103,7 @@ export async function getUserById(id: string) {
     return user;
 }
 
-export async function updateUserNameAndPassword(user: any, password: any) {
+export async function updateUserNameAndPassword(user: User, password: string) {
     const hashedPassword = await getHashedPassword(password);
     const updateUser = await prisma.user.update({
         where: {
@@ -120,7 +121,7 @@ export async function updateUserNameAndPassword(user: any, password: any) {
         return false;
     }
 }
-export async function updateUserPassword(email: string, password: any) {
+export async function updateUserPassword(email: string, password: string) {
     try {
         const hashedPassword = await getHashedPassword(password);
         const updateUser = await prisma.user.update({
@@ -143,7 +144,7 @@ export async function updateUserPassword(email: string, password: any) {
     }
 }
 
-export async function updateUser(email: string, input: any) {
+export async function updateUser(email: string, input: Prisma.UserCreateInput): Promise<boolean> {
     try {
         const updateUser = await prisma.user.update({
             where: {
@@ -151,32 +152,34 @@ export async function updateUser(email: string, input: any) {
             },
             data: input
         });
+        if (updateUser) {
+            return true;
+        }
+        return false;
     } catch (error) {
-        console.log('')
-        return ({ error });
+        console.log('updateUser error: ', error)
+        return false
     }
 }
 
-export async function findUpdateGoogleUser(email: string, input: GoogleUser) {
+export async function findUpdateGoogleUser(email: string, input: GoogleUser): Promise<boolean> {
     try {
-
-
-        let user = await getUserByEmail(email);
+        const user = await getUserByEmail(email);
         if (!user) {
-            const userCreated = await createUser(input);
+
+            await createUser(input as Prisma.UserCreateInput);
         }
         else {
-            const userStored = user as GoogleUser;
-            input.roles = userStored.roles;
-            const userUpdated = await updateUser(email, input);
+            await updateUser(email, input as Prisma.UserCreateInput);
         }
         return true;
     } catch (error) {
-        return ({ error });
+        console.log('findUpdateGoogleUser error: ', error)
+        return false
     }
 }
 
-export async function searchUsersByName(name: string) {
+export async function searchUsersByName(name: string): Promise<User[] | null> {
     try {
         const users = await prisma.user.findMany({
             where: {
@@ -197,6 +200,7 @@ export async function searchUsersByName(name: string) {
         })
         return users;
     } catch (error) {
-        console.log("searchUsersByName:", searchUsersByName)
+        console.log('searchUsersByName error: ', error)
+        return null
     }
 }

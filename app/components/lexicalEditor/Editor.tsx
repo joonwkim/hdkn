@@ -44,7 +44,7 @@ import LoadInitialDataPlugin from './plugins/LoadInitialDataPlugin';
 
 //     const exportToHTML = () => {
 //         editor.update(() => {
-//             const htmlString = $generateHtmlFromNodes(editor, null); // Exports entire content
+//             const htmlString = $generateHtmlFromNodes(editor, null); // Exports entire initailData
 //             setHtmlContent(htmlString);
 //             setIframeContent(htmlString)
 //         });
@@ -59,7 +59,7 @@ import LoadInitialDataPlugin from './plugins/LoadInitialDataPlugin';
 //                 <iframe
 //                     title="HTML Document Preview"
 
-//                     srcDoc={iframeContent} // Load the HTML content into the iframe
+//                     srcDoc={iframeContent} // Load the HTML initailData into the iframe
 //                 />
 //             </div>
 //         </div>
@@ -68,11 +68,11 @@ import LoadInitialDataPlugin from './plugins/LoadInitialDataPlugin';
 
 interface EditorProps{
     isReadOnly: boolean,
-    content?:string,
-    saveDocument: (content: string) => void,
+    initailData?: string,
+    saveDocument: (initailData: string) => void,
 }
 
-const Editor = ({ saveDocument, isReadOnly, content }: EditorProps) => {
+const Editor = ({ saveDocument, isReadOnly, initailData }: EditorProps) => {
     //const [isReadOnly, setIsReadOnly] = useState(false);/
     const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null);
     const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false);
@@ -81,7 +81,6 @@ const Editor = ({ saveDocument, isReadOnly, content }: EditorProps) => {
     const onRef = (_floatingAnchorElem: HTMLDivElement) => { if (_floatingAnchorElem !== null) { setFloatingAnchorElem(_floatingAnchorElem); } };
 
     useEffect(() => {
-
         const updateViewPortWidth = () => {
             const isNextSmallWidthViewport = CAN_USE_DOM && window.matchMedia('(max-width: 1025px)').matches;
 
@@ -89,7 +88,6 @@ const Editor = ({ saveDocument, isReadOnly, content }: EditorProps) => {
                 setIsSmallWidthViewport(isNextSmallWidthViewport);
             }
         };
-
         updateViewPortWidth();
         window.addEventListener('resize', updateViewPortWidth);
 
@@ -109,10 +107,6 @@ const Editor = ({ saveDocument, isReadOnly, content }: EditorProps) => {
         theme: EditorTheme,
     };
 
-
-    // const saveDocument = (content: string) => {
-    //     alert(content);
-    // }
     // const toggleEditMode = () => {
     //     setIsReadOnly((prev) => !prev);
     // };
@@ -165,8 +159,8 @@ const Editor = ({ saveDocument, isReadOnly, content }: EditorProps) => {
                                     />
 
                                 </>)}
-                                {content && (
-                                    <LoadInitialDataPlugin initialData={content} />
+                                {initailData && (
+                                    <LoadInitialDataPlugin initialData={initailData} />
                                 )}
                                 {/* <TreeViewPlugin /> */}
                             </div>

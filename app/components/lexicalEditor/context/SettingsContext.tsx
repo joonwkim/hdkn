@@ -1,29 +1,14 @@
-import { DEFAULT_SETTINGS, INITIAL_SETTINGS, SettingName } from '@/app/appSettings';
+import { DEFAULT_SETTINGS, INITIAL_SETTINGS, SettingName } from './appSettings';
 
 import * as React from 'react';
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
-
+import { createContext, ReactNode, useCallback, useContext, useMemo, useState, } from 'react';
 
 type SettingsContextShape = {
   setOption: (name: SettingName, value: boolean) => void;
   settings: Record<SettingName, boolean>;
 };
 
-const Context: React.Context<SettingsContextShape> = createContext({
-  setOption: (name: SettingName, value: boolean) => {
-    console.log('context: ', name);
-    console.log('value: ', value);
-    return;
-  },
-  settings: INITIAL_SETTINGS,
-});
+const Context: React.Context<SettingsContextShape> = createContext({ setOption: (name: SettingName, value: boolean) => { console.log('context: ', name); console.log('value: ', value); return; }, settings: INITIAL_SETTINGS, });
 
 export const SettingsContext = ({ children, }: { children: ReactNode; }): JSX.Element => {
   const [settings, setSettings] = useState(INITIAL_SETTINGS);

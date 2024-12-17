@@ -34,6 +34,7 @@ export default function RootLayout({
 
   //#region theme control
   const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>('light');
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const applyTheme = useCallback((newTheme: 'light' | 'dark' | 'auto') => {
     document.documentElement.setAttribute('data-bs-theme', newTheme);
   }, [])
@@ -89,21 +90,27 @@ export default function RootLayout({
 
   //#endregion
 
+  const onWidowSidbarBtnClick = () => {
+    setSidebarOpen(!sidebarOpen);
+  }
   return (
     <html lang="en" data-bs-theme="" id="hdkn">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <SessionProvider>
           <BootstrapClient />
-          <Header theme={theme} onThemeChange={handleThemeChange} />
-          <div className='dFlex'>
+          <Header theme={theme} onThemeChange={handleThemeChange} onWidowSidbarBtnClick={onWidowSidbarBtnClick} sidebarOpen={sidebarOpen} />
+          {sidebarOpen ? (<><div className='dFlex'>
             <div ref={sidebarRef} className='sidebar'>
               <TreeView theme={theme} />
             </div>
             <div onMouseDown={handleMouseDown} className='resizer' />
-            <div className='mainContent'>
+            <div className='container'>
               {children}
             </div>
-          </div>
+          </div></>) : (<><div className='container'>
+            {children}
+          </div>  </>)}
+
           <Footer />
         </SessionProvider>
 

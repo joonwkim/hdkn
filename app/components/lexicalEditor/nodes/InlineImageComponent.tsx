@@ -283,7 +283,7 @@ export default function InlineImageComponent({ src, altText, nodeKey, width, hei
         editor.update(() => {
             const node = $getNodeByKey(nodeKey);
             if ($isInlineImageNode(node)) {
-                node.setWidthAndHeight(nextWidth, nextHeight);
+                node.setWidthAndHeight(Number.parseInt(nextWidth.toString()), Number.parseInt(nextHeight.toString()));
             }
         });
     };
