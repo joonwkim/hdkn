@@ -25,17 +25,29 @@ model TreeNode {
 }
 
 model LexicalDocument {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  title     String   
-  url       String?
-  content   String // JSON content as a string
-  author    User     @relation(fields: [userId], references: [id], onDelete:Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    String   @db.ObjectId
+  id               String          @id @default(auto()) @map("_id") @db.ObjectId
+  title            String
+  url              String?
+  content          String // JSON content as a string
+  author           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  userId           String          @db.ObjectId
+  // images           Image[] 
+  CloudinaryData   CloudinaryData? @relation(fields: [cloudinaryDataId], references: [id])
+  cloudinaryDataId String?         @db.ObjectId
 
   @@unique([userId, title])
 }
+
+// model Image {
+//   id           String          @id @default(auto()) @map("_id") @db.ObjectId
+//   data         Bytes
+//   contentType  String
+//   lexicalDocId String          @db.ObjectId
+//   lexicalDoc   LexicalDocument @relation(fields: [lexicalDocId], references: [id])
+//   createdAt    DateTime        @default(now())
+// }
 
 model Todo {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -54,6 +66,12 @@ model Profile {
   userId String @unique @db.ObjectId
 }
 
+model Role {
+  id       String     @id @default(auto()) @map("_id") @db.ObjectId
+  roleName String     @unique
+  users    UserRole[] // Define the relation to UserRole
+}
+
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   name          String
@@ -70,7 +88,7 @@ model User {
 
   notificationCount Int @default(0)
 
-  userRoles UserRole[]
+  roles UserRole[] // Define the relation to UserRole
 
   profile Profile?
 
@@ -91,6 +109,19 @@ model User {
   updatedAt            DateTime              @updatedAt
   bulletinCommentVotes BulletinCommentVote[]
   LexicalDocument      LexicalDocument[]
+}
+
+model UserRole {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  roleId String @db.ObjectId
+
+  user User @relation(fields: [userId], references: [id]) // Foreign key to User
+  role Role @relation(fields: [roleId], references: [id]) // Foreign key to Role
+
+  @@unique([userId, roleId]) // Ensure unique user-role pairs
+  @@index([userId]) // Optional index for better query performance
+  @@index([roleId]) // Optional index for better query performance
 }
 
 model BulletinCommentVote {
@@ -382,7 +413,8 @@ model CloudinaryData {
   thumbnail_url String?
   path          String
 
-  knowhow Knowhow[]
+  knowhow         Knowhow[]
+  lexicalDocuments LexicalDocument[]
 
   knowhowDetailInfos   KnowhowDetailInfo[] @relation(fields: [knowhowDetailInfoIds], references: [id])
   knowhowDetailInfoIds String[]            @db.ObjectId
@@ -408,21 +440,4 @@ model Tag {
 
   knowHowIds String[]  @db.ObjectId
   knowHows   Knowhow[] @relation(fields: [knowHowIds], references: [id])
-}
-
-model Role {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  roleName  String     @unique
-  userRoles UserRole[]
-}
-
-model UserRole {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  userId String @db.ObjectId
-  roleId String @db.ObjectId
-
-  user User @relation(fields: [userId], references: [id])
-  role Role @relation(fields: [roleId], references: [id])
-
-  @@unique([userId, roleId])
 }

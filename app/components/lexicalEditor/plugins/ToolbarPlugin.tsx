@@ -3,13 +3,13 @@ import React, { createContext, Dispatch, useCallback, useContext, useEffect, use
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { actionName, DropdownItem, getRichTextAction, RichTextAction, ToolbarItem } from '../data/toolbarData';
 import Toolbar from '../../controls/toolbar';
-import { $createNodeSelection, $createParagraphNode, $createRangeSelection, $getRoot, $getSelection, $insertNodes, $isElementNode, $isNodeSelection, $isRangeSelection, $isRootOrShadowRoot, $setSelection, CAN_REDO_COMMAND, CAN_UNDO_COMMAND, COMMAND_PRIORITY_CRITICAL, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_HIGH, COMMAND_PRIORITY_LOW, COMMAND_PRIORITY_NORMAL, createCommand, DRAGOVER_COMMAND, DRAGSTART_COMMAND, DROP_COMMAND, EditorThemeClasses, ElementFormatType, FORMAT_ELEMENT_COMMAND, FORMAT_TEXT_COMMAND, INDENT_CONTENT_COMMAND, KEY_MODIFIER_COMMAND, Klass, LexicalCommand, LexicalEditor, LexicalNode, NodeKey, OUTDENT_CONTENT_COMMAND, REDO_COMMAND, SELECTION_CHANGE_COMMAND, UNDO_COMMAND } from 'lexical';
+import { $createNodeSelection, $createParagraphNode, $createRangeSelection, $getRoot, $getSelection, $insertNodes, $isElementNode, $isNodeSelection, $isRangeSelection, $isRootOrShadowRoot, $setSelection, CAN_REDO_COMMAND, CAN_UNDO_COMMAND, COMMAND_PRIORITY_CRITICAL, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_HIGH, COMMAND_PRIORITY_LOW, COMMAND_PRIORITY_NORMAL, createCommand, DRAGOVER_COMMAND, DRAGSTART_COMMAND, DROP_COMMAND, EditorState, EditorThemeClasses, ElementFormatType, FORMAT_ELEMENT_COMMAND, FORMAT_TEXT_COMMAND, INDENT_CONTENT_COMMAND, KEY_MODIFIER_COMMAND, Klass, LexicalCommand, LexicalEditor, LexicalNode, NodeKey, OUTDENT_CONTENT_COMMAND, REDO_COMMAND, SELECTION_CHANGE_COMMAND, UNDO_COMMAND } from 'lexical';
 import { $findMatchingParent, $isEditorIsNestedEditor, $getNearestNodeOfType, mergeRegister, $wrapNodeInElement, $insertNodeToNearestRoot } from '@lexical/utils'
 import { $isParentElementRTL, $setBlocksType } from '@lexical/selection';
 import { $createHeadingNode, $createQuoteNode, $isHeadingNode } from '@lexical/rich-text';
 import { $isListNode, INSERT_CHECK_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND, ListNode, } from '@lexical/list';
 import { $createLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
-import { getSelectedNode } from '../utils/getSelectedNode';
+import { fetchBlobData, getBlobUrls, getSelectedNode, searchImageNodeBlobData, searchNodesByType } from '../utils/getSelectedNode';
 // import { sanitizeUrl } from '../utils/url';
 import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/react/LexicalHorizontalRuleNode';
 import { $createImageNode, $isImageNode, ImageNode, ImagePayload } from '../nodes/ImageNode';
@@ -21,6 +21,7 @@ import { INSERT_LAYOUT_COMMAND } from './LayoutPlugin';
 import { $createStickyNode } from '../nodes/StickyNode';
 import { INSERT_YOUTUBE_COMMAND } from './YouTubePlugin';
 import { exportFile, } from '@lexical/file';
+import { ImageNodeBlobData, } from '@/app/lib/types';
 
 export type InsertImagePayload = Readonly<ImagePayload>;
 export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> = createCommand('INSERT_IMAGE_COMMAND');
@@ -48,7 +49,7 @@ interface LexicalToolbarProps {
     isReadOnly: boolean,
     lexicalToolbarData: ToolbarItem[],
     setIsLinkEditMode: Dispatch<boolean>,
-    saveDocument: (content:string) =>void
+    saveDocument: (content: string, images: ImageNodeBlobData[]) => void
 }
 
 //#endregion
@@ -280,6 +281,7 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
     //         console.error('Error exporting file:', error);
     //     }
     // }
+
     const handleToolbarSelect = async (item: ToolbarItem) => {
         switch (item.id) {
             case RichTextAction.Undo: {
@@ -411,119 +413,41 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
                 break;
             }
             case RichTextAction.Save: {
-                try {                   
-                    activeEditor.update(() => {
+                try {      
+                    const imageNodes = searchImageNodeBlobData(activeEditor);
+                    // console.log('imageNodes: ', imageNodes)
+
+
+                    activeEditor.update(async () => {
                         const editorState = activeEditor.getEditorState();
+
                         const serializedState = JSON.stringify(editorState);
-                        saveDocument(serializedState);
-                        console.log('serializedState:', serializedState)
-                     });
-                    // const content = await saveLexicalFile(activeEditor);
-                    // if (!content) throw new Error('Failed to get content from editor');
+                        // const root = $getRoot();
+                        // const images: { src: string; name: string }[] = [];
 
-                    // const response = await fetch('/api/saveFile', {
-                    //     method: 'POST',
-                    //     headers: {
-                    //         'Content-Type': 'application/json',
-                    //     },
-                    //     body: JSON.stringify({ content, filename: 'myDocument.lexical' }),
-                    // });
+                        // root.getChildren().forEach((node) => {
+                        //     if (node instanceof ImageNode) {
+                        //         console.log('image:', { src: node.getSrc(), name: node.getAltText() || "Untitled" });
+                        //         images.push({ src: node.getSrc(), name: node.getAltText() || "Untitled" })
+                        //     }
+                        // });
 
-                    // if (!response.ok) {
-                    //     throw new Error('Failed to save file');
-                    // }
+                        // console.log('images: ', images)
 
-                    // console.log('File saved successfully');
+                        // const blobUrls = getBlobUrls(editorState);
+                        // console.log('blobUrls: ', blobUrls)
+
+                        // const imageData: Buffer[] = await fetchBlobData(blobUrls);
+                        // console.log('buffer imageData:', imageData)
+                        saveDocument(serializedState, imageNodes);
+                        // console.log('serializedState:', serializedState)
+                    });
+
                 } catch (error) {
                     console.error('Error saving document:', error);
                 }
 
-                // const file = await exportFile(editor, { fileName: 'mhyfile', });
-                // console.log('file: ', file)
 
-                // if (file instanceof Blob) {
-                //     const fileContent = await file.text();
-                // }
-                // // Convert Blob to JSON content
-
-
-                // // Send to the server
-                // const response = await fetch('/api/saveDocument', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //     },
-                //     body: JSON.stringify({ content: file }),
-                // });
-
-                // if (response.ok) {
-                //     console.log('File saved successfully!');
-                // } else {
-                //     console.error('Error saving file:', await response.text());
-                // }
-
-
-
-
-                // alert('save to file')
-                // exportFile(activeEditor, {
-                //     fileName: `editor ${new Date().toISOString()}`,
-                //     source: 'Playground',
-                // })
-
-                // const editorState = activeEditor.getEditorState();
-                // const jsonContent = editorState.toJSON();
-
-                // const filename = 'myDocument'; // Specify a filename without the extension
-
-                // try {
-                //     const response = await fetch('/api/saveDocument', {
-                //         method: 'POST',
-                //         headers: { 'Content-Type': 'application/json' },
-                //         body: JSON.stringify({ content: jsonContent, filename }),
-                //     });
-
-                //     if (!response.ok) {
-                //         // Handle errors with non-200 status codes
-                //         const errorData = await response.json();
-                //         console.error('Error:', errorData.message);
-                //         return;
-                //     }
-
-                //     const data = await response.json();
-                //     console.log(data.message); // Success message
-
-                // } catch (error) {
-                //     console.error('Error saving document:', error);
-                // }
-                // const editorState = editor.getEditorState();
-                // const jsonContent = editorState.toJSON();
-                // console.log('jsonContent', jsonContent)
-                // const filename = 'myDocument';
-                // try {
-                //     const response = await fetch('/api/saveDocument', {
-                //         method: 'POST',
-                //         headers: { 'Content-Type': 'application/json' },
-                //         body: JSON.stringify({ content: jsonContent, filename }),
-                //     });
-
-                //     const data = await response.json();
-                //     if (response.ok) {
-                //         console.log(data.message); // Success message
-                //     } else {
-                //         console.error(data.message);
-                //     }
-                // } catch (error) {
-                //     console.error('Error saving document:', error);
-                // }
-                // await fetch('/api/saveDocument', {
-                //     method: 'POST', // Ensure method is set to POST
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify({ content: jsonContent }), // Send JSON data
-                // })
-                //     .then(response => response.json())
-                //     .then(data => console.log(data.message))
-                //     .catch(error => console.error('Error saving document:', error));
                 break;
             }
         }

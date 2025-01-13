@@ -3,8 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 // import CredentialsProvider from "next-auth/providers/credentials";
 import { GoogleUser } from "@/app/auth/types";
 // import { loginAction } from "@/app/actions/userAction";
-import { findUpdateGoogleUser, getUserByEmail } from "@/app/services/userService";
-import { User } from "@prisma/client";
+import { findUpdateGoogleUser, getSessionUserByEmail, } from "@/app/services/userService";
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -45,22 +44,23 @@ export const authOptions: NextAuthOptions = {
     },
 
     callbacks: {
-        async signIn({ user, account, profile, email, credentials }) {
-            console.log('profile: ', profile)
-            console.log('email: ', email)
-            console.log('credentials: ', credentials)
+        async signIn({ user, account, }) {
+        // async signIn({ user, account, profile, email, credentials }) {
+        // console.log('profile: ', profile)
+        // console.log('profile: ', profile)
+        // console.log('email: ', email)
+        // console.log('credentials: ', credentials)
             if (account?.provider === 'google' && user.email) {
                 const googleUser: GoogleUser = {
                     name: user.name || " ",
                     email: user.email || " ",
                     image: user.image || " ",
-                    // roles: ["USER"],
                     provider: 'google',
                     googleLogin: true
                 };
 
-                const result = await findUpdateGoogleUser(user.email, googleUser);
-                console.log('update result: ', result)
+                await findUpdateGoogleUser(user.email, googleUser);
+                // console.log('update result: ', result)
             }
             else if (account?.provider === 'credentials') {
             }
@@ -77,13 +77,18 @@ export const authOptions: NextAuthOptions = {
                     name: token.name,
                     email: token.email,
                     image: token.picture,
-                    roles: token.roles || [],
+                    isUserAdmin: token.isUserAdmin,
+                    // iaUserAdmin =
+                    // isAdmin:
+                    // roles: token.roles || [],
                     notificationCount: token.notificationCount || 0,
                     membershipProcessedBys: token.membershipProcessedBys || [],
                     membershipRequestedBys: token.membershipRequestedBys || [],
                 };
+                // console.log("Final Session:", session);
+                return session;
             }
-            // console.log("Final Session:", session);
+
             return session;
         },
 
@@ -96,18 +101,26 @@ export const authOptions: NextAuthOptions = {
                 token.id = user.id;
             }
 
-            const dbUser: User | null = await getUserByEmail(token.email || " ");
+            if (token.email) {
+                const sessionUser = await getSessionUserByEmail(token.email);
             // console.log("Database User:", dbUser);
 
-            if (dbUser) {
-                return {
-                    ...token,
-                    id: dbUser.id,
-                    // roles: dbUser.userRoles || [],
-                    notificationCount: dbUser.notificationCount || 0,
-                    // membershipProcessedBys: dbUser.membershipProcessedBys || [],
-                    // membershipRequestedBys: dbUser.membershipRequestedBys || [],
-                };
+
+                if (sessionUser) {
+
+
+                    const nt = {
+                        ...token,
+                        id: sessionUser.id,
+                        // notificationCount: sessionUser.notificationCount || 0,
+                        isUserAdmin: sessionUser.isUserAdmin,
+                        // isAdmin: isAdmin,
+                        // membershipProcessedBys: dbUser.membershipProcessedBys || [],
+                        // membershipRequestedBys: dbUser.membershipRequestedBys || [],
+                    };
+                    // console.log('new token: ', nt)
+                    return nt;
+                }              
             }
             return token;
         },

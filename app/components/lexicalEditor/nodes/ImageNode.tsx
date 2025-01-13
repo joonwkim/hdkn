@@ -98,6 +98,10 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
         return this.__src;
     }
 
+    setSrc(src: string) {
+        this.__src = src;
+    }
+
     setWidthAndHeight(width: number, height: number,): void {
         const writable = this.getWritable();
         writable.__width = width;

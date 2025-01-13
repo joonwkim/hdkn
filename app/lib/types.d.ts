@@ -1,6 +1,39 @@
+export interface CloudiaryInfo {
+    asset_id: string,
+    public_id: string,
+    filename: string,
+    path: string,
+    format: string,
+    // resource_type: string,
+    bytes: number,
+    // width:number,
+    // height:number,
+    folder: string,
+    // url:string,
+    secure_url: string,
+    thumbnail_url: string;
+}
+
 export type CanHandleSubmit = {
     handleSubmit: () => void;
 };
+
+export type ImageNodeBlobData = {
+    // parent: string | null | undefined,
+    key: string,
+    src: string;
+    alt?: string;
+    width?: number;
+    height?: number;
+};
+
+export type SessionUser = {
+    id?: string,
+    name: string,
+    email: string,
+    image: string | null,
+    isUserAdmin: boolean,
+}
 
 export type Stage = {
     id?: string,
@@ -8,6 +41,7 @@ export type Stage = {
     stage: number,
     stageContents: StageContents[],
 }
+
 export type StageContents = {
     id?: string,
     title: string,
@@ -18,6 +52,8 @@ export type StageContents = {
     childDetail?: ChildDetail,
     isDeleted: boolean,
 }
+
+
 
 // export type ChildData = {
 //     header?: ChildHeader,

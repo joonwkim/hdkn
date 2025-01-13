@@ -17,11 +17,12 @@
     "@lexical/rich-text": "^0.20.0",
     "@lexical/table": "^0.20.0",
     "@lexical/utils": "^0.20.0",
-    "@prisma/client": "^6.0.1",
+    "@prisma/client": "^6.1.0",
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
+    "cloudinary": "^2.5.1",
     "formidable": "^3.5.2",
     "jsonwebtoken": "^9.0.2",
     "lodash-es": "^4.17.21",
@@ -47,7 +48,7 @@
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "15.0.3",
-    "prisma": "^6.0.1",
+    "prisma": "^6.1.0",
     "typescript": "^5"
   }
 }

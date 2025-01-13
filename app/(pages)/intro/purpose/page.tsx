@@ -1,29 +1,23 @@
 'use client'
-import { upsertLexicalDocumentAction } from '@/app/actions/lexicalDocumentAction'
 import Editor from '@/app/components/lexicalEditor/Editor'
 import React, { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation';
-import { getLexicalDocumentByPath } from '@/app/services/lexicalDocument';
 import { LexicalDocument } from '@prisma/client';
-import { useSession } from 'next-auth/react';
+import { useIntroLayoutContext } from '../layout';
 
 const PurposePage = () => {
-  const { data: session } = useSession();
   const pathname = usePathname();
   const [data, setData] = useState<LexicalDocument | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [readOnly, setReadOnly] = useState(true)
+  const { isUserReadOnly, getContent, saveContent } = useIntroLayoutContext();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await getLexicalDocumentByPath(pathname.trim())
-        if (result.props?.doc?.userId === session?.user.id) {
-          setReadOnly(false);
-        }
-        if (result.props?.doc) {
-          setData(result.props?.doc);
+        const result = await getContent(pathname.trim())
+        if (result) {
+          setData(result.props)
         }
       } catch {
         setError(null);
@@ -32,10 +26,11 @@ const PurposePage = () => {
       }
     };
     fetchData();
-  }, [pathname, session?.user.id]);
+  }, [getContent, pathname]);
 
   const saveDocument = async (content: string) => {
-    await upsertLexicalDocumentAction(content, pathname, pathname, session?.user.id)
+    saveContent(pathname, content);
+    // await upsertLexicalDocumentAction(content, pathname, pathname, session?.user.id)
   }
 
   if (loading) return <p>Loading...</p>;
@@ -43,10 +38,11 @@ const PurposePage = () => {
 
   return (
     <div>
-      {/* <div>{JSON.stringify(pathname)}</div> */}
+      {/* <h1>{pathname}</h1> */}
+      {/* <div>{JSON.stringify(session, null, 2)}</div> */}
       {/* <div>{readOnly}</div> */}
       {/* <pre>{`data content: ${JSON.stringify(data?.content, null, 2)}`}</pre> */}
-      <Editor saveDocument={saveDocument} isReadOnly={readOnly} initailData={data?.content} />
+      <Editor saveDocument={saveDocument} isReadOnly={isUserReadOnly} initailData={data?.content} />
     </div>
   )
 }

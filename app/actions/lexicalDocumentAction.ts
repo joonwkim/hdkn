@@ -2,18 +2,11 @@
 
 import { revalidatePath } from "next/cache"
 import { upsertLexicalDocument } from "../services/lexicalDocument"
+import { ImageNodeBlobData } from "../lib/types";
 
-// export async function createLexicalDocumentAction(content:string, pathName:string) {
-//     try {
-//         await createLexicalDocument(content, pathName)
-//         revalidatePath('/')
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
-export async function upsertLexicalDocumentAction(content: string, title: string, pathName: string, userId: string) {
+export async function upsertLexicalDocumentAction(content: string, images: ImageNodeBlobData[], title: string, pathName: string, userId: string) {
     try {
-        await upsertLexicalDocument(content, title, pathName, userId);
+        await upsertLexicalDocument(content, images, title, pathName, userId);
         revalidatePath('/')
     } catch (error) {
         console.log(error)

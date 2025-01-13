@@ -36,6 +36,8 @@ import LinkPlugin from './plugins/LinkPlugin';
 // import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 // import { $generateHtmlFromNodes } from "@lexical/html";
 import LoadInitialDataPlugin from './plugins/LoadInitialDataPlugin';
+import TreeViewPlugin from './plugins/TreeViewPlugin';
+import { ImageNodeBlobData } from '@/app/lib/types';
 
 // const ExportToHtmlButton = () => {
 //     const [editor] = useLexicalComposerContext();
@@ -66,10 +68,10 @@ import LoadInitialDataPlugin from './plugins/LoadInitialDataPlugin';
 //     );
 // };
 
-interface EditorProps{
+interface EditorProps {
     isReadOnly: boolean,
     initailData?: string,
-    saveDocument: (initailData: string) => void,
+    saveDocument: (content: string, images: ImageNodeBlobData[]) => void,
 }
 
 const Editor = ({ saveDocument, isReadOnly, initailData }: EditorProps) => {
@@ -120,7 +122,7 @@ const Editor = ({ saveDocument, isReadOnly, initailData }: EditorProps) => {
                 <div className='editor-container tree-view'>
                     <LexicalComposer initialConfig={editorConfig}>
                         <div className="editor-scroller">
-                            {!isReadOnly && <ToolbarPlugin lexicalToolbarData={toolbarData} isReadOnly={isReadOnly} setIsLinkEditMode={setIsLinkEditMode} saveDocument={saveDocument}/>}
+                            {!isReadOnly && <ToolbarPlugin lexicalToolbarData={toolbarData} isReadOnly={isReadOnly} setIsLinkEditMode={setIsLinkEditMode} saveDocument={saveDocument} />}
                             <div className='editor' ref={onRef}>
                                 <RichTextPlugin
                                     contentEditable={
@@ -162,7 +164,7 @@ const Editor = ({ saveDocument, isReadOnly, initailData }: EditorProps) => {
                                 {initailData && (
                                     <LoadInitialDataPlugin initialData={initailData} />
                                 )}
-                                {/* <TreeViewPlugin /> */}
+                                {!isReadOnly && <TreeViewPlugin />}
                             </div>
                         </div>
                         {/* <ExportToHtmlButton /> */}
