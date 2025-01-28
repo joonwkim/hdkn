@@ -4,27 +4,17 @@ export interface CloudiaryInfo {
     filename: string,
     path: string,
     format: string,
-    // resource_type: string,
     bytes: number,
-    // width:number,
-    // height:number,
+    width: number,
+    height: number,
     folder: string,
-    // url:string,
+    url: string,
     secure_url: string,
     thumbnail_url: string;
 }
 
 export type CanHandleSubmit = {
     handleSubmit: () => void;
-};
-
-export type ImageNodeBlobData = {
-    // parent: string | null | undefined,
-    key: string,
-    src: string;
-    alt?: string;
-    width?: number;
-    height?: number;
 };
 
 export type SessionUser = {

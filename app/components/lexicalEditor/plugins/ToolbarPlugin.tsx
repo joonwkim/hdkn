@@ -1,27 +1,25 @@
 'use client'
-import React, { createContext, Dispatch, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, Dispatch, useCallback, useEffect, useState } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { actionName, DropdownItem, getRichTextAction, RichTextAction, ToolbarItem } from '../data/toolbarData';
 import Toolbar from '../../controls/toolbar';
-import { $createNodeSelection, $createParagraphNode, $createRangeSelection, $getRoot, $getSelection, $insertNodes, $isElementNode, $isNodeSelection, $isRangeSelection, $isRootOrShadowRoot, $setSelection, CAN_REDO_COMMAND, CAN_UNDO_COMMAND, COMMAND_PRIORITY_CRITICAL, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_HIGH, COMMAND_PRIORITY_LOW, COMMAND_PRIORITY_NORMAL, createCommand, DRAGOVER_COMMAND, DRAGSTART_COMMAND, DROP_COMMAND, EditorState, EditorThemeClasses, ElementFormatType, FORMAT_ELEMENT_COMMAND, FORMAT_TEXT_COMMAND, INDENT_CONTENT_COMMAND, KEY_MODIFIER_COMMAND, Klass, LexicalCommand, LexicalEditor, LexicalNode, NodeKey, OUTDENT_CONTENT_COMMAND, REDO_COMMAND, SELECTION_CHANGE_COMMAND, UNDO_COMMAND } from 'lexical';
-import { $findMatchingParent, $isEditorIsNestedEditor, $getNearestNodeOfType, mergeRegister, $wrapNodeInElement, $insertNodeToNearestRoot } from '@lexical/utils'
-import { $isParentElementRTL, $setBlocksType } from '@lexical/selection';
+import { $createParagraphNode, $getRoot, $getSelection, $insertNodes, $isRangeSelection, $isRootOrShadowRoot, CAN_REDO_COMMAND, CAN_UNDO_COMMAND, COMMAND_PRIORITY_CRITICAL, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_NORMAL, createCommand, EditorThemeClasses, FORMAT_ELEMENT_COMMAND, FORMAT_TEXT_COMMAND, INDENT_CONTENT_COMMAND, KEY_MODIFIER_COMMAND, Klass, LexicalCommand, LexicalEditor, LexicalNode, OUTDENT_CONTENT_COMMAND, REDO_COMMAND, SELECTION_CHANGE_COMMAND, UNDO_COMMAND } from 'lexical';
+import { $findMatchingParent, $isEditorIsNestedEditor, $getNearestNodeOfType, mergeRegister, $wrapNodeInElement, } from '@lexical/utils'
+import { $setBlocksType } from '@lexical/selection';
 import { $createHeadingNode, $createQuoteNode, $isHeadingNode } from '@lexical/rich-text';
 import { $isListNode, INSERT_CHECK_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND, ListNode, } from '@lexical/list';
-import { $createLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
-import { fetchBlobData, getBlobUrls, getSelectedNode, searchImageNodeBlobData, searchNodesByType } from '../utils/getSelectedNode';
+import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
+import { getSelectedNode, } from '../utils/getSelectedNode';
 // import { sanitizeUrl } from '../utils/url';
 import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/react/LexicalHorizontalRuleNode';
-import { $createImageNode, $isImageNode, ImageNode, ImagePayload } from '../nodes/ImageNode';
-import { CAN_USE_DOM } from '@lexical/utils'
+import { $createImageNode, ImageNode, ImagePayload } from '../nodes/ImageNode';
 import { sanitizeUrl } from '../utils/url';
-import { $createInlineImageNode, InlineImagePayload } from '../nodes/InlineImageNode';
 import { $createTableNodeWithDimensions, INSERT_TABLE_COMMAND, InsertTableCommandPayload, TableNode } from '@lexical/table';
 import { INSERT_LAYOUT_COMMAND } from './LayoutPlugin';
 import { $createStickyNode } from '../nodes/StickyNode';
 import { INSERT_YOUTUBE_COMMAND } from './YouTubePlugin';
-import { exportFile, } from '@lexical/file';
-import { ImageNodeBlobData, } from '@/app/lib/types';
+import { consoleLogFormData, } from '@/app/lib/formData';
+// import { ImageNodeBlobData, } from '@/app/lib/types';
 
 export type InsertImagePayload = Readonly<ImagePayload>;
 export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> = createCommand('INSERT_IMAGE_COMMAND');
@@ -49,7 +47,7 @@ interface LexicalToolbarProps {
     isReadOnly: boolean,
     lexicalToolbarData: ToolbarItem[],
     setIsLinkEditMode: Dispatch<boolean>,
-    saveDocument: (content: string, images: ImageNodeBlobData[]) => void
+    saveDocument: (content: string, imageFormData: FormData[]) => void
 }
 
 //#endregion
@@ -58,17 +56,18 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
     const [editor] = useLexicalComposerContext();
     const [toolbarData, setToolbarData] = useState<ToolbarItem[]>(lexicalToolbarData)
     const [activeEditor, setActiveEditor] = useState(editor);
-    const [blockType, setBlockType] = useState<keyof typeof actionName>(RichTextAction.Paragraph);
-    const [isRTL, setIsRTL] = useState(false);
-    const [selectedElementKey, setSelectedElementKey] = useState<NodeKey | null>(null,);
-    const [selectedRichTextAction, setSelectedRichTextAction] = useState<RichTextAction | null>(null)
-    const [elementFormat, setElementFormat] = useState<ElementFormatType>('left');
-    const [isEditable, setIsEditable] = useState(() => editor.isEditable());
+    const [imageFormData, setImageFormData] = useState<FormData[]>([])
+    // const [blockType, setBlockType] = useState<keyof typeof actionName>(RichTextAction.Paragraph);
+    // const [isRTL, setIsRTL] = useState(false);
+    // const [selectedElementKey, setSelectedElementKey] = useState<NodeKey | null>(null,);
+    // const [selectedRichTextAction, setSelectedRichTextAction] = useState<RichTextAction | null>(null)
+    // const [elementFormat, setElementFormat] = useState<ElementFormatType>('left');
+    // const [isEditable, setIsEditable] = useState(() => editor.isEditable());
     const [canUndo, setCanUndo] = useState(false);
     const [canRedo, setCanRedo] = useState(false);
     const [isLink, setIsLink] = useState(false);
     const [selectedBlockType, setSelectedBlockType] = useState<DropdownItem | undefined>()
-    const cellContext = useContext(CellContext);
+    // const cellContext = useContext(CellContext);
     // const cellContext = useContext(CellContext);
 
 
@@ -106,7 +105,7 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
 
             const elementKey = element.getKey();
             const elementDOM = activeEditor.getElementByKey(elementKey);
-            setIsRTL($isParentElementRTL(selection));
+            // setIsRTL($isParentElementRTL(selection));
 
             // Update links
             const node = getSelectedNode(selection);
@@ -120,34 +119,34 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
             }
             $upDataLinkButton(isLink);
             if (elementDOM !== null) {
-                setSelectedElementKey(elementKey);
+                // setSelectedElementKey(elementKey);
                 let type;
                 if ($isListNode(element)) {
                     const parentList = $getNearestNodeOfType<ListNode>(anchorNode, ListNode,);
                     type = parentList ? parentList.getListType() : element.getListType();
-                    setBlockType(type as keyof typeof actionName);
+                    // setBlockType(type as keyof typeof actionName);
                 } else {
                     type = $isHeadingNode(element) ? element.getTag() : element.getType();
                     if (type in actionName) {
-                        setBlockType(type as keyof typeof actionName);
+                        // setBlockType(type as keyof typeof actionName);
                     }
 
                 }
                 const action = getRichTextAction(type)
 
                 if (action) {
-                    setSelectedRichTextAction(action)
+                    // setSelectedRichTextAction(action)
                     $updateDropdownItemForBlockFormatItmes(action);
 
                 }
             }
-            let matchingParent;
-            if ($isLinkNode(parent)) {
-                matchingParent = $findMatchingParent(node, (parentNode) => $isElementNode(parentNode) && !parentNode.isInline(),);
-            }
+            // let matchingParent;
+            // if ($isLinkNode(parent)) {
+            //     matchingParent = $findMatchingParent(node, (parentNode) => $isElementNode(parentNode) && !parentNode.isInline(),);
+            // }
 
             // If matchingParent is a valid node, pass it's format type
-            setElementFormat($isElementNode(matchingParent) ? matchingParent.getFormatType() : $isElementNode(node) ? node.getFormatType() : parent?.getFormatType() || 'left',);
+            // setElementFormat($isElementNode(matchingParent) ? matchingParent.getFormatType() : $isElementNode(node) ? node.getFormatType() : parent?.getFormatType() || 'left',);
         }
     }, [$upDataLinkButton, $updateDropdownItemForBlockFormatItmes, activeEditor, editor, isLink]);
 
@@ -187,9 +186,9 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
                     }
                     return true;
                 }, COMMAND_PRIORITY_EDITOR,),
-            activeEditor.registerEditableListener((editable) => {
-                setIsEditable(editable);
-            }),
+            // activeEditor.registerEditableListener((editable) => {
+            //     setIsEditable(editable);
+            // }),
             activeEditor.registerCommand<boolean>(
                 CAN_UNDO_COMMAND,
                 (payload) => {
@@ -414,7 +413,7 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
             }
             case RichTextAction.Save: {
                 try {      
-                    const imageNodes = searchImageNodeBlobData(activeEditor);
+                    // const imageNodes = searchImageNodeBlobData(activeEditor);
                     // console.log('imageNodes: ', imageNodes)
 
 
@@ -439,21 +438,30 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
 
                         // const imageData: Buffer[] = await fetchBlobData(blobUrls);
                         // console.log('buffer imageData:', imageData)
-                        saveDocument(serializedState, imageNodes);
+
+                        saveDocument(serializedState, imageFormData);
                         // console.log('serializedState:', serializedState)
                     });
 
                 } catch (error) {
                     console.error('Error saving document:', error);
                 }
-
-
                 break;
             }
         }
     }
 
     const handleInsertImage = (payload: InsertImagePayload) => {
+        // console.log('handleInsertImage payload: ', payload)
+        const { imageFormData } = payload;
+        if (imageFormData) {
+            // const formDataObj = Object.fromEntries(imageFormData.entries());
+            // const filea = formDataObj['file'] as File;
+            // console.log('File name:', filea.name);
+            // console.log('Object.fromEntries(imageFormData.entries())', JSON.stringify(formDataObj, null, 2));
+            setImageFormData(prev => [...prev, imageFormData])
+            // consoleLogFormData('handleInsertImage imageFormData:', imageFormData);
+        }
         activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, payload);
     };
     // const handleInsertInlineImage = (payload: InlineImagePayload) => {
@@ -480,9 +488,6 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
     const handleEmbedYoutube = (payload: { value: string }) => {
         activeEditor.dispatchCommand(INSERT_YOUTUBE_COMMAND, payload.value);
     };
-
-
-
     return (
         <div>
             <Toolbar toolbarData={toolbarData} canUndo={canUndo} canRedo={canRedo}

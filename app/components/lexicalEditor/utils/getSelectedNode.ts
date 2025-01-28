@@ -1,7 +1,7 @@
 import { $isAtNodeEnd } from '@lexical/selection';
 import { $getRoot, $isElementNode, EditorState, ElementNode, LexicalEditor, LexicalNode, RangeSelection, TextNode } from 'lexical';
 import { $isImageNode, ImageNode } from '../nodes/ImageNode';
-import { ImageNodeBlobData } from '@/app/lib/types';
+// import { ImageNodeBlobData } from '@/app/lib/types';
 
 export function getSelectedNode(selection: RangeSelection,): TextNode | ElementNode {
   const anchor = selection.anchor;
@@ -58,7 +58,7 @@ export function sanitizeLexicalData(lexicalData: string) {
   // console.log('typeof parsedData: ', typeof parsedData)
   // Start traversal from the root node
   if (Array.isArray(va)) {
-    console.log('parsedData.root.forEach(traverse) ')
+    // console.log('parsedData.root.forEach(traverse) ')
     va.forEach((d) => {
       console.log('iteration', d);
     })
@@ -113,30 +113,31 @@ export const removeImageNodeBlobSrc = (editor: LexicalEditor) => {
 
 
 };
-export const searchImageNodeBlobData = (editor: LexicalEditor): ImageNodeBlobData[] => {
-  const results: ImageNodeBlobData[] = [];
 
-  const traverse = (node: LexicalNode) => {
-    if (node instanceof ImageNode) {
-      const bd: ImageNodeBlobData = {
-        key: node.getKey(),
-        src: node.getSrc(),
-      }
-      results.push(bd);
-    }
-    // Check if the node is an instance of ElementNode (can have children)
-    if (node instanceof ElementNode) {
-      node.getChildren().forEach(traverse); // Recursively check child nodes
-    }
-  };
+// export const searchImageNodeBlobData = (editor: LexicalEditor): FormData[] => {
+//   const results: FormData[] = [];
 
-  editor.update(() => {
-    const root = $getRoot();
-    root.getChildren().forEach(traverse); // Start traversal from the root
-  });
+//   const traverse = (node: LexicalNode) => {
+//     if (node instanceof ImageNode) {
+//       const bd: FormData = {
+//         key: node.getKey(),
+//         src: node.getSrc(),
+//       }
+//       results.push(bd);
+//     }
+//     // Check if the node is an instance of ElementNode (can have children)
+//     if (node instanceof ElementNode) {
+//       node.getChildren().forEach(traverse); // Recursively check child nodes
+//     }
+//   };
 
-  return results;
-};
+//   editor.update(() => {
+//     const root = $getRoot();
+//     root.getChildren().forEach(traverse); // Start traversal from the root
+//   });
+
+//   return results;
+// };
 
 
 export const searchNodesByType = (editor: LexicalEditor, type: string): LexicalNode[] => {

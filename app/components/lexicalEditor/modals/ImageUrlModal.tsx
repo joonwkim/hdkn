@@ -12,15 +12,15 @@ import { InsertImagePayload } from '../plugins/ToolbarPlugin';
 const ImageUrlModal = ({ onClick }: { onClick: (payload: InsertImagePayload) => void, }) => {
 
     // const [editor] = useLexicalComposerContext();
-    const [formData, setFormData] = useState({ url: '', referrer: '' });
+    const [imageFormData, setFormData] = useState({ url: '', referrer: '' });
     const [isUrlValid, setIsUrlValid] = useState(false);
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        onClick({ src: formData.url, altText: formData.referrer })
+        onClick({ src: imageFormData.url, altText: imageFormData.referrer })
 
         // editor.update(() => {
-        //     const imageNode = new CustomImageNode(formData.url, formData.referrer);
+        //     const imageNode = new CustomImageNode(imageFormData.url, imageFormData.referrer);
 
         //     // Insert the image node into the editor's root or at the current selection point
         //     const selection = $getSelection();
@@ -45,7 +45,7 @@ const ImageUrlModal = ({ onClick }: { onClick: (payload: InsertImagePayload) => 
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target;
-        setFormData({ ...formData, [id]: value, });
+        setFormData({ ...imageFormData, [id]: value, });
         if (id === 'url') {
             validateUrl(value);
         }
@@ -88,7 +88,7 @@ const ImageUrlModal = ({ onClick }: { onClick: (payload: InsertImagePayload) => 
                                             className={`form-control ${isUrlValid ? 'is-valid' : 'is-invalid'}`}
                                             id="url"
                                             placeholder="예시, https://example.com/image.jpg"
-                                            value={formData.url}
+                                            value={imageFormData.url}
                                             onChange={handleInputChange}
                                             required
                                         />
@@ -109,7 +109,7 @@ const ImageUrlModal = ({ onClick }: { onClick: (payload: InsertImagePayload) => 
                                             className="form-control"
                                             id="referrer"
                                             placeholder="공란 또는 참고사항"
-                                            value={formData.referrer}
+                                            value={imageFormData.referrer}
                                             onChange={handleInputChange}
                                             required
                                         />

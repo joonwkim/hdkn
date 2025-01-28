@@ -1,7 +1,7 @@
 'use server'
 import prisma from "@/prisma/prisma";
 import { LexicalDocument } from "@prisma/client";
-import { ImageNodeBlobData } from "../lib/types";
+import { consoleLogFormDatas } from "../lib/formData";
 
 export async function getLexicalDocumentByPath(path: string): Promise<{ props: LexicalDocument, revalidate: number } | null> {
     try {
@@ -68,49 +68,32 @@ export async function getLexicalDocuments() {
     }
 }
 
-export async function upsertLexicalDocument(content: string, images: ImageNodeBlobData[], title: string, pathName: string, userId: string): Promise<LexicalDocument | null> {
+export async function upsertLexicalDocument(content: string, imageFormData: FormData[], title: string, pathName: string, userId: string): Promise<LexicalDocument | null> {
     try {
+
+        // check and get imagenary urls if not create and get url
+        // replace image node src of content into imagenary url
+        // save content
+        // return true;
+
+        // await getCloudinaryImageIds(imageFormData);
+
+        // console.log('ids: ', ids)
+
+        consoleLogFormDatas('upsertLexicalDocument: ', imageFormData)
         console.log('content: ', content)
-        console.log('images: ', images)
-        const result = await prisma.lexicalDocument.upsert({
-            where: {
-                userId_title: {
-                    userId,
-                    title,
-                },
-            },
-            update: {
-                content: content,
-            },
-            create: {
-                title: title,
-                url: pathName,
-                content: content,
-                userId: userId,
-                // images: {
-                //     createMany: {
-                //         data: {
-                //             images.map((image) => ({
-                //                 id: image.id,
-                //                 data: image.data,
-                //             }))
-                //         }
-                //     }
-                // }
-            }
-        })
-
-        // const imageData = images.map((image) => ({
-        //     lexicalDocId: result.id,
-        //     data: Buffer.from(image.data),
-        //     contentType: image.contentType,
-        // }));
-
-        // await prisma.image.createMany
-        // console.log('result: ', result)
-        return result;   
-
-        // return null;
+        console.log('title: ', title)
+        console.log('pathName: ', pathName)
+        console.log('userId: ', userId)
+        console.log('images: ', imageFormData.length)
+        // imageFormData.forEach(fd => {
+        //     if (fd) {
+        //         const formDataObj = Object.fromEntries(fd.entries());
+        //         const filea = formDataObj['file'] as File;
+        //         console.log('File name:', filea.name);
+        //     }
+        // })
+        return null;
     } catch (error) {
         console.log('createLexicalDocument error:', error)
         return null;
