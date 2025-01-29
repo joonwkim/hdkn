@@ -1,3 +1,6 @@
+export interface CustomFile extends File {
+    secure_url: string;
+}
 export interface CloudiaryInfo {
     asset_id: string,
     public_id: string,

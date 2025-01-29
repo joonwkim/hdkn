@@ -22,18 +22,20 @@ const InsertImageFileModal = ({ onClick }: { onClick: (payload: InsertImagePaylo
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
         if (file) {
             const formData = new FormData();
             formData.append('file', file)
-            // const response = await fetch('/api/upload', { method: 'POST', body: formData });
-            // console.log('fetch response: ', response)
-            // if (!response.ok) {
-            //     throw new Error("Failed to upload image");
-            // }
-            // const { url, altText } = await response.json();
-            // console.log('url: ', url)
+            formData.append('filename', file.name)
             const src = URL.createObjectURL(file);
-            const payload = { src: src, altText: altText, width: imageWidth, height: imageHeight, position: position }
+            const payload: InsertImagePayload = {
+                src: src,
+                altText: altText,
+                width: imageWidth,
+                height: imageHeight,
+                position: position,
+                formData: formData,
+            };
             onClick(payload)
         }
         setFile(null)

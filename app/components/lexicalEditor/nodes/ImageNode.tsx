@@ -16,7 +16,7 @@ export interface ImagePayload {
     width?: number;
     captionsEnabled?: boolean;
     position?: Position;
-    imageFormData?: FormData;
+    formData?: FormData;
 }
 
 function isGoogleDocCheckboxImg(img: HTMLImageElement): boolean {
@@ -38,7 +38,7 @@ function $convertImageElement(domNode: Node): null | DOMConversionOutput {
     return { node };
 }
 
-export type SerializedImageNode = Spread<{ altText: string; caption: SerializedEditor; height?: number; maxWidth?: number; showCaption: boolean; src: string; width?: number; position?: Position; imageFormData?: FormData }, SerializedLexicalNode>;
+export type SerializedImageNode = Spread<{ altText: string; caption: SerializedEditor; height?: number; maxWidth?: number; showCaption: boolean; src: string; width?: number; position?: Position; formData?: FormData }, SerializedLexicalNode>;
 export class ImageNode extends DecoratorNode<JSX.Element> {
     __src: string;
     __altText: string;
@@ -49,19 +49,19 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     __caption: LexicalEditor;
     __position?: Position;
     __captionsEnabled: boolean;
-    __imageFormData?: FormData;
+    __formData?: FormData;
 
     static getType(): string {
         return 'image';
     }
 
     static clone(node: ImageNode): ImageNode {
-        return new ImageNode(node.__src, node.__altText, node.__maxWidth, node.__width, node.__height, node.__showCaption, node.__caption, node.__captionsEnabled, node.__key, node.__position, node.__imageFormData);
+        return new ImageNode(node.__src, node.__altText, node.__maxWidth, node.__width, node.__height, node.__showCaption, node.__caption, node.__captionsEnabled, node.__key, node.__position, node.__formData);
     }
 
     static importJSON(serializedNode: SerializedImageNode): ImageNode {
-        const { altText, height, width, maxWidth, caption, src, showCaption, imageFormData } = serializedNode;
-        const node = $createImageNode({ altText, height, maxWidth, showCaption, src, width, imageFormData });
+        const { altText, height, width, maxWidth, caption, src, showCaption, formData } = serializedNode;
+        const node = $createImageNode({ altText, height, maxWidth, showCaption, src, width, formData });
         const nestedEditor = node.__caption;
         const editorState = nestedEditor.parseEditorState(caption.editorState);
         if (!editorState.isEmpty()) {
@@ -79,7 +79,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
         };
     }
 
-    constructor(src: string, altText: string, maxWidth?: number, width?: number, height?: number, showCaption?: boolean, caption?: LexicalEditor, captionsEnabled?: boolean, key?: NodeKey, position?: Position, imageFormData?: FormData) {
+    constructor(src: string, altText: string, maxWidth?: number, width?: number, height?: number, showCaption?: boolean, caption?: LexicalEditor, captionsEnabled?: boolean, key?: NodeKey, position?: Position, formData?: FormData) {
         super(key);
         this.__src = src;
         this.__altText = altText;
@@ -90,11 +90,14 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
         this.__caption = caption || createEditor({ nodes: [], });
         this.__captionsEnabled = captionsEnabled || captionsEnabled === undefined;
         this.__position = position;
-        this.__imageFormData = imageFormData;
+        this.__formData = formData;
     }
 
     getAltText(): string {
         return this.__altText;
+    }
+    getFormData(): FormData | undefined {
+        return this.__formData;
     }
 
     getSrc(): string {
@@ -109,6 +112,16 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
         const writable = this.getWritable();
         writable.__width = width;
         writable.__height = height;
+    }
+
+    updateSrc(newSrc: string) {
+        const self = this.getWritable();
+        self.__src = newSrc
+        console.log('src: ', self.__src)
+    }
+    updateAltText(altText: string) {
+        const self = this.getWritable();
+        self.__altText = altText;
     }
 
     setShowCaption(showCaption: boolean): void {
@@ -127,7 +140,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
             type: 'image',
             version: 1,
             width: this.__width,
-            imageFormData: this.__imageFormData,
+            formData: this.__formData,
         };
     }
 
@@ -188,8 +201,8 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     }
 }
 
-export function $createImageNode({ altText, height, maxWidth, captionsEnabled, src, width, showCaption, caption, key, position, imageFormData }: ImagePayload): ImageNode {
-    return $applyNodeReplacement(new ImageNode(src, altText, maxWidth, width, height, showCaption, caption, captionsEnabled, key, position, imageFormData));
+export function $createImageNode({ altText, height, maxWidth, captionsEnabled, src, width, showCaption, caption, key, position, formData }: ImagePayload): ImageNode {
+    return $applyNodeReplacement(new ImageNode(src, altText, maxWidth, width, height, showCaption, caption, captionsEnabled, key, position, formData));
 }
 
 export function $isImageNode(node: LexicalNode | null | undefined,): node is ImageNode {

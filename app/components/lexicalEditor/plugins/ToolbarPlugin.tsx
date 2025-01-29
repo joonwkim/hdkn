@@ -9,8 +9,7 @@ import { $setBlocksType } from '@lexical/selection';
 import { $createHeadingNode, $createQuoteNode, $isHeadingNode } from '@lexical/rich-text';
 import { $isListNode, INSERT_CHECK_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND, ListNode, } from '@lexical/list';
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
-import { getSelectedNode, } from '../utils/getSelectedNode';
-// import { sanitizeUrl } from '../utils/url';
+import { getImageNodes, getSelectedNode, } from '../utils/getSelectedNode';
 import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/react/LexicalHorizontalRuleNode';
 import { $createImageNode, ImageNode, ImagePayload } from '../nodes/ImageNode';
 import { sanitizeUrl } from '../utils/url';
@@ -18,8 +17,7 @@ import { $createTableNodeWithDimensions, INSERT_TABLE_COMMAND, InsertTableComman
 import { INSERT_LAYOUT_COMMAND } from './LayoutPlugin';
 import { $createStickyNode } from '../nodes/StickyNode';
 import { INSERT_YOUTUBE_COMMAND } from './YouTubePlugin';
-import { consoleLogFormData, } from '@/app/lib/formData';
-// import { ImageNodeBlobData, } from '@/app/lib/types';
+import { uploadToCloudinary } from '@/app/actions/cloudinary';
 
 export type InsertImagePayload = Readonly<ImagePayload>;
 export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> = createCommand('INSERT_IMAGE_COMMAND');
@@ -47,7 +45,7 @@ interface LexicalToolbarProps {
     isReadOnly: boolean,
     lexicalToolbarData: ToolbarItem[],
     setIsLinkEditMode: Dispatch<boolean>,
-    saveDocument: (content: string, imageFormData: FormData[]) => void
+    saveDocument: (content: string) => void
 }
 
 //#endregion
@@ -56,7 +54,7 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
     const [editor] = useLexicalComposerContext();
     const [toolbarData, setToolbarData] = useState<ToolbarItem[]>(lexicalToolbarData)
     const [activeEditor, setActiveEditor] = useState(editor);
-    const [imageFormData, setImageFormData] = useState<FormData[]>([])
+    // const [imageFormData, setImageFormData] = useState<FormData[]>([]);
     // const [blockType, setBlockType] = useState<keyof typeof actionName>(RichTextAction.Paragraph);
     // const [isRTL, setIsRTL] = useState(false);
     // const [selectedElementKey, setSelectedElementKey] = useState<NodeKey | null>(null,);
@@ -413,34 +411,39 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
             }
             case RichTextAction.Save: {
                 try {      
-                    // const imageNodes = searchImageNodeBlobData(activeEditor);
-                    // console.log('imageNodes: ', imageNodes)
-
 
                     activeEditor.update(async () => {
                         const editorState = activeEditor.getEditorState();
-
                         const serializedState = JSON.stringify(editorState);
-                        // const root = $getRoot();
-                        // const images: { src: string; name: string }[] = [];
+                        const rootNode = $getRoot();
+                        const imageNodes = getImageNodes(rootNode)
 
-                        // root.getChildren().forEach((node) => {
-                        //     if (node instanceof ImageNode) {
-                        //         console.log('image:', { src: node.getSrc(), name: node.getAltText() || "Untitled" });
-                        //         images.push({ src: node.getSrc(), name: node.getAltText() || "Untitled" })
-                        //     }
-                        // });
+                        imageNodes.forEach(async (node) => {
+                            if (node.__src.startsWith("blob:")) {
+                                try {
 
-                        // console.log('images: ', images)
+                                    const fd = node.getFormData();
+                                    console.log('node formData fd: ', node.__formData)
+                                    if (fd && fd instanceof FormData) {
+                                        const ci = await uploadToCloudinary(fd)
+                                        node.updateSrc(ci.url)
+                                        node.updateAltText(ci.filename)
+                                        console.log('node updated: ', node)
+                                    } else {
+                                        const fdType = JSON.stringify(fd, null, 2);
+                                        alert('Check type is FormData!!!' + fdType + ' ' + node.getSrc());
+                                    }
+                                } catch (error) {
+                                    console.error("Failed to upload image:", error);
+                                }
+                            }
+                            else {
 
-                        // const blobUrls = getBlobUrls(editorState);
-                        // console.log('blobUrls: ', blobUrls)
+                            }
+                        })
+                        console.error("serializedState:", serializedState);
+                        saveDocument(serializedState);
 
-                        // const imageData: Buffer[] = await fetchBlobData(blobUrls);
-                        // console.log('buffer imageData:', imageData)
-
-                        saveDocument(serializedState, imageFormData);
-                        // console.log('serializedState:', serializedState)
                     });
 
                 } catch (error) {
@@ -452,16 +455,22 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
     }
 
     const handleInsertImage = (payload: InsertImagePayload) => {
-        // console.log('handleInsertImage payload: ', payload)
-        const { imageFormData } = payload;
-        if (imageFormData) {
-            // const formDataObj = Object.fromEntries(imageFormData.entries());
-            // const filea = formDataObj['file'] as File;
-            // console.log('File name:', filea.name);
-            // console.log('Object.fromEntries(imageFormData.entries())', JSON.stringify(formDataObj, null, 2));
-            setImageFormData(prev => [...prev, imageFormData])
-            // consoleLogFormData('handleInsertImage imageFormData:', imageFormData);
-        }
+        // console.log('handleInsertImage payload:', payload);
+
+        // const { formData } = payload;
+        // if (formData) {
+        //     setImageFormData((prev: FormData[]) => [...prev, formData]);
+        // console.log('Updated form data:', imageFormData);
+        // }
+        // const { formData } = payload;
+
+        // consoleLogFormData('handleInsertImage formData:', formData);
+        // if (formData) {
+        //     setImageFormData((prev) => [...prev, formData]);
+        //     console.log('handleInsertImage formData:', imageFormData);
+        //     consoleLogFormDatas('handleInsertImage', imageFormData)
+
+        // }
         activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, payload);
     };
     // const handleInsertInlineImage = (payload: InlineImagePayload) => {

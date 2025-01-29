@@ -1,7 +1,6 @@
 'use client'
 
 import { upsertLexicalDocumentAction } from "@/app/actions/lexicalDocumentAction";
-import { ImageNodeBlobData } from "@/app/lib/types";
 import { getLexicalDocumentByPath } from "@/app/services/lexicalDocument";
 import { LexicalDocument } from "@prisma/client";
 import { useSession } from "next-auth/react";
@@ -10,7 +9,7 @@ import React, { createContext, useContext, } from 'react';
 interface IntroContextProps {
     isUserReadOnly: boolean;
     getContent: (pathName: string) => Promise<{ props: LexicalDocument, revalidate: number } | null>;
-    saveContent: (pathName: string, content: string, images: ImageNodeBlobData[]) => void;
+    saveContent: (pathName: string, content: string) => void;
 }
 
 const IntroLayoutContext = createContext<IntroContextProps | undefined>(undefined);
@@ -27,10 +26,10 @@ const IntroLayout = ({ children, }: { children: React.ReactNode }) => {
     const { data: session } = useSession();
     const isUserReadOnly = session?.user ? session.user.isUserReadOnly : true;
 
-    const saveContent = async (pathName: string, content: string, images: ImageNodeBlobData[]) => {
-        console.log('saveContent pathName content: ', content)
+    const saveContent = async (pathName: string, content: string) => {
+    // console.log('saveContent pathName content: ', content)
 
-        await upsertLexicalDocumentAction(content, images, pathName, pathName, session?.user.id)
+        await upsertLexicalDocumentAction(content, pathName, pathName, session?.user.id)
     }
     const getContent = async (pathName: string): Promise<{ props: LexicalDocument, revalidate: number } | null> => {
         const result = await getLexicalDocumentByPath(pathName.trim())

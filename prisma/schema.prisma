@@ -34,8 +34,8 @@ model LexicalDocument {
   updatedAt        DateTime        @updatedAt
   userId           String          @db.ObjectId
   // images           Image[] 
-  CloudinaryData   CloudinaryData? @relation(fields: [cloudinaryDataId], references: [id])
-  cloudinaryDataId String?         @db.ObjectId
+  // CloudinaryData   CloudinaryData? @relation(fields: [cloudinaryDataId], references: [id])
+  // cloudinaryDataId String?         @db.ObjectId
 
   @@unique([userId, title])
 }
@@ -251,8 +251,8 @@ model StageContents {
   stageId String @db.ObjectId
   stage   Stage  @relation(fields: [stageId], references: [id])
 
-  thumbnailCloudinaryData CloudinaryData? @relation(fields: [cloudinaryDataId], references: [id])
-  cloudinaryDataId        String?         @db.ObjectId
+  // thumbnailCloudinaryData CloudinaryData? @relation(fields: [cloudinaryDataId], references: [id])
+  // cloudinaryDataId        String?         @db.ObjectId
 
   knowhowDetailInfo   KnowhowDetailInfo? @relation(fields: [knowhowDetailInfoId], references: [id])
   knowhowDetailInfoId String?            @db.ObjectId
@@ -313,8 +313,8 @@ model Knowhow {
 
   stages Stage[]
 
-  thumbnailCloudinaryData CloudinaryData? @relation(fields: [cloudinaryDataId], references: [id])
-  cloudinaryDataId        String?         @db.ObjectId
+  // thumbnailCloudinaryData CloudinaryData? @relation(fields: [cloudinaryDataId], references: [id])
+  // cloudinaryDataId        String?         @db.ObjectId
 
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -375,8 +375,8 @@ model KnowhowDetailInfo {
   youtubeDatas   YouTubeData[] @relation(fields: [youtubeDataIds], references: [id])
   youtubeDataIds String[]      @db.ObjectId
 
-  cloudinaryDatas   CloudinaryData[] @relation(fields: [cloudinaryDataIds], references: [id])
-  cloudinaryDataIds String[]         @db.ObjectId
+  // cloudinaryDatas   CloudinaryData[] @relation(fields: [cloudinaryDataIds], references: [id])
+  // cloudinaryDataIds String[]         @db.ObjectId
   stageContents     StageContents[]
 }
 
@@ -401,27 +401,27 @@ enum ThumbnailType {
   MAXRES
 }
 
-model CloudinaryData {
-  id            String  @id @default(auto()) @map("_id") @db.ObjectId
-  asset_id      String?
-  public_id     String?
-  filename      String?
-  format        String?
-  bytes         Int?
-  folder        String  @default("openplace")
-  secure_url    String?
-  thumbnail_url String?
-  path          String
+// model CloudinaryData {
+//   id            String  @id @default(auto()) @map("_id") @db.ObjectId
+//   asset_id      String?
+//   public_id     String?
+//   filename      String?
+//   format        String?
+//   bytes         Int?
+//   folder        String  @default("openplace")
+//   secure_url    String?
+//   thumbnail_url String?
+//   path          String
 
-  knowhow         Knowhow[]
-  lexicalDocuments LexicalDocument[]
+//   knowhow         Knowhow[]
+//   lexicalDocuments LexicalDocument[]
 
-  knowhowDetailInfos   KnowhowDetailInfo[] @relation(fields: [knowhowDetailInfoIds], references: [id])
-  knowhowDetailInfoIds String[]            @db.ObjectId
-  stageContents        StageContents[]
+//   knowhowDetailInfos   KnowhowDetailInfo[] @relation(fields: [knowhowDetailInfoIds], references: [id])
+//   knowhowDetailInfoIds String[]            @db.ObjectId
+//   stageContents        StageContents[]
 
-  @@unique([folder, path])
-}
+//   @@unique([folder, path])
+// }
 
 enum MembershipRequestStatus {
   NONE

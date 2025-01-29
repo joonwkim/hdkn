@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation';
 import { LexicalDocument } from '@prisma/client';
 import { useIntroLayoutContext } from '../layout';
-import { ImageNodeBlobData } from '@/app/lib/types';
 
 const OtherActivitesPage = () => {
   const pathname = usePathname();
@@ -28,8 +27,8 @@ const OtherActivitesPage = () => {
     fetchData();
   }, [getContent, pathname]);
 
-  const saveDocument = async (content: string, imageNodes: ImageNodeBlobData[]) => {
-    saveContent(pathname, content, imageNodes);
+  const saveDocument = async (content: string) => {
+    saveContent(pathname, content);
   }
 
   if (loading) return <p>Loading...</p>;

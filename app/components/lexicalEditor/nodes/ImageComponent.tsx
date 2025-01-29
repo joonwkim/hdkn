@@ -47,8 +47,10 @@ function LazyImage({ altText, className, imageRef, width, height, src, onError }
     }, [height, width])
 
     return (<>
+        <div>{src}</div>
         {width && height && (<>
-            {/* <div>case1</div> */}
+
+
             <Image
                 className={className}
                 alt={altText}
@@ -354,7 +356,10 @@ const ImageComponent = ({ src, altText, nodeKey, width, height, maxWidth, resiza
 
                 <div className='image-container' draggable={draggable}>
                     {isLoadError ? (
-                        <h2 className='text-center'>이미지가 손상되었습니다.</h2>
+                        <div>
+                            <div>{src}</div>
+                            <h2 className='text-center'>이미지가 손상되었습니다.</h2></div>
+
                     ) : (<>
                         <LazyImage
                                 className={isFocused ? `image-container focused ${$isNodeSelection(selection) ? 'draggable' : ''}` : 'image-container'}

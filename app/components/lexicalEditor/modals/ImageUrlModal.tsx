@@ -63,7 +63,7 @@ const ImageUrlModal = ({ onClick }: { onClick: (payload: InsertImagePayload) => 
                 '(\\#[-a-zA-Z\\d_]*)?$', // fragment locator
                 'i' // case-insensitive
             );
-            const isImageUrl = /\.(jpg|jpeg|png|gif)$/i.test(url); // Separate check for image URL
+            const isImageUrl = /\.(jpg|jpeg|png|gif|webp)$/i.test(url); // Separate check for image URL
             const isValid = urlPattern.test(url) && isImageUrl;
             setIsUrlValid(isValid);
         }
@@ -95,7 +95,7 @@ const ImageUrlModal = ({ onClick }: { onClick: (payload: InsertImagePayload) => 
                                         {isUrlValid ? (
                                             <div className="form-text ms-2">유효한 image URL</div>
                                         ) : (
-                                            <div className="invalid-feedback ms-2">유효한 image URL을 입력하세요 (jpg, jpeg, png, gif).</div>
+                                                <div className="invalid-feedback ms-2">유효한 image URL을 입력하세요 (jpg, jpeg, png, gif, webp).</div>
                                         )}
 
 

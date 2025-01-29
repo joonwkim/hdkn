@@ -37,7 +37,6 @@ import LinkPlugin from './plugins/LinkPlugin';
 // import { $generateHtmlFromNodes } from "@lexical/html";
 import LoadInitialDataPlugin from './plugins/LoadInitialDataPlugin';
 import TreeViewPlugin from './plugins/TreeViewPlugin';
-import { ImageNodeBlobData } from '@/app/lib/types';
 
 // const ExportToHtmlButton = () => {
 //     const [editor] = useLexicalComposerContext();
@@ -71,7 +70,7 @@ import { ImageNodeBlobData } from '@/app/lib/types';
 interface EditorProps {
     isReadOnly: boolean,
     initailData?: string,
-    saveDocument: (content: string, images: ImageNodeBlobData[]) => void,
+    saveDocument: (content: string, images: FormData[]) => void,
 }
 
 const Editor = ({ saveDocument, isReadOnly, initailData }: EditorProps) => {

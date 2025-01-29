@@ -1,7 +1,6 @@
 'use server'
 import prisma from "@/prisma/prisma";
 import { LexicalDocument } from "@prisma/client";
-import { consoleLogFormDatas } from "../lib/formData";
 
 export async function getLexicalDocumentByPath(path: string): Promise<{ props: LexicalDocument, revalidate: number } | null> {
     try {
@@ -68,32 +67,36 @@ export async function getLexicalDocuments() {
     }
 }
 
-export async function upsertLexicalDocument(content: string, imageFormData: FormData[], title: string, pathName: string, userId: string): Promise<LexicalDocument | null> {
+export async function upsertLexicalDocument(content: string, title: string, pathName: string, userId: string): Promise<LexicalDocument | null> {
     try {
 
-        // check and get imagenary urls if not create and get url
-        // replace image node src of content into imagenary url
-        // save content
-        // return true;
 
-        // await getCloudinaryImageIds(imageFormData);
+        // console.log('content: ', content)
+        // console.log('title: ', title)
+        // console.log('pathName: ', pathName)
+        // console.log('userId: ', userId)
 
-        // console.log('ids: ', ids)
+        const result = await prisma.lexicalDocument.upsert({
+            where: {
+                userId_title: {
+                    userId: userId,
+                    title: title,
+                },
+            },
+            create: {
+                title: title,
+                content: content,
+                userId: userId,
+                url: pathName,
+            },
+            update: {
+                content: content,
+                updatedAt: new Date(),
+            }
+        })
 
-        consoleLogFormDatas('upsertLexicalDocument: ', imageFormData)
-        console.log('content: ', content)
-        console.log('title: ', title)
-        console.log('pathName: ', pathName)
-        console.log('userId: ', userId)
-        console.log('images: ', imageFormData.length)
-        // imageFormData.forEach(fd => {
-        //     if (fd) {
-        //         const formDataObj = Object.fromEntries(fd.entries());
-        //         const filea = formDataObj['file'] as File;
-        //         console.log('File name:', filea.name);
-        //     }
-        // })
-        return null;
+        // console.log('upsertLexicalDocument :', result)
+        return result;
     } catch (error) {
         console.log('createLexicalDocument error:', error)
         return null;
