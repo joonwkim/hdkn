@@ -2,8 +2,10 @@ import { $applyNodeReplacement, createEditor, DecoratorNode, DOMConversionMap, D
 import * as React from 'react';
 import { Suspense } from "react";
 import { Position } from "./InlineImageNode";
+import debounce from 'lodash-es/debounce';
+import dynamic from 'next/dynamic';
 
-const ImageComponent = React.lazy(() => import('./ImageComponent'));
+const ImageComponent = dynamic(() => import('./ImageComponent'), { ssr: false });
 
 export interface ImagePayload {
     altText: string;
@@ -39,6 +41,29 @@ function $convertImageElement(domNode: Node): null | DOMConversionOutput {
 }
 
 export type SerializedImageNode = Spread<{ altText: string; caption: SerializedEditor; height?: number; maxWidth?: number; showCaption: boolean; src: string; width?: number; position?: Position; formData?: FormData }, SerializedLexicalNode>;
+
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+    constructor(props: { children: React.ReactNode }) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError(): { hasError: boolean } {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+        console.error("Error caught in ErrorBoundary: ", error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return <span>Failed to load image.</span>;
+        }
+        return this.props.children;
+    }
+}
+
 export class ImageNode extends DecoratorNode<JSX.Element> {
     __src: string;
     __altText: string;
@@ -114,14 +139,29 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
         writable.__height = height;
     }
 
-    updateSrc(newSrc: string) {
-        const self = this.getWritable();
-        self.__src = newSrc
-        console.log('src: ', self.__src)
+    private saveNodeStateDebounced = debounce(() => {
+        console.log('Saving node state with updated src...');
+
+    }, 300);
+
+    updateSrc(editor: LexicalEditor, newSrc: string) {
+        editor.update(() => {
+            const self = this.getWritable();
+            self.__src = newSrc;
+            this.saveNodeStateDebounced(); // Save node state after a delay
+            console.log('src: ', self.__src)
+            this.markDirty(); // Ensure the state change is reflected
+        });
+        editor.focus();
     }
-    updateAltText(altText: string) {
-        const self = this.getWritable();
-        self.__altText = altText;
+
+    updateAltText(editor: LexicalEditor, altText: string) {
+        editor.update(() => {
+            const self = this.getWritable();
+            self.__altText = altText;
+            this.saveNodeStateDebounced(); // Save node state after a delay
+            this.markDirty(); // Ensure the state change is reflected
+        });
     }
 
     setShowCaption(showCaption: boolean): void {
@@ -174,29 +214,35 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
         const element = document.createElement('img');
         element.setAttribute('src', this.__src);
         element.setAttribute('alt', this.__altText);
-        element.setAttribute('width', this.__width ? this.__width.toString() : '');
-        element.setAttribute('height', this.__height ? this.__height.toString() : '');
+        if (this.__width) {
+            element.setAttribute('width', this.__width.toString());
+        }
+        if (this.__height) {
+            element.setAttribute('height', this.__height.toString());
+        }
         return { element };
     }
 
     decorate(): JSX.Element {
+        const MemoizedImageComponent = React.memo(ImageComponent);
         return (
-            <Suspense fallback={<div>Loading...</div>}>
-                <ImageComponent
-                    src={this.__src}
-                    altText={this.__altText}
-                    width={this.__width}
-                    maxWidth={this.__maxWidth}
-                    height={this.__height}
-                    nodeKey={this.getKey()}
-                    showCaption={this.__showCaption}
-                    caption={this.__caption}
-                    position={this.__position}
-                    captionsEnabled={this.__captionsEnabled}
-                    resizable={true}
-                />
-
-            </Suspense>
+            <Suspense fallback={<span>Loading image...</span>}>
+                <ErrorBoundary>
+                    <MemoizedImageComponent
+                        src={this.__src}
+                        altText={this.__altText}
+                        width={this.__width}
+                        maxWidth={this.__maxWidth}
+                        height={this.__height}
+                        nodeKey={this.getKey()}
+                        showCaption={this.__showCaption}
+                        caption={this.__caption}
+                        position={this.__position}
+                        captionsEnabled={this.__captionsEnabled}
+                        resizable={true}
+                    />
+                </ErrorBoundary>
+            </Suspense>         
         );
     }
 }

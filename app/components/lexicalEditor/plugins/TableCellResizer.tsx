@@ -405,9 +405,13 @@ export default function TableCellResizerPlugin(): null | ReactPortal {
     const isEditable = useLexicalEditable();
     const [isClient, setIsClient] = useState(false);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         setIsClient(true);
     }, []);
+
+    // useLayoutEffect(() => {
+    //     setIsClient(true);
+    // }, []);
 
     return useMemo(() => {
         if (!isClient || !isEditable) {

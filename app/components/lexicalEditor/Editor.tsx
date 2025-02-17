@@ -17,7 +17,6 @@ import { ListItemNode, ListNode, } from '@lexical/list';
 import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin';
 import './styles.css'
 import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
-// import TreeViewPlugin from './plugins/TreeViewPlugin';
 import { ImageNode } from './nodes/ImageNode';
 import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
@@ -33,48 +32,15 @@ import { CAN_USE_DOM } from '@lexical/utils';
 import FloatingLinkEditorPlugin from './plugins/FloatingLinkEditorPlugin';
 import { LinkNode } from '@lexical/link';
 import LinkPlugin from './plugins/LinkPlugin';
-// import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-// import { $generateHtmlFromNodes } from "@lexical/html";
 import LoadInitialDataPlugin from './plugins/LoadInitialDataPlugin';
 import TreeViewPlugin from './plugins/TreeViewPlugin';
-
-// const ExportToHtmlButton = () => {
-//     const [editor] = useLexicalComposerContext();
-//     const [htmlContent, setHtmlContent] = useState<string>("");
-//     const [iframeContent, setIframeContent] = useState<string>("");
-
-//     const exportToHTML = () => {
-//         editor.update(() => {
-//             const htmlString = $generateHtmlFromNodes(editor, null); // Exports entire initailData
-//             setHtmlContent(htmlString);
-//             setIframeContent(htmlString)
-//         });
-//     };
-
-//     return (
-//         <div>
-//             <button onClick={exportToHTML}>Export to HTML</button>
-//             <div>
-//                 <h3>Exported HTML:</h3>
-//                 <div>{htmlContent}</div>
-//                 <iframe
-//                     title="HTML Document Preview"
-
-//                     srcDoc={iframeContent} // Load the HTML initailData into the iframe
-//                 />
-//             </div>
-//         </div>
-//     );
-// };
-
 interface EditorProps {
     isReadOnly: boolean,
     initailData?: string,
-    saveDocument: (content: string, images: FormData[]) => void,
+    saveDocument: (content: string) => void,
 }
 
 const Editor = ({ saveDocument, isReadOnly, initailData }: EditorProps) => {
-    //const [isReadOnly, setIsReadOnly] = useState(false);/
     const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null);
     const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false);
     const [isLinkEditMode, setIsLinkEditMode] = useState<boolean>(false);
@@ -108,9 +74,6 @@ const Editor = ({ saveDocument, isReadOnly, initailData }: EditorProps) => {
         theme: EditorTheme,
     };
 
-    // const toggleEditMode = () => {
-    //     setIsReadOnly((prev) => !prev);
-    // };
 
     return (
         <>

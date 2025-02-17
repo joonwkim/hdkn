@@ -47,10 +47,8 @@ function LazyImage({ altText, className, imageRef, width, height, src, onError }
     }, [height, width])
 
     return (<>
-        <div>{src}</div>
+        {/* <div>{`:${src}, width:${width}, height:${height}`}</div> */}
         {width && height && (<>
-
-
             <Image
                 className={className}
                 alt={altText}
@@ -352,8 +350,6 @@ const ImageComponent = ({ src, altText, nodeKey, width, height, maxWidth, resiza
     return (
         <Suspense fallback={null}>
             <>
-                {/* <div>{`showCaption: ${showCaption}`}</div> */}
-
                 <div className='image-container' draggable={draggable}>
                     {isLoadError ? (
                         <div>

@@ -13,7 +13,7 @@ const ImageModal = ({ onClick }: { onClick: (payload: InsertImagePayload) => voi
                         <h1 className="modal-title fs-4" id="insertImageModalToggleLabel">이미지 삽입</h1>
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div className="modal-body my-3">
+                    <div className="modal-body">
                         <div className="row g-3">
                             <button className="btn btn-outline-secondary border-0" data-bs-target="#insertImageUrlModal" data-bs-toggle="modal">URL 입력</button>
                             <button className="btn btn-outline-secondary border-0" data-bs-target="#insertImageFileModal" data-bs-toggle="modal">파일 입력</button>

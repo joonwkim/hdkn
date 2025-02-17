@@ -27,8 +27,6 @@ const IntroLayout = ({ children, }: { children: React.ReactNode }) => {
     const isUserReadOnly = session?.user ? session.user.isUserReadOnly : true;
 
     const saveContent = async (pathName: string, content: string) => {
-    // console.log('saveContent pathName content: ', content)
-
         await upsertLexicalDocumentAction(content, pathName, pathName, session?.user.id)
     }
     const getContent = async (pathName: string): Promise<{ props: LexicalDocument, revalidate: number } | null> => {

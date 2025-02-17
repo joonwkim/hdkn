@@ -1,31 +1,26 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { useEffect } from "react";
-// import { sanitizeLexicalData, } from "../utils/getSelectedNode";
-// import { ImageNodeBlobData } from "@/app/lib/types";
+import { useEffect, useRef } from "react";
 
 const LoadInitialDataPlugin: React.FC<{ initialData: string }> = ({ initialData }) => {
     const [editor] = useLexicalComposerContext();
-    // const sanitizedData = sanitizeLexicalData(initialData);
-    // console.log('sanitizedData: ', sanitizedData);
+    const hasLoaded = useRef(false);
 
     useEffect(() => {
-        if (initialData) {
-        // const parsedState = JSON.parse(sanitizedData);
-            const parsedState = JSON.parse(initialData);
-        // console.log('parsedState: ', parsedState);
-        // updateImageSrc(parsedState.root);
-
-            editor.update(() => {
-                const editorState = editor.parseEditorState(parsedState);
-                console.log('editorState: ', editorState)
-                editor.setEditorState(editorState);
+        if (initialData && !hasLoaded.current) {
+            hasLoaded.current = true; // Prevent multiple updates
+            queueMicrotask(() => {
+                try {
+                    const parsedState = JSON.parse(initialData);
+                    editor.update(() => {
+                        const editorState = editor.parseEditorState(parsedState);
+                        editor.setEditorState(editorState);
+                    });
+                } catch (error) {
+                    console.error('Error parsing initial editor state:', error);
+                }
             });
-
-            // const imageNodeBlobData: ImageNodeBlobData[] = searchImageNodeBlobData(editor);
-            // console.log('ImageNodeBlobData: ', imageNodeBlobData)
-            // removeImageNodeBlobSrc(editor)
         }
-    }, [initialData, editor,]);
+    }, [initialData, editor]);
 
     return null;
 };

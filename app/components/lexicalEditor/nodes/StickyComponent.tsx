@@ -7,7 +7,7 @@ import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import { calculateZoomLevel } from '@lexical/utils';
 import { $getNodeByKey } from 'lexical';
 import * as React from 'react';
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { $isStickyNode } from './StickyNode';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import StickyEditorTheme from '../themes/StickyEditorTheme';
@@ -49,7 +49,7 @@ export default function StickyComponent({ x, y, nodeKey, color, caption, }: { ca
     }
   }, [x, y]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const position = positioningRef.current;
     const resizeObserver = new ResizeObserver((entries) => {
       for (let i = 0; i < entries.length; i++) {

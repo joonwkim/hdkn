@@ -39,7 +39,7 @@ const EmbedYoutubeModal = ({ onClick }: { onClick: (payload: { value: string }) 
                     <h1 className="modal-title fs-4" id="insertInlineImageModalToggleLabel">유튜브 비디오 삽입</h1>
                     <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div className="modal-body my-3">
+                <div className="modal-body">
                     <div className="container">
                         <form onSubmit={handleSubmit} id='insertYouTubeLinkForm'>
                             <input

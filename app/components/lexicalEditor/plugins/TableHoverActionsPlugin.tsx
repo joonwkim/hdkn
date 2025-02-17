@@ -212,9 +212,12 @@ function getMouseInfo(event: MouseEvent): { tableDOMNode: HTMLElement | null; is
 
 export default function TableHoverActionsPlugin({ anchorElem }: { anchorElem?: HTMLElement }): React.ReactPortal | null {
     const [isClient, setIsClient] = useState(false);
-    React.useLayoutEffect(() => {
+    React.useEffect(() => {
         setIsClient(true);
     }, []);
+    // React.useLayoutEffect(() => {
+    //     setIsClient(true);
+    // }, []);
     if (!isClient) return null;
 
     return createPortal(<TableHoverActionsContainer anchorElem={anchorElem ?? document.body} />, anchorElem ?? document.body);

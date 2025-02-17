@@ -1,38 +1,32 @@
 'use client'
+//#region import export interface
 import React, { createContext, Dispatch, useCallback, useEffect, useState } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { actionName, DropdownItem, getRichTextAction, RichTextAction, ToolbarItem } from '../data/toolbarData';
+import { DropdownItem, getRichTextAction, RichTextAction, ToolbarItem } from '../data/toolbarData';
 import Toolbar from '../../controls/toolbar';
 import { $createParagraphNode, $getRoot, $getSelection, $insertNodes, $isRangeSelection, $isRootOrShadowRoot, CAN_REDO_COMMAND, CAN_UNDO_COMMAND, COMMAND_PRIORITY_CRITICAL, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_NORMAL, createCommand, EditorThemeClasses, FORMAT_ELEMENT_COMMAND, FORMAT_TEXT_COMMAND, INDENT_CONTENT_COMMAND, KEY_MODIFIER_COMMAND, Klass, LexicalCommand, LexicalEditor, LexicalNode, OUTDENT_CONTENT_COMMAND, REDO_COMMAND, SELECTION_CHANGE_COMMAND, UNDO_COMMAND } from 'lexical';
-import { $findMatchingParent, $isEditorIsNestedEditor, $getNearestNodeOfType, mergeRegister, $wrapNodeInElement, } from '@lexical/utils'
+import { $findMatchingParent, $getNearestNodeOfType, mergeRegister, $wrapNodeInElement, } from '@lexical/utils'
 import { $setBlocksType } from '@lexical/selection';
 import { $createHeadingNode, $createQuoteNode, $isHeadingNode } from '@lexical/rich-text';
 import { $isListNode, INSERT_CHECK_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND, ListNode, } from '@lexical/list';
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
-import { getImageNodes, getSelectedNode, } from '../utils/getSelectedNode';
+import { getSelectedNode, } from '../utils/getSelectedNode';
 import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/react/LexicalHorizontalRuleNode';
 import { $createImageNode, ImageNode, ImagePayload } from '../nodes/ImageNode';
 import { sanitizeUrl } from '../utils/url';
-import { $createTableNodeWithDimensions, INSERT_TABLE_COMMAND, InsertTableCommandPayload, TableNode } from '@lexical/table';
+import { $createTableNodeWithDimensions, INSERT_TABLE_COMMAND, InsertTableCommandPayload } from '@lexical/table';
 import { INSERT_LAYOUT_COMMAND } from './LayoutPlugin';
 import { $createStickyNode } from '../nodes/StickyNode';
 import { INSERT_YOUTUBE_COMMAND } from './YouTubePlugin';
-import { uploadToCloudinary } from '@/app/actions/cloudinary';
-
 export type InsertImagePayload = Readonly<ImagePayload>;
 export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> = createCommand('INSERT_IMAGE_COMMAND');
-
 export const INSERT_NEW_TABLE_COMMAND: LexicalCommand<InsertTableCommandPayload> = createCommand('INSERT_NEW_TABLE_COMMAND');
-
-
 export type CellEditorConfig = Readonly<{ namespace: string; nodes?: ReadonlyArray<Klass<LexicalNode>>; onError: (error: Error, editor: LexicalEditor) => void; readOnly?: boolean; theme?: EditorThemeClasses; }>;
-
 export type CellContextShape = {
     cellEditorConfig: null | CellEditorConfig;
     cellEditorPlugins: null | JSX.Element | Array<JSX.Element>;
     set: (cellEditorConfig: null | CellEditorConfig, cellEditorPlugins: null | JSX.Element | Array<JSX.Element>,) => void;
 };
-
 export const CellContext = createContext<CellContextShape>({
     cellEditorConfig: null,
     cellEditorPlugins: null,
@@ -40,35 +34,22 @@ export const CellContext = createContext<CellContextShape>({
         // Empty
     },
 });
-
 interface LexicalToolbarProps {
     isReadOnly: boolean,
     lexicalToolbarData: ToolbarItem[],
     setIsLinkEditMode: Dispatch<boolean>,
     saveDocument: (content: string) => void
 }
-
 //#endregion
 
 const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, saveDocument }: LexicalToolbarProps) => {
     const [editor] = useLexicalComposerContext();
     const [toolbarData, setToolbarData] = useState<ToolbarItem[]>(lexicalToolbarData)
     const [activeEditor, setActiveEditor] = useState(editor);
-    // const [imageFormData, setImageFormData] = useState<FormData[]>([]);
-    // const [blockType, setBlockType] = useState<keyof typeof actionName>(RichTextAction.Paragraph);
-    // const [isRTL, setIsRTL] = useState(false);
-    // const [selectedElementKey, setSelectedElementKey] = useState<NodeKey | null>(null,);
-    // const [selectedRichTextAction, setSelectedRichTextAction] = useState<RichTextAction | null>(null)
-    // const [elementFormat, setElementFormat] = useState<ElementFormatType>('left');
-    // const [isEditable, setIsEditable] = useState(() => editor.isEditable());
     const [canUndo, setCanUndo] = useState(false);
     const [canRedo, setCanRedo] = useState(false);
     const [isLink, setIsLink] = useState(false);
     const [selectedBlockType, setSelectedBlockType] = useState<DropdownItem | undefined>()
-    // const cellContext = useContext(CellContext);
-    // const cellContext = useContext(CellContext);
-
-
     const $updateDropdownItemForBlockFormatItmes = useCallback((action: RichTextAction) => {
         const updatedToolbarData = toolbarData.map(item => ({ ...item, dropdownItems: item.dropdownItems?.map(dropdown => dropdown.id === action ? { ...dropdown, active: true } : { ...dropdown, active: false }) }));
         const si = updatedToolbarData[4].dropdownItems?.find(item => item.id === action);
@@ -89,12 +70,6 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
 
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
-            if (activeEditor !== editor && $isEditorIsNestedEditor(activeEditor)) {
-                // const rootElement = activeEditor.getRootElement();
-                // setIsImageCaption(!!rootElement?.parentElement?.classList.contains('image-caption-container',),);
-            } else {
-                // setIsImageCaption(false);
-            }
             const anchorNode = selection.anchor.getNode();
             let element = anchorNode.getKey() === 'root' ? anchorNode : $findMatchingParent(anchorNode, (e) => { const parent = e.getParent(); return parent !== null && $isRootOrShadowRoot(parent); });
             if (element === null) {
@@ -103,8 +78,6 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
 
             const elementKey = element.getKey();
             const elementDOM = activeEditor.getElementByKey(elementKey);
-            // setIsRTL($isParentElementRTL(selection));
-
             // Update links
             const node = getSelectedNode(selection);
             const parent = node.getParent();
@@ -117,44 +90,26 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
             }
             $upDataLinkButton(isLink);
             if (elementDOM !== null) {
-                // setSelectedElementKey(elementKey);
                 let type;
                 if ($isListNode(element)) {
                     const parentList = $getNearestNodeOfType<ListNode>(anchorNode, ListNode,);
                     type = parentList ? parentList.getListType() : element.getListType();
-                    // setBlockType(type as keyof typeof actionName);
                 } else {
                     type = $isHeadingNode(element) ? element.getTag() : element.getType();
-                    if (type in actionName) {
-                        // setBlockType(type as keyof typeof actionName);
-                    }
-
                 }
                 const action = getRichTextAction(type)
-
                 if (action) {
-                    // setSelectedRichTextAction(action)
                     $updateDropdownItemForBlockFormatItmes(action);
 
                 }
             }
-            // let matchingParent;
-            // if ($isLinkNode(parent)) {
-            //     matchingParent = $findMatchingParent(node, (parentNode) => $isElementNode(parentNode) && !parentNode.isInline(),);
-            // }
-
-            // If matchingParent is a valid node, pass it's format type
-            // setElementFormat($isElementNode(matchingParent) ? matchingParent.getFormatType() : $isElementNode(node) ? node.getFormatType() : parent?.getFormatType() || 'left',);
         }
-    }, [$upDataLinkButton, $updateDropdownItemForBlockFormatItmes, activeEditor, editor, isLink]);
+    }, [$upDataLinkButton, $updateDropdownItemForBlockFormatItmes, activeEditor, isLink]);
 
-    // editor.setEditable(!isReadOnly); /
     useEffect(() => {
         editor.setEditable(!isReadOnly); // Set editor to editable when not in read-only mode
     }, [editor, isReadOnly]);
 
-
-    //set toolbar  data
     useEffect(() => {
         setToolbarData(lexicalToolbarData)
     }, [lexicalToolbarData])
@@ -184,9 +139,6 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
                     }
                     return true;
                 }, COMMAND_PRIORITY_EDITOR,),
-            // activeEditor.registerEditableListener((editable) => {
-            //     setIsEditable(editable);
-            // }),
             activeEditor.registerCommand<boolean>(
                 CAN_UNDO_COMMAND,
                 (payload) => {
@@ -242,12 +194,6 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
     }, [activeEditor, isLink, setIsLinkEditMode]);
 
     useEffect(() => {
-        if (!activeEditor.hasNodes([TableNode])) {
-            // invariant(false, 'TablePlugin: TableNode is not registered on editor');
-        }
-
-        // cellContext.set(cellEditorConfig, children);
-
         return activeEditor.registerCommand<InsertTableCommandPayload>(
             INSERT_NEW_TABLE_COMMAND,
             ({ columns, rows, includeHeaders }) => {
@@ -262,22 +208,6 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
             COMMAND_PRIORITY_EDITOR,
         );
     }, [activeEditor]);
-
-    // async function saveLexicalFile(editor) {
-    //     try {
-    //         const file = await exportFile(editor, { fileName: 'myDocument.lexical' });
-
-    //         if (!(file instanceof Blob)) {
-    //             throw new Error('Exported file is not a valid Blob');
-    //         }
-
-    //         const fileContent = await file.text(); // Get the file content as text
-    //         console.log('Exported file content:', fileContent);
-    //         return fileContent; // Use this to save or process
-    //     } catch (error) {
-    //         console.error('Error exporting file:', error);
-    //     }
-    // }
 
     const handleToolbarSelect = async (item: ToolbarItem) => {
         switch (item.id) {
@@ -410,41 +340,11 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
                 break;
             }
             case RichTextAction.Save: {
-                try {      
-
-                    activeEditor.update(async () => {
-                        const editorState = activeEditor.getEditorState();
-                        const serializedState = JSON.stringify(editorState);
-                        const rootNode = $getRoot();
-                        const imageNodes = getImageNodes(rootNode)
-
-                        imageNodes.forEach(async (node) => {
-                            if (node.__src.startsWith("blob:")) {
-                                try {
-
-                                    const fd = node.getFormData();
-                                    console.log('node formData fd: ', node.__formData)
-                                    if (fd && fd instanceof FormData) {
-                                        const ci = await uploadToCloudinary(fd)
-                                        node.updateSrc(ci.url)
-                                        node.updateAltText(ci.filename)
-                                        console.log('node updated: ', node)
-                                    } else {
-                                        const fdType = JSON.stringify(fd, null, 2);
-                                        alert('Check type is FormData!!!' + fdType + ' ' + node.getSrc());
-                                    }
-                                } catch (error) {
-                                    console.error("Failed to upload image:", error);
-                                }
-                            }
-                            else {
-
-                            }
-                        })
-                        console.error("serializedState:", serializedState);
-                        saveDocument(serializedState);
-
-                    });
+                try {
+                    const updatedState = editor.getEditorState();
+                    const serializedState = JSON.stringify(updatedState);
+                    // console.log("serializedState:", serializedState);
+                    saveDocument(serializedState);
 
                 } catch (error) {
                     console.error('Error saving document:', error);
@@ -455,43 +355,13 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
     }
 
     const handleInsertImage = (payload: InsertImagePayload) => {
-        // console.log('handleInsertImage payload:', payload);
-
-        // const { formData } = payload;
-        // if (formData) {
-        //     setImageFormData((prev: FormData[]) => [...prev, formData]);
-        // console.log('Updated form data:', imageFormData);
-        // }
-        // const { formData } = payload;
-
-        // consoleLogFormData('handleInsertImage formData:', formData);
-        // if (formData) {
-        //     setImageFormData((prev) => [...prev, formData]);
-        //     console.log('handleInsertImage formData:', imageFormData);
-        //     consoleLogFormDatas('handleInsertImage', imageFormData)
-
-        // }
         activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, payload);
     };
-    // const handleInsertInlineImage = (payload: InlineImagePayload) => {
-    //     // alert(JSON.stringify(payload))
-    //     activeEditor.dispatchCommand(INSERT_INLINE_IMAGE_COMMAND, payload);
-    // };
 
     const handleInsertTable = (payload: InsertTableCommandPayload) => {
-
-        // activeEditor.update(() => {
-        //     const tableNode = $createTableNodeWithDimensions(Number(payload.rows), Number(payload.columns), true);
-        //     $insertNodeToNearestRoot(tableNode);
-        // });
         activeEditor.dispatchCommand(INSERT_TABLE_COMMAND, payload);
     };
     const handleInsertColumnsLayout = (payload: { value: string }) => {
-        // alert(payload.value)
-        // activeEditor.update(() => {
-        //     const tableNode = $createTableNodeWithDimensions(Number(payload.rows), Number(payload.columns), true);
-        //     $insertNodeToNearestRoot(tableNode);
-        // });
         activeEditor.dispatchCommand(INSERT_LAYOUT_COMMAND, payload.value);
     };
     const handleEmbedYoutube = (payload: { value: string }) => {

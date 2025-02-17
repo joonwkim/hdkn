@@ -69,13 +69,6 @@ export async function getLexicalDocuments() {
 
 export async function upsertLexicalDocument(content: string, title: string, pathName: string, userId: string): Promise<LexicalDocument | null> {
     try {
-
-
-        // console.log('content: ', content)
-        // console.log('title: ', title)
-        // console.log('pathName: ', pathName)
-        // console.log('userId: ', userId)
-
         const result = await prisma.lexicalDocument.upsert({
             where: {
                 userId_title: {

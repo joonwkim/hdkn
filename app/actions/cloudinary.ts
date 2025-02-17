@@ -41,28 +41,34 @@ export async function uploadToCloudinary(formData: FormData) {
     formData.append('timestamp', timestamp.toString());
     formData.append('folder', 'hdkn');
     formData.append('upload-preset', 'open-place');
-    const endpoint = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_URL as string;
-    const data = await fetch(endpoint, {
-      method: 'POST',
-      body: formData
-    }).then(res => res.json());
+    try {
+      const endpoint = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_URL as string;
+      const data = await fetch(endpoint, {
+        method: 'POST',
+        body: formData
+      }).then(res => res.json());
 
-    console.log('upload result to cloudinary(return  value):', data);
-    const ci: CloudiaryInfo = {
-      asset_id: data.asset_id,
-      public_id: data.public_id,
-      filename: data.original_filename,
-      path: data.path,
-      format: data.format,
-      bytes: data.bytes,
-      folder: data.folder,
-      width: data.width,
-      height: data.height,
-      url: data.url,
-      secure_url: data.secure_url,
-      thumbnail_url: data.thumbnail_url,
-    };
-    return ci;
+      console.log('upload result to cloudinary(return  value):', data);
+      const ci: CloudiaryInfo = {
+        asset_id: data.asset_id,
+        public_id: data.public_id,
+        filename: data.original_filename,
+        path: data.path,
+        format: data.format,
+        bytes: data.bytes,
+        folder: data.folder,
+        width: data.width,
+        height: data.height,
+        url: data.url,
+        secure_url: data.secure_url,
+        thumbnail_url: data.thumbnail_url,
+      };
+      return ci;
+    } catch (error) {
+      console.log('uploadToCloudinary error:', error);
+      throw error;
+    }
+
   } catch (error) {
     console.log('uploadToCloudinary error:', error);
     throw error;

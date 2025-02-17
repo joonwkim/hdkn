@@ -22,6 +22,11 @@ const nextConfig = {
     ],
     domains: ['img.youtube.com', 'res.cloudinary.com', 'assets.vercel.com',],
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
 
 };
 

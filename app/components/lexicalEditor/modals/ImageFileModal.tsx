@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { InsertImagePayload } from '../plugins/ToolbarPlugin';
 import './styles.css'
 import { Position } from '../nodes/InlineImageNode';
+import { uploadToCloudinary } from '@/app/actions/cloudinary';
 
 const InsertImageFileModal = ({ onClick }: { onClick: (payload: InsertImagePayload) => void, }) => {
     const [file, setFile] = useState<File | null>(null);
@@ -27,21 +28,31 @@ const InsertImageFileModal = ({ onClick }: { onClick: (payload: InsertImagePaylo
             const formData = new FormData();
             formData.append('file', file)
             formData.append('filename', file.name)
-            const src = URL.createObjectURL(file);
-            const payload: InsertImagePayload = {
-                src: src,
-                altText: altText,
-                width: imageWidth,
-                height: imageHeight,
-                position: position,
-                formData: formData,
-            };
-            onClick(payload)
+            // console.log('uploaded file: ', file.size)
+            if (file.size > 1024 * 1024 * 2) {
+                alert('2mb 이하 파일을 삽입할 수 있습니다. 파일 크기:' + file.size);
+            } else {
+                try {
+                    const ci = await uploadToCloudinary(formData)
+                    // console.log('uploaded file(ci): ', ci)
+
+                    if (ci) {
+                        const payload: InsertImagePayload = {
+                            src: ci.secure_url,
+                            altText: ci.filename,
+                            width: ci.width,
+                            height: ci.height,
+                            position: position,
+                            formData: formData,
+                        };
+                        onClick(payload)
+                    }
+                } catch (error) {
+                    throw error;
+                }
+            }
         }
         setFile(null)
-        // setAltText('');
-        setImageWidth(undefined)
-        setImageHeight(undefined)
     };
 
     const isButtonDisabled = !file;
