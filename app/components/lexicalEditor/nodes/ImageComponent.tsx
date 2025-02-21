@@ -2,14 +2,12 @@ import { $getNodeByKey, $getSelection, $isNodeSelection, $isRangeSelection, $set
 import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { $isImageNode } from './ImageNode';
 import { mergeRegister } from '@lexical/utils';
-// import { useSettings } from '../context/SettingsContext';
 import { LexicalNestedComposer } from '@lexical/react/LexicalNestedComposer';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import ImageResizer from './ImageResizer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-// import TreeViewPlugin from '../plugins/TreeViewPlugin';
 import { LinkNode } from '@lexical/link';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import { useSharedHistoryContext } from '../context/SharedHistoryContext';
@@ -49,6 +47,7 @@ function LazyImage({ altText, className, imageRef, width, height, src, onError }
     return (<>
         {/* <div>{`:${src}, width:${width}, height:${height}`}</div> */}
         {width && height && (<>
+            {/* <div>case1</div> */}
             <Image
                 className={className}
                 alt={altText}
@@ -57,11 +56,12 @@ function LazyImage({ altText, className, imageRef, width, height, src, onError }
                 height={height}
                 ref={imageRef}
                 draggable="false"
+                layout="intrinsic"
                 onError={onError}
             /></>)}
 
         {width && !height && (<>
-            {/* <div>case2</div> */}
+            <div>case2</div>
             {/* <div>{`width: ${width}`}</div>
             <div>{`height: ${height}`}</div> */}
             <div className='image-width'>
@@ -77,7 +77,7 @@ function LazyImage({ altText, className, imageRef, width, height, src, onError }
             </div>
         </>)}
         {!width && height && (<>
-            {/* <div>case3</div> */}
+            <div>case3</div>
             {/* <div>{`width: ${width}`}</div>
             <div>{`height: ${height}`}</div> */}
             <div className='image-height'>
@@ -94,7 +94,7 @@ function LazyImage({ altText, className, imageRef, width, height, src, onError }
         </>)}
 
         {!width && !height && (<>
-            {/* <div>case4</div> */}
+            <div>case4</div>
             <Image
                 className={className}
                 alt={altText}
@@ -121,10 +121,10 @@ interface ImageComponentProps {
     src: string;
     captionsEnabled: boolean;
     position: Position;
+    updateResizedImage?: (resizedWidth: number, resizedHeight: number, sourceUrl: string) => void;
 }
 
-
-const ImageComponent = ({ src, altText, nodeKey, width, height, maxWidth, resizable, showCaption, caption, captionsEnabled }: ImageComponentProps) => {
+const ImageComponent = ({ src, altText, nodeKey, width, height, maxWidth, resizable, showCaption, caption, captionsEnabled, updateResizedImage }: ImageComponentProps) => {
 
     const imageRef = useRef<null | HTMLImageElement>(null);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -332,9 +332,14 @@ const ImageComponent = ({ src, altText, nodeKey, width, height, maxWidth, resiza
             const node = $getNodeByKey(nodeKey);
             if ($isImageNode(node)) {
                 console.log('nextWidth, nextHeight:', nextWidth, nextHeight)
+                console.log('resized node src: ', node.__src)
+                if (updateResizedImage) {
+                    updateResizedImage(nextWidth, nextHeight, node.__src)
+                }
                 // node.setWidthAndHeight(nextWidth, nextHeight);
             }
         });
+
     };
 
     const onResizeStart = () => {
