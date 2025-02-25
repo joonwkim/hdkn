@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { InsertImagePayload } from '../plugins/ToolbarPlugin';
 import './styles.css'
-import { Position } from '../nodes/InlineImageNode';
 import { uploadToCloudinary } from '@/app/actions/cloudinary';
+import { Position, ResizedImage } from '../nodes/ImageNode';
 
 const InsertImageFileModal = ({ onClick }: { onClick: (payload: InsertImagePayload) => void, }) => {
     const [file, setFile] = useState<File | null>(null);
@@ -18,7 +18,6 @@ const InsertImageFileModal = ({ onClick }: { onClick: (payload: InsertImagePaylo
             setFileError('');
             setFile(selectedFile);
         }
-
     };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -28,14 +27,11 @@ const InsertImageFileModal = ({ onClick }: { onClick: (payload: InsertImagePaylo
             const formData = new FormData();
             formData.append('file', file)
             formData.append('filename', file.name)
-            // console.log('uploaded file: ', file.size)
             if (file.size > 1024 * 1024 * 2) {
                 alert('2mb 이하 파일을 삽입할 수 있습니다. 파일 크기:' + file.size);
             } else {
                 try {
                     const ci = await uploadToCloudinary(formData)
-                    // console.log('uploaded file(ci): ', ci)
-
                     if (ci) {
                         const payload: InsertImagePayload = {
                             src: ci.secure_url,
@@ -43,8 +39,9 @@ const InsertImageFileModal = ({ onClick }: { onClick: (payload: InsertImagePaylo
                             width: ci.width,
                             height: ci.height,
                             position: position,
-                            formData: formData,
+                            formData: formData,                           
                         };
+                        console.log('payload:', payload)
                         onClick(payload)
                     }
                 } catch (error) {

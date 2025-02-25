@@ -54,6 +54,7 @@ export function getImageNodes(editor: LexicalEditor): ImageNode[] {
     const rootNode = $getRoot();
     const traverse = (node: LexicalNode) => {
       if (node instanceof ImageNode) {
+        // console.log('imageNode: ', node)
         imageNodes.push(node)
       }
       if (node instanceof ParagraphNode) {
@@ -95,3 +96,20 @@ export function getImageNodes(editor: LexicalEditor): ImageNode[] {
 // }
 
 
+
+export function logRootChildren(editor: LexicalEditor) {
+  console.log('logRootChildren', editor)
+  editor.update(() => {
+    const root = $getRoot();
+    const children = root.getChildren(); // get an array of child nodes
+    children.forEach((child, index) => {
+      console.log(`Child ${index}:`, child);
+      // Check if child is an ElementNode to safely call getChildren()
+      if (child instanceof ElementNode) {
+        child.getChildren().forEach((grandchild, idx) => {
+          console.log(`Grandchild ${index}-${idx}:`, grandchild);
+        });
+      }
+    });
+  });
+}

@@ -1,6 +1,7 @@
 import { $getNodeByKey, $getSelection, $isNodeSelection, $isRangeSelection, $setSelection, BaseSelection, CLICK_COMMAND, COMMAND_PRIORITY_LOW, createCommand, DRAGSTART_COMMAND, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, KEY_ENTER_COMMAND, KEY_ESCAPE_COMMAND, LexicalCommand, LexicalEditor, LineBreakNode, NodeKey, ParagraphNode, RootNode, SELECTION_CHANGE_COMMAND, TextNode } from 'lexical';
 import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react'
-import { $isImageNode } from './ImageNode';
+import { $isImageNode, Position, } from './ImageNode';
+// import { $isImageNode, Position, ResizedImage } from './ImageNode';
 import { mergeRegister } from '@lexical/utils';
 import { LexicalNestedComposer } from '@lexical/react/LexicalNestedComposer';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
@@ -15,8 +16,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { KeywordNode } from './KeywordNode';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import './styles.css'
-import Image from 'next/image'
-import { Position } from './InlineImageNode';
+import Image from "next/image"
 
 export const RIGHT_CLICK_IMAGE_COMMAND: LexicalCommand<MouseEvent> = createCommand('RIGHT_CLICK_IMAGE_COMMAND');
 interface LazyImageProps {
@@ -56,10 +56,11 @@ function LazyImage({ altText, className, imageRef, width, height, src, onError }
                 height={height}
                 ref={imageRef}
                 draggable="false"
-                layout="intrinsic"
                 onError={onError}
-            /></>)}
-
+                style={{
+                    maxWidth: "100%",
+                    height: "auto"
+                }} /></>)}
         {width && !height && (<>
             <div>case2</div>
             {/* <div>{`width: ${width}`}</div>
@@ -73,7 +74,10 @@ function LazyImage({ altText, className, imageRef, width, height, src, onError }
                     ref={imageRef}
                     draggable="false"
                     onError={onError}
-                />
+                    style={{
+                        maxWidth: "100%",
+                        height: "auto"
+                    }} />
             </div>
         </>)}
         {!width && height && (<>
@@ -89,10 +93,12 @@ function LazyImage({ altText, className, imageRef, width, height, src, onError }
                     ref={imageRef}
                     draggable="false"
                     onError={onError}
-                />
+                    style={{
+                        maxWidth: "100%",
+                        height: "auto"
+                    }} />
             </div>
         </>)}
-
         {!width && !height && (<>
             <div>case4</div>
             <Image
@@ -103,12 +109,13 @@ function LazyImage({ altText, className, imageRef, width, height, src, onError }
                 ref={imageRef}
                 draggable="false"
                 onError={onError}
-            />
+                style={{
+                    maxWidth: "100%",
+                    height: "auto"
+                }} />
         </>)}
-    </>
-    );
+    </>);
 }
-
 interface ImageComponentProps {
     altText: string;
     caption: LexicalEditor;
@@ -121,10 +128,10 @@ interface ImageComponentProps {
     src: string;
     captionsEnabled: boolean;
     position: Position;
-    updateResizedImage?: (resizedWidth: number, resizedHeight: number, sourceUrl: string) => void;
+    // updateResizedImage?: (resizedImage: ResizedImage) => void;
 }
 
-const ImageComponent = ({ src, altText, nodeKey, width, height, maxWidth, resizable, showCaption, caption, captionsEnabled, updateResizedImage }: ImageComponentProps) => {
+const ImageComponent = ({ src, altText, nodeKey, width, height, maxWidth, resizable, showCaption, caption, captionsEnabled, }: ImageComponentProps) => {
 
     const imageRef = useRef<null | HTMLImageElement>(null);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -331,15 +338,17 @@ const ImageComponent = ({ src, altText, nodeKey, width, height, maxWidth, resiza
         editor.update(() => {
             const node = $getNodeByKey(nodeKey);
             if ($isImageNode(node)) {
-                console.log('nextWidth, nextHeight:', nextWidth, nextHeight)
-                console.log('resized node src: ', node.__src)
-                if (updateResizedImage) {
-                    updateResizedImage(nextWidth, nextHeight, node.__src)
-                }
-                // node.setWidthAndHeight(nextWidth, nextHeight);
+                node.setWidthAndHeight(nextWidth, nextHeight);
+                // if (updateResizedImage) {
+                //     const resized: ResizedImage = {
+                //         resizedWidth: nextWidth,
+                //         resizedHeight: nextHeight,
+                //         sourceUrl: node.__src
+                //     }
+                //     updateResizedImage(resized)
+                // }
             }
         });
-
     };
 
     const onResizeStart = () => {
@@ -347,8 +356,6 @@ const ImageComponent = ({ src, altText, nodeKey, width, height, maxWidth, resiza
     };
 
     const { historyState } = useSharedHistoryContext();
-    // const { settings: { showNestedEditorTreeView }, } = useSettings();
-
     const draggable = isSelected && $isNodeSelection(selection) && !isResizing;
     const isFocused = isSelected || isResizing;
 

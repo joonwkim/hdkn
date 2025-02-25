@@ -22,7 +22,7 @@ export async function getUsers() {
 }
 
 export async function isUserRegistered(email: string): Promise<boolean> {
-    return await getUserByEmail(email) != null;
+    return (await getUserByEmail(email)) != null;
 }
 
 export async function isPasswordValid(email: string, password: string): Promise<boolean | undefined> {

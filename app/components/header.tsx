@@ -2,7 +2,7 @@
 import React from 'react'
 import { Container, Dropdown, Nav, Navbar } from 'react-bootstrap';
 import { useSession, signIn, signOut } from "next-auth/react";
-import Image from 'next/image';
+import Image from "next/image";
 
 interface ThemeProps {
     theme: 'light' | 'dark' | 'auto';
@@ -19,7 +19,7 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
     };
 
     return (
-        <Navbar className='sticky-top' expand="lg" bg={theme === 'dark' ? 'dark' : 'light'} variant={theme === 'dark' ? 'dark' : 'light'}>
+        (<Navbar className='sticky-top' expand="lg" bg={theme === 'dark' ? 'dark' : 'light'} variant={theme === 'dark' ? 'dark' : 'light'}>
             <Container>
                 <Nav.Link>
                     <div className="fs-2 me-5" onClick={onWidowSidbarBtnClick} title={sidebarOpen ? "사이드바 닫기" : "사이드바 열기"}>
@@ -41,7 +41,20 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
                         <button className="btn btn-outline-success" type="submit">Search</button>
                     </form>
                     {session ? (<div>
-                        {session?.user?.image ? (<Image className='ms-3' id="userpicture" style={{ borderRadius: '50%' }} unoptimized src={session.user?.image} alt='' title={session.user?.name ? session.user.name : ''} width="30" height="30" />) : ''}
+                        {session?.user?.image ? (<Image
+                            className='ms-3'
+                            id="userpicture"
+                            unoptimized
+                            src={session.user?.image}
+                            alt=''
+                            title={session.user?.name ? session.user.name : ''}
+                            width="30"
+                            height="30"
+                            style={{
+                                borderRadius: '50%',
+                                maxWidth: "100%",
+                                height: "auto"
+                            }} />) : ''}
                         <button className="btn btn-outline-danger border border-0 me-3" onClick={() => signOut()} title='나가기'>
                             <i className="bi bi-box-arrow-right"></i>
                         </button>
@@ -54,8 +67,11 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
                                     alt="google login"
                                     width={24}
                                     height={20}
-                                    style={{ cursor: 'pointer' }}
-                                />
+                                    style={{
+                                        cursor: 'pointer',
+                                        maxWidth: "100%",
+                                        height: "auto"
+                                    }} />
                             </button>
                         </div>
 
@@ -80,8 +96,8 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
                     </Nav>
                 </Navbar.Collapse>
             </Container>
-        </Navbar>
-    )
+        </Navbar>)
+    );
 }
 
 export default Header

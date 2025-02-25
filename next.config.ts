@@ -15,9 +15,9 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'i.ytimg.com',
+        hostname: 'res.cloudinary.com',
         port: '',
-        pathname: '/vi/**',
+        pathname: '/dhhev1lrj/**',
       },
     ],
     domains: ['img.youtube.com', 'res.cloudinary.com', 'assets.vercel.com',],

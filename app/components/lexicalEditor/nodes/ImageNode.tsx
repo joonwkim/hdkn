@@ -1,11 +1,18 @@
 import { $applyNodeReplacement, createEditor, DecoratorNode, DOMConversionMap, DOMConversionOutput, DOMExportOutput, EditorConfig, LexicalEditor, LexicalNode, NodeKey, SerializedEditor, SerializedLexicalNode, Spread } from "lexical";
 import * as React from 'react';
 import { Suspense } from "react";
-import { Position } from "./InlineImageNode";
+// import { Position } from "./InlineImageNode";
 import debounce from 'lodash-es/debounce';
 import dynamic from 'next/dynamic';
 
 const ImageComponent = dynamic(() => import('./ImageComponent'), { ssr: false });
+
+export type Position = 'left' | 'right' | 'full' | undefined;
+export type ResizedImage = {
+    resizedWidth: number;
+    resizedHeight: number;
+    sourceUrl: string;
+}
 
 export interface ImagePayload {
     altText: string;
@@ -19,6 +26,7 @@ export interface ImagePayload {
     captionsEnabled?: boolean;
     position?: Position;
     formData?: FormData;
+    // updateResizedImage?: (resizedImage: ResizedImage) => void;
 }
 
 function isGoogleDocCheckboxImg(img: HTMLImageElement): boolean {
@@ -69,19 +77,22 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     __altText: string;
     __width?: number;
     __height?: number;
-    __maxWidth?: number; 
+    __maxWidth?: number;
     __showCaption: boolean;
     __caption: LexicalEditor;
     __position?: Position;
     __captionsEnabled: boolean;
     __formData?: FormData;
+    __resizeCallbackAdded?: boolean;
+    // __updateResizedImage?: (resizedImage: ResizedImage) => void;
 
     static getType(): string {
         return 'image';
     }
 
     static clone(node: ImageNode): ImageNode {
-        return new ImageNode(node.__src, node.__altText, node.__maxWidth, node.__width, node.__height, node.__showCaption, node.__caption, node.__captionsEnabled, node.__key, node.__position, node.__formData);
+        return new ImageNode(node.__src, node.__altText, node.__maxWidth, node.__width, node.__height, node.__showCaption, node.__caption, node.__captionsEnabled, node.__key, node.__position, node.__formData,);
+        // return new ImageNode(node.__src, node.__altText, node.__maxWidth, node.__width, node.__height, node.__showCaption, node.__caption, node.__captionsEnabled, node.__key, node.__position, node.__formData, node.__updateResizedImage);
     }
 
     static importJSON(serializedNode: SerializedImageNode): ImageNode {
@@ -104,7 +115,8 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
         };
     }
 
-    constructor(src: string, altText: string, maxWidth?: number, width?: number, height?: number, showCaption?: boolean, caption?: LexicalEditor, captionsEnabled?: boolean, key?: NodeKey, position?: Position, formData?: FormData) {
+    // constructor(src: string, altText: string, maxWidth?: number, width?: number, height?: number, showCaption?: boolean, caption?: LexicalEditor, captionsEnabled?: boolean, key?: NodeKey, position?: Position, formData?: FormData, updateResizedImage?: (resizedImage: ResizedImage) => void) {
+    constructor(src: string, altText: string, maxWidth?: number, width?: number, height?: number, showCaption?: boolean, caption?: LexicalEditor, captionsEnabled?: boolean, key?: NodeKey, position?: Position, formData?: FormData,) {
         super(key);
         this.__src = src;
         this.__altText = altText;
@@ -116,6 +128,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
         this.__captionsEnabled = captionsEnabled || captionsEnabled === undefined;
         this.__position = position;
         this.__formData = formData;
+        // this.__updateResizedImage = updateResizedImage;
     }
 
     getAltText(): string {
@@ -133,10 +146,18 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
         this.__src = src;
     }
 
-    setWidthAndHeight(width: number, height: number,): void {
+    // setResizeCallback(callback: (resizedImage: ResizedImage) => void): void {
+    //     const writable = this.getWritable();
+    //     writable.__updateResizedImage = callback;
+    //     writable.__resizeCallbackAdded = true;
+    // }
+
+    setWidthAndHeight(width: number, height: number): void {
         const writable = this.getWritable();
         writable.__width = width;
         writable.__height = height;
+        // this.saveNodeStateDebounced();
+        // this.markDirty();
     }
 
     private saveNodeStateDebounced = debounce(() => {
@@ -240,15 +261,18 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
                         position={this.__position}
                         captionsEnabled={this.__captionsEnabled}
                         resizable={true}
+                        // updateResizedImage={this.__updateResizedImage}
                     />
                 </ErrorBoundary>
-            </Suspense>         
+            </Suspense>
         );
     }
 }
 
-export function $createImageNode({ altText, height, maxWidth, captionsEnabled, src, width, showCaption, caption, key, position, formData }: ImagePayload): ImageNode {
-    return $applyNodeReplacement(new ImageNode(src, altText, maxWidth, width, height, showCaption, caption, captionsEnabled, key, position, formData));
+// export function $createImageNode({ altText, height, maxWidth, captionsEnabled, src, width, showCaption, caption, key, position, formData, updateResizedImage }: ImagePayload): ImageNode {
+export function $createImageNode({ altText, height, maxWidth, captionsEnabled, src, width, showCaption, caption, key, position, formData, }: ImagePayload): ImageNode {
+    return $applyNodeReplacement(new ImageNode(src, altText, maxWidth, width, height, showCaption, caption, captionsEnabled, key, position, formData,));
+// return $applyNodeReplacement(new ImageNode(src, altText, maxWidth, width, height, showCaption, caption, captionsEnabled, key, position, formData, updateResizedImage));
 }
 
 export function $isImageNode(node: LexicalNode | null | undefined,): node is ImageNode {

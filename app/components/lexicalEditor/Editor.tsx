@@ -124,7 +124,11 @@ const Editor = ({ saveDocument, isReadOnly, initailData }: EditorProps) => {
 
                                 </>)}
                                 {initailData && (
-                                    <LoadInitialDataPlugin initialData={initailData} />
+                                    <LoadInitialDataPlugin initialData={initailData}
+                                        onImageResize={(node) => {
+                                            console.log("Image resized:", node);
+                                        }}
+                                    />
                                 )}
                                 {!isReadOnly && <TreeViewPlugin />}
                             </div>

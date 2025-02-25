@@ -11,13 +11,16 @@ import { $createHeadingNode, $createQuoteNode, $isHeadingNode } from '@lexical/r
 import { $isListNode, INSERT_CHECK_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND, ListNode, } from '@lexical/list';
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
 import { getSelectedNode, } from '../utils/getSelectedNode';
+// import { getImageNodes, getSelectedNode, } from '../utils/getSelectedNode';
 import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/react/LexicalHorizontalRuleNode';
-import { $createImageNode, ImageNode, ImagePayload } from '../nodes/ImageNode';
+import { $createImageNode, ImageNode, ImagePayload, } from '../nodes/ImageNode';
+// import { $createImageNode, ImageNode, ImagePayload, ResizedImage } from '../nodes/ImageNode';
 import { sanitizeUrl } from '../utils/url';
 import { $createTableNodeWithDimensions, INSERT_TABLE_COMMAND, InsertTableCommandPayload } from '@lexical/table';
 import { INSERT_LAYOUT_COMMAND } from './LayoutPlugin';
 import { $createStickyNode } from '../nodes/StickyNode';
 import { INSERT_YOUTUBE_COMMAND } from './YouTubePlugin';
+// import { resizeCloudinaryImage } from '@/app/actions/cloudinary';
 export type InsertImagePayload = Readonly<ImagePayload>;
 export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> = createCommand('INSERT_IMAGE_COMMAND');
 export const INSERT_NEW_TABLE_COMMAND: LexicalCommand<InsertTableCommandPayload> = createCommand('INSERT_NEW_TABLE_COMMAND');
@@ -114,6 +117,16 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
         setToolbarData(lexicalToolbarData)
     }, [lexicalToolbarData])
 
+
+    // const updateImage = (resized: ResizedImage) => {
+    //     // image를 삽입하고 size를 변경하였을 경우 
+    //     // console.log(resized);
+    //     // alert(JSON.stringify(resized))
+    //     const result = resizeCloudinaryImage(resized);
+    //     console.log('result: ', result)
+    // }
+
+
     useEffect(() => {
         if (!editor.hasNodes([ImageNode])) {
             throw new Error('ImagesPlugin: ImageNode not registered on editor');
@@ -132,7 +145,11 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
             activeEditor.registerCommand<InsertImagePayload>(
                 INSERT_IMAGE_COMMAND,
                 (payload) => {
+
+                    // const np: ImagePayload = { ...payload, updateResizedImage: updateImage }
+                    // const imageNode = $createImageNode(np);
                     const imageNode = $createImageNode(payload);
+                    // console.log('imageNode:', imageNode)
                     $insertNodes([imageNode]);
                     if ($isRootOrShadowRoot(imageNode.getParentOrThrow())) {
                         $wrapNodeInElement(imageNode, $createParagraphNode).selectEnd();
@@ -341,10 +358,14 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
             }
             case RichTextAction.Save: {
                 try {
-                    const updatedState = editor.getEditorState();
+                    const updatedState = activeEditor.getEditorState();
                     const serializedState = JSON.stringify(updatedState);
                     // console.log("serializedState:", serializedState);
                     saveDocument(serializedState);
+                    // const imageNodes = getImageNodes(activeEditor);
+                    // imageNodes.forEach((node) => {
+                    //     console.log('node to save: ', node)
+                    // });
 
                 } catch (error) {
                     console.error('Error saving document:', error);

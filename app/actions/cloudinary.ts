@@ -1,7 +1,7 @@
 'use server';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudiaryInfo, CustomFile } from '../lib/types';
-import { consoleLogFormData } from '../lib/formData';
+import { ResizedImage } from '../components/lexicalEditor/nodes/ImageNode';
 
 const cloudinaryConfig = cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUDNAME,
@@ -34,7 +34,7 @@ export const getFormdata = async (file: CustomFile, foldername: string) => {
 
 export async function uploadToCloudinary(formData: FormData) {
   try {
-    consoleLogFormData('uploadToCloudinary', formData)
+    // consoleLogFormData('uploadToCloudinary', formData)
     const { timestamp, signature } = await getSignature('hdkn');
     formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY as string);
     formData.append('signature', signature);
@@ -48,7 +48,7 @@ export async function uploadToCloudinary(formData: FormData) {
         body: formData
       }).then(res => res.json());
 
-      console.log('upload result to cloudinary(return  value):', data);
+      // console.log('upload result to cloudinary(return  value):', data);
       const ci: CloudiaryInfo = {
         asset_id: data.asset_id,
         public_id: data.public_id,
@@ -109,4 +109,32 @@ export async function getAssetResources() {
   }
 }
 
+export async function resizeCloudinaryImage(resizedImage: ResizedImage) {
+  console.log('resizeImage cloudinary: ', resizedImage.sourceUrl);
+  try {
+    if (resizedImage) {
+      const publicId = resizedImage.sourceUrl.split('/').pop()?.split('.')[0];
+      console.log('public Id: ', publicId)
+      if (!publicId) {
 
+        return 'Not registered'
+      }
+      else {
+        const uploadResult = await cloudinary.uploader.upload(resizedImage.sourceUrl, {
+          width: Number(resizedImage.resizedWidth),
+          height: Number(resizedImage.resizedHeight),
+          crop: 'fill',
+          folder: 'hdkn',
+        });
+        await cloudinary.uploader.destroy(publicId);
+        console.log('uploadResult', uploadResult)
+        return uploadResult;
+      }
+    }
+  } catch (error) {
+    console.log(error)
+  }
+
+  return null;
+
+}
