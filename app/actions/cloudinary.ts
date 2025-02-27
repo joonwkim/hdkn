@@ -138,3 +138,40 @@ export async function resizeCloudinaryImage(resizedImage: ResizedImage) {
   return null;
 
 }
+
+const getPublicIdFromUrl = (url: string) => {
+  const regex = /\/upload\/(?:v\d+\/)?(.+)\.\w+$/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+};
+
+export const deleteCloudinaryImage = async (imageUrl: string) => {
+  const publicId = getPublicIdFromUrl(imageUrl);
+  if (!publicId) {
+    console.log("Invalid Cloudinary URL");
+    return;
+  }
+
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+    console.log("Delete result:", result);
+  } catch (error) {
+    console.error("Error deleting image:", error);
+  }
+};
+
+export const deleteImageFromCloudinary = async (imageUrl: string) => {
+  try {
+    const response = await fetch("/api/delete-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageUrl }),
+    });
+
+    const data = await response.json();
+    return data; // Return response data to handle it in the caller function
+  } catch (error) {
+    console.error("Error deleting image:", error);
+    return { error: "Failed to delete image" };
+  }
+};

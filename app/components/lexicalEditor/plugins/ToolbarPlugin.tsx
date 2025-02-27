@@ -4,7 +4,7 @@ import React, { createContext, Dispatch, useCallback, useEffect, useState } from
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { DropdownItem, getRichTextAction, RichTextAction, ToolbarItem } from '../data/toolbarData';
 import Toolbar from '../../controls/toolbar';
-import { $createParagraphNode, $getRoot, $getSelection, $insertNodes, $isRangeSelection, $isRootOrShadowRoot, CAN_REDO_COMMAND, CAN_UNDO_COMMAND, COMMAND_PRIORITY_CRITICAL, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_NORMAL, createCommand, EditorThemeClasses, FORMAT_ELEMENT_COMMAND, FORMAT_TEXT_COMMAND, INDENT_CONTENT_COMMAND, KEY_MODIFIER_COMMAND, Klass, LexicalCommand, LexicalEditor, LexicalNode, OUTDENT_CONTENT_COMMAND, REDO_COMMAND, SELECTION_CHANGE_COMMAND, UNDO_COMMAND } from 'lexical';
+import { $createParagraphNode, $getRoot, $getSelection, $insertNodes, $isNodeSelection, $isRangeSelection, $isRootOrShadowRoot, CAN_REDO_COMMAND, CAN_UNDO_COMMAND, COMMAND_PRIORITY_CRITICAL, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_NORMAL, createCommand, EditorThemeClasses, FORMAT_ELEMENT_COMMAND, FORMAT_TEXT_COMMAND, INDENT_CONTENT_COMMAND, KEY_DELETE_COMMAND, KEY_MODIFIER_COMMAND, Klass, LexicalCommand, LexicalEditor, LexicalNode, OUTDENT_CONTENT_COMMAND, REDO_COMMAND, SELECTION_CHANGE_COMMAND, UNDO_COMMAND } from 'lexical';
 import { $findMatchingParent, $getNearestNodeOfType, mergeRegister, $wrapNodeInElement, } from '@lexical/utils'
 import { $setBlocksType } from '@lexical/selection';
 import { $createHeadingNode, $createQuoteNode, $isHeadingNode } from '@lexical/rich-text';
@@ -20,6 +20,7 @@ import { $createTableNodeWithDimensions, INSERT_TABLE_COMMAND, InsertTableComman
 import { INSERT_LAYOUT_COMMAND } from './LayoutPlugin';
 import { $createStickyNode } from '../nodes/StickyNode';
 import { INSERT_YOUTUBE_COMMAND } from './YouTubePlugin';
+import { deleteImageFromCloudinary } from '@/app/actions/cloudinary';
 // import { resizeCloudinaryImage } from '@/app/actions/cloudinary';
 export type InsertImagePayload = Readonly<ImagePayload>;
 export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> = createCommand('INSERT_IMAGE_COMMAND');
@@ -41,7 +42,7 @@ interface LexicalToolbarProps {
     isReadOnly: boolean,
     lexicalToolbarData: ToolbarItem[],
     setIsLinkEditMode: Dispatch<boolean>,
-    saveDocument: (content: string) => void
+    saveDocument: (content: string) => void,
 }
 //#endregion
 
@@ -108,6 +109,34 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
             }
         }
     }, [$upDataLinkButton, $updateDropdownItemForBlockFormatItmes, activeEditor, isLink]);
+
+    useEffect(() => {
+        return editor.registerCommand(
+            KEY_DELETE_COMMAND,
+            () => {
+                editor.update(() => {
+                    const selection = $getSelection();
+                    if ($isNodeSelection(selection)) {
+                        // Get selected nodes
+                        const nodes = selection.getNodes();
+                        nodes.forEach(async (node) => {
+                            if (node instanceof ImageNode) {
+                                await deleteImageFromCloudinary(node.__src)
+                                console.log("Deleting ImageNode:", {
+                                    src: node.__src,
+                                    alt: node.__altText,
+                                    key: node.getKey(),
+                                });
+                            }
+                        });
+                    }
+                });
+
+                return false; // Return true if you handle the deletion manually
+            },
+            1
+        );
+    }, [editor]);
 
     useEffect(() => {
         editor.setEditable(!isReadOnly); // Set editor to editable when not in read-only mode
@@ -360,7 +389,7 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
                 try {
                     const updatedState = activeEditor.getEditorState();
                     const serializedState = JSON.stringify(updatedState);
-                    // console.log("serializedState:", serializedState);
+                    console.log("serializedState:", serializedState);
                     saveDocument(serializedState);
                     // const imageNodes = getImageNodes(activeEditor);
                     // imageNodes.forEach((node) => {
