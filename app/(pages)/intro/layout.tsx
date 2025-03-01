@@ -36,7 +36,7 @@ const IntroLayout = ({ children, }: { children: React.ReactNode }) => {
     return (
         <IntroLayoutContext.Provider value={{ isUserReadOnly, getContent, saveContent }}>
             <div>
-                {/* {`ReadOnly: ${isUserReadOnly}`} */}
+                {`ReadOnly: ${isUserReadOnly}`}
                 <main>{children}</main>
             </div>
         </IntroLayoutContext.Provider>      
