@@ -1,8 +1,8 @@
 'use server'
 import prisma from "@/prisma/prisma";
-import { LexicalDocument } from "@prisma/client";
+import { LexicalDocument, User } from "@prisma/client";
 
-export async function getLexicalDocumentByPath(path: string): Promise<{ props: LexicalDocument, revalidate: number } | null> {
+export async function getLexicalDocumentByPath(path: string): Promise<{ props: LexicalDocument & { author: User }, revalidate: number } | null> {
     try {
         const doc = await prisma.lexicalDocument.findFirst({
             where: {
@@ -15,14 +15,7 @@ export async function getLexicalDocumentByPath(path: string): Promise<{ props: L
         if (doc) {
             return { props: doc, revalidate: 10 }
         }
-        return null;
-        // return {
-        //     props: {
-        //         doc,
-        //     },
-        //     // Revalidate every 10 seconds
-        //     revalidate: 10,
-        // };
+        return null;      
     } catch (error) {
         console.log('getLexicalDocumentByPath error: ', error)
         return null;

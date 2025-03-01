@@ -68,9 +68,6 @@ export const authOptions: NextAuthOptions = {
         },
 
         async session({ session, token }) {
-            // console.log("Session Callback - Token:", token);
-            // console.log("Session Callback - Current Session:", session);
-
             if (token) {
                 session.user = {
                     id: token.id,
@@ -78,14 +75,10 @@ export const authOptions: NextAuthOptions = {
                     email: token.email,
                     image: token.picture,
                     isUserAdmin: token.isUserAdmin,
-                    // iaUserAdmin =
-                    // isAdmin:
-                    // roles: token.roles || [],
                     notificationCount: token.notificationCount || 0,
                     membershipProcessedBys: token.membershipProcessedBys || [],
                     membershipRequestedBys: token.membershipRequestedBys || [],
                 };
-                // console.log("Final Session:", session);
                 return session;
             }
 
@@ -93,22 +86,14 @@ export const authOptions: NextAuthOptions = {
         },
 
         async jwt({ token, user }) {
-            // console.log("Initial JWT Token:", token);
-            // console.log("User from JWT Callback:", user);
-
             if (user) {
-                console.log("Adding user data to token");
+                console.log("Adding user data to token!!!");
                 token.id = user.id;
             }
 
             if (token.email) {
                 const sessionUser = await getSessionUserByEmail(token.email);
-            // console.log("Database User:", dbUser);
-
-
                 if (sessionUser) {
-
-
                     const nt = {
                         ...token,
                         id: sessionUser.id,
