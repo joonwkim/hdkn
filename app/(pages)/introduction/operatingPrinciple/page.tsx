@@ -3,8 +3,8 @@ import Editor from '@/app/components/lexicalEditor/Editor'
 import React, { useEffect, useState, useRef } from 'react'
 import { usePathname } from 'next/navigation';
 import { LexicalDocument, User } from '@prisma/client';
+import { useIntroLayoutContext } from '../../intro/layout';
 import { useSession } from 'next-auth/react';
-import { useBaseLayoutContext } from '../../(IntrolBase)/layout';
 
 const Page = () => {
     const { data: session } = useSession();
@@ -12,7 +12,7 @@ const Page = () => {
     const [data, setData] = useState<LexicalDocument & { author: User } | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { getContent, saveContent } = useBaseLayoutContext();
+    const { getContent, saveContent } = useIntroLayoutContext();
     const [isAuthor, setIsAuthor] = useState(false);
     const isMountedRef = useRef(true);
 

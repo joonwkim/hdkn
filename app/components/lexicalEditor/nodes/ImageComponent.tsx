@@ -339,6 +339,7 @@ const ImageComponent = ({ src, altText, nodeKey, width, height, maxWidth, resiza
             const node = $getNodeByKey(nodeKey);
             if ($isImageNode(node)) {
                 node.setWidthAndHeight(nextWidth, nextHeight);
+                console.log('resized node:', node)
                 // if (updateResizedImage) {
                 //     const resized: ResizedImage = {
                 //         resizedWidth: nextWidth,

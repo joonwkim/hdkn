@@ -6,15 +6,16 @@ import { LexicalDocument, User } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import React, { createContext, useContext, } from 'react';
 
-interface BaseContextProps {
+interface IntroContextProps {
+    // isUserReadOnly: boolean;
     getContent: (pathName: string) => Promise<{ props: LexicalDocument & { author: User }, revalidate: number } | null>;
     saveContent: (pathName: string, content: string) => void;
 }
 
-const BaseLayoutContext = createContext<BaseContextProps | undefined>(undefined);
+const IntroLayoutContext = createContext<IntroContextProps | undefined>(undefined);
 
 export const useIntroLayoutContext = () => {
-    const context = useContext(BaseLayoutContext);
+    const context = useContext(IntroLayoutContext);
     if (!context) {
         throw new Error('useGroupLayoutContext must be used within GroupLayout');
     }
@@ -31,11 +32,11 @@ const IntroLayout = ({ children, }: { children: React.ReactNode }) => {
         return result;
     }
     return (
-        <BaseLayoutContext.Provider value={{ getContent, saveContent }}>
+        <IntroLayoutContext.Provider value={{ getContent, saveContent }}>
             <div>
                 <main>{children}</main>
             </div>
-        </BaseLayoutContext.Provider>
+        </IntroLayoutContext.Provider>
     )
 }
 

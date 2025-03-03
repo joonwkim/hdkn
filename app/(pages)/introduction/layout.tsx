@@ -13,7 +13,7 @@ interface BaseContextProps {
 
 const BaseLayoutContext = createContext<BaseContextProps | undefined>(undefined);
 
-export const useIntroLayoutContext = () => {
+export const useBaseLayoutContext = () => {
     const context = useContext(BaseLayoutContext);
     if (!context) {
         throw new Error('useGroupLayoutContext must be used within GroupLayout');

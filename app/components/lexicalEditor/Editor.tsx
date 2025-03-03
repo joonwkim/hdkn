@@ -33,7 +33,7 @@ import FloatingLinkEditorPlugin from './plugins/FloatingLinkEditorPlugin';
 import { LinkNode } from '@lexical/link';
 import LinkPlugin from './plugins/LinkPlugin';
 import LoadInitialDataPlugin from './plugins/LoadInitialDataPlugin';
-import TreeViewPlugin from './plugins/TreeViewPlugin';
+// import TreeViewPlugin from './plugins/TreeViewPlugin';
 interface EditorProps {
     isReadOnly: boolean,
     initailData?: string,
@@ -130,7 +130,7 @@ const Editor = ({ saveDocument, isReadOnly, initailData }: EditorProps) => {
                                         }}
                                     />
                                 )}
-                                {!isReadOnly && <TreeViewPlugin />}
+                                {/* {!isReadOnly && <TreeViewPlugin />} */}
                             </div>
                         </div>
                         {/* <ExportToHtmlButton /> */}

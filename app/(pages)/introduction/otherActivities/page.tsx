@@ -3,10 +3,10 @@ import Editor from '@/app/components/lexicalEditor/Editor'
 import React, { useEffect, useState, useRef } from 'react'
 import { usePathname } from 'next/navigation';
 import { LexicalDocument, User } from '@prisma/client';
-import { useIntroLayoutContext } from '../layout';
+import { useIntroLayoutContext } from '../../intro/layout';
 import { useSession } from 'next-auth/react';
 
-const OtherActivitesPage = () => {
+const Page = () => {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [data, setData] = useState<LexicalDocument & { author: User } | null>(null);
@@ -60,4 +60,4 @@ const OtherActivitesPage = () => {
   );
 };
 
-export default OtherActivitesPage;
+export default Page;

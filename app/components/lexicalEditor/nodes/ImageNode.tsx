@@ -156,8 +156,8 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
         const writable = this.getWritable();
         writable.__width = width;
         writable.__height = height;
-        // this.saveNodeStateDebounced();
-        // this.markDirty();
+        this.saveNodeStateDebounced();
+        this.markDirty();
     }
 
     private saveNodeStateDebounced = debounce(() => {
