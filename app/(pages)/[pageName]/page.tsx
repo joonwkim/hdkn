@@ -3,8 +3,8 @@ import Editor from '@/app/components/lexicalEditor/Editor'
 import React, { useEffect, useState, useRef } from 'react'
 import { usePathname } from 'next/navigation';
 import { LexicalDocument, User } from '@prisma/client';
-import { useIntroLayoutContext } from '../../intro/layout';
 import { useSession } from 'next-auth/react';
+import { useIntroLayoutContext } from '../layout';
 
 const Page = () => {
     const { data: session } = useSession();
@@ -55,6 +55,7 @@ const Page = () => {
 
     return (
         <div>
+            {`Path: ${pathname}`}
             <Editor saveDocument={saveDocument} isReadOnly={!isAuthor} initailData={data?.content} />
         </div>
     );

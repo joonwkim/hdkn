@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { usePathname } from 'next/navigation';
 import { LexicalDocument, User } from '@prisma/client';
 import { useSession } from 'next-auth/react';
-import { useIntroLayoutContext } from '../layout';
+import { useIntroLayoutContext } from '../../layout';
 
 const Page = () => {
     const { data: session } = useSession();
