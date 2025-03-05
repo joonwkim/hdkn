@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from 'react'
+import React, { useState } from 'react'
 import { InsertImagePayload } from '../plugins/ToolbarPlugin';
 import './styles.css'
 import { uploadToCloudinary } from '@/app/actions/cloudinary';
-import { Position, ResizedImage } from '../nodes/ImageNode';
+import { Position, } from '../nodes/ImageNode';
 
 const InsertImageFileModal = ({ onClick }: { onClick: (payload: InsertImagePayload) => void, }) => {
     const [file, setFile] = useState<File | null>(null);

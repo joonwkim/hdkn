@@ -1,16 +1,13 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+/* config options here */
   compiler: {
     styledComponents: true,
-  },
-  i18n: {
-    locales: ['ko-KR'],
-    defaultLocale: 'ko-KR',
   },
   typescript: {
     ignoreBuildErrors: true,
   },
-  // images: { domains: ['img.youtube.com'], },
   images: {
     remotePatterns: [
       {
@@ -27,7 +24,6 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-
 };
 
-module.exports = nextConfig;
+export default nextConfig;

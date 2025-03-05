@@ -1,10 +1,10 @@
 'use server';
 import { revalidatePath } from "next/cache";
 import { createUser, getUserByEmail, updateUser, updateUserPassword } from "../services/userService";
-import { generateRandomPassword, getHashedPassword, verifyPassword, } from "../lib/password";
+import { generateRandomPassword, getHashedPassword, } from "../lib/password";
 import { sendMail } from "../lib/mailServer";
 import { RegisterForm } from "../auth/types";
-import { Prisma, User } from "@prisma/client";
+import { Prisma, } from "@prisma/client";
 
 export async function createUserAction(input: RegisterForm) {
     try {
@@ -57,5 +57,3 @@ export async function updateUserAction(id: string, input: Prisma.UserCreateInput
     await updateUser(id, input);
     revalidatePath('/');
 }
-
-

@@ -19,7 +19,6 @@ import {
     ReactPortal,
     useCallback,
     useEffect,
-    useLayoutEffect,
     useMemo,
     useRef,
     useState,
@@ -408,10 +407,6 @@ export default function TableCellResizerPlugin(): null | ReactPortal {
     useEffect(() => {
         setIsClient(true);
     }, []);
-
-    // useLayoutEffect(() => {
-    //     setIsClient(true);
-    // }, []);
 
     return useMemo(() => {
         if (!isClient || !isEditable) {

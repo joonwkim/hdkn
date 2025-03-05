@@ -1,5 +1,4 @@
 import type {
-  EditorConfig,
   LexicalEditor,
   LexicalNode,
   NodeKey,
@@ -7,7 +6,7 @@ import type {
   SerializedLexicalNode,
   Spread,
 } from 'lexical';
-
+import type { JSX } from 'react';
 import { $setSelection, createEditor, DecoratorNode } from 'lexical';
 import * as React from 'react';
 import { Suspense } from 'react';
@@ -53,13 +52,19 @@ export class StickyNode extends DecoratorNode<JSX.Element> {
       serializedNode.yOffset,
       serializedNode.color,
     );
-    const caption = serializedNode.caption;
-    const nestedEditor = stickyNode.__caption;
-    const editorState = nestedEditor.parseEditorState(caption.editorState);
-    if (!editorState.isEmpty()) {
-      nestedEditor.setEditorState(editorState);
+    if (serializedNode.caption?.editorState) {
+      stickyNode.__caption.setEditorState(
+        createEditor().parseEditorState(serializedNode.caption.editorState)
+      );
     }
     return stickyNode;
+    // const caption = serializedNode.caption;
+    // const nestedEditor = stickyNode.__caption;
+    // const editorState = nestedEditor.parseEditorState(caption.editorState);
+    // if (!editorState.isEmpty()) {
+    //   nestedEditor.setEditorState(editorState);
+    // }
+    // return stickyNode;
   }
 
   constructor(
@@ -105,12 +110,16 @@ export class StickyNode extends DecoratorNode<JSX.Element> {
   }
 
   toggleColor(): void {
+    const colors: StickyNoteColor[] = ['pink', 'yellow'];
     const writable = this.getWritable();
-    writable.__color = writable.__color === 'pink' ? 'yellow' : 'pink';
+    const nextColor = colors[(colors.indexOf(writable.__color) + 1) % colors.length];
+    writable.__color = nextColor;
+    // const writable = this.getWritable();
+    // writable.__color = writable.__color === 'pink' ? 'yellow' : 'pink';
   }
 
   decorate(): JSX.Element {
-
+    if (typeof window === 'undefined') return <></>;
     return createPortal(
       <Suspense fallback={null}>
         <StickyComponent

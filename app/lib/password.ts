@@ -11,14 +11,14 @@ export const generateRandomPassword = () => {
 };
 export const getHashedPassword = async (password: string) => {
     const saltFactor = process.env.SALT_WORK_FACTOR || 10;
-    var sf: number = + saltFactor;
+    const sf: number = + saltFactor;
     const salt = await bcrypt.genSalt(sf);
     const hash = await bcrypt.hashSync(password, salt);
     return hash;
 }
 
 export const verifyPassword = async (inputPassword: string, encriptedPassword: string) => {
-    const result = await bcrypt.compare(inputPassword, encriptedPassword).catch((e) => false);
+    const result = await bcrypt.compare(inputPassword, encriptedPassword).catch(() => false);
     if (!result) {
         const errorMessage = 'password do not match';
         return errorMessage;
