@@ -15,6 +15,7 @@ model TreeNode {
   url      String?
   expanded Boolean    @default(false)
   selected Boolean?   @default(false)
+  active   Boolean?   @default(true)
   level    Int
   parentId String?    @db.ObjectId
   parent   TreeNode?  @relation("TreeRelation", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -25,14 +26,14 @@ model TreeNode {
 }
 
 model LexicalDocument {
-  id               String          @id @default(auto()) @map("_id") @db.ObjectId
-  title            String
-  url              String?
-  content          String // JSON content as a string
-  author           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  userId           String          @db.ObjectId
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  url       String?
+  content   String // JSON content as a string
+  author    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @db.ObjectId
   // images           Image[] 
   // CloudinaryData   CloudinaryData? @relation(fields: [cloudinaryDataId], references: [id])
   // cloudinaryDataId String?         @db.ObjectId
@@ -377,7 +378,7 @@ model KnowhowDetailInfo {
 
   // cloudinaryDatas   CloudinaryData[] @relation(fields: [cloudinaryDataIds], references: [id])
   // cloudinaryDataIds String[]         @db.ObjectId
-  stageContents     StageContents[]
+  stageContents StageContents[]
 }
 
 model YouTubeData {
