@@ -1,8 +1,6 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-// import CredentialsProvider from "next-auth/providers/credentials";
 import { GoogleUser } from "@/app/auth/types";
-// import { loginAction } from "@/app/actions/userAction";
 import { findUpdateGoogleUser, getSessionUserByEmail, } from "@/app/services/userService";
 
 export const authOptions: NextAuthOptions = {
@@ -45,11 +43,6 @@ export const authOptions: NextAuthOptions = {
 
     callbacks: {
         async signIn({ user, account, }) {
-        // async signIn({ user, account, profile, email, credentials }) {
-        // console.log('profile: ', profile)
-        // console.log('profile: ', profile)
-        // console.log('email: ', email)
-        // console.log('credentials: ', credentials)
             if (account?.provider === 'google' && user.email) {
                 const googleUser: GoogleUser = {
                     name: user.name || " ",
@@ -60,7 +53,6 @@ export const authOptions: NextAuthOptions = {
                 };
 
                 await findUpdateGoogleUser(user.email, googleUser);
-                // console.log('update result: ', result)
             }
             else if (account?.provider === 'credentials') {
             }
@@ -74,17 +66,15 @@ export const authOptions: NextAuthOptions = {
                     name: token.name,
                     email: token.email,
                     image: token.picture,
-                    isUserAdmin: token.isUserAdmin,
+                    roles: token.roles,
                     notificationCount: token.notificationCount || 0,
                     membershipProcessedBys: token.membershipProcessedBys || [],
                     membershipRequestedBys: token.membershipRequestedBys || [],
                 };
                 return session;
             }
-
             return session;
         },
-
         async jwt({ token, user }) {
             if (user) {
                 console.log("Adding user data to token!!!");
@@ -93,12 +83,13 @@ export const authOptions: NextAuthOptions = {
 
             if (token.email) {
                 const sessionUser = await getSessionUserByEmail(token.email);
+                // console.log('session User: ', sessionUser)
                 if (sessionUser) {
                     const nt = {
                         ...token,
                         id: sessionUser.id,
                         // notificationCount: sessionUser.notificationCount || 0,
-                        isUserAdmin: sessionUser.isUserAdmin,
+                        // isUserAdmin: sessionUser.isUserAdmin,
                         // isAdmin: isAdmin,
                         // membershipProcessedBys: dbUser.membershipProcessedBys || [],
                         // membershipRequestedBys: dbUser.membershipRequestedBys || [],
@@ -114,8 +105,6 @@ export const authOptions: NextAuthOptions = {
         signIn: '/auth/login'
     }
 };
-
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };
 

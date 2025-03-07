@@ -1,9 +1,10 @@
 import prisma from '@/prisma/prisma';
 import bcrypt from "bcrypt";
 import { getHashedPassword } from '../lib/password';
-import { Prisma, User, } from '@prisma/client';
+import { Prisma, User, UserRole, } from '@prisma/client';
 import { GoogleUser } from '../auth/types';
 import { SessionUser } from '../lib/types';
+import { use } from 'react';
 
 export async function getUsers() {
     try {
@@ -52,21 +53,16 @@ export async function createUser(input: Prisma.UserCreateInput): Promise<User | 
 }
 
 export async function getIsUserAdmin(userId: string): Promise<boolean> {
-    // console.log('getIsUserAdmin userId: ', userId);
     if (userId) {
         const userRoles = await prisma.userRole.findMany({
             where: { userId }, // Assuming `userId` should filter user roles
         });
-
-        // console.log('getIsUserAdmin userRoles: ', userRoles);
-
         for (const userRole of userRoles) {
             const role = await prisma.role.findFirst({
                 where: { id: userRole.roleId },
             });
 
             if (role?.roleName === '관리자') {
-                // console.log('role: ', role);
                 return true;
             }
         }
@@ -74,47 +70,17 @@ export async function getIsUserAdmin(userId: string): Promise<boolean> {
     return false;
 }
 
-
-// export async function getIsUserAdmin(userId: string): Promise<boolean> {
-//     console.log('getIsUserAdmin userId: ', userId)
-//     if (userId) {
-
-//         const userRoles = await prisma.userRole.findMany();
-//         // console.log('')
-
-//         // const userRoles = await getUserRolesByUserId(userId);
-
-//         console.log('getIsUserAdmin userRoles: ', userRoles)
-//         userRoles.forEach(async userRole => {
-//             const role = await prisma.role.findFirst({
-//                 where: {
-//                     id: userRole.roleId,
-//                 }
-//             })
-//             if (role) {
-//                 if (role.roleName === '관리자') {
-//                     console.log('role: ', role)
-//                     return true;
-//                 }
-//             }
-//         });
-//     }
-//     return false;
-// }
-
 export async function getSessionUserByEmail(emailInput: string): Promise<SessionUser | null> {
     try {
         const user = await getUserByEmail(emailInput);
 
         if (user) {
-            const isUserAdmin = await getIsUserAdmin(user.id);
-            // console.log('isUserAdmin: ', isUserAdmin)
             const sessionUser: SessionUser = {
                 id: user.id,
                 name: user.name,
                 email: user.email,
                 image: user.image,
-                isUserAdmin: isUserAdmin,
+                roles: user.roles,
             }
             return sessionUser;
         }
@@ -125,13 +91,9 @@ export async function getSessionUserByEmail(emailInput: string): Promise<Session
     }
 }
 
-export async function getUserByEmail(emailInput: string): Promise<User | null> {
+export async function getUserByEmail(emailInput: string): Promise<User & { roles: UserRole[] } | null> {
     try {
-        const user: Prisma.UserGetPayload<{
-            include: {
-                roles: { include: { role: true; }; };
-            };
-        }> | null = await prisma.user.findFirst({
+        const user: Prisma.UserGetPayload<{ include: { roles: { include: { role: true; }; }; }; }> | null = await prisma.user.findFirst({
             where: {
                 email: emailInput,
             },

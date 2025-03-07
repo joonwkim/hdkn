@@ -2,7 +2,7 @@
 import Editor from '@/app/components/lexicalEditor/Editor'
 import React, { useEffect, useState, useRef } from 'react'
 import { usePathname } from 'next/navigation';
-import { LexicalDocument, User } from '@prisma/client';
+import { LexicalDocument, Role, User, UserRole } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import { useIntroLayoutContext } from '../../layout';
 
@@ -15,20 +15,25 @@ const Page = () => {
     const { getContent, saveContent } = useIntroLayoutContext();
     const [isAuthor, setIsAuthor] = useState(false);
     const isMountedRef = useRef(true);
+    const [hasUserAdminRole, setHasUserAdminRole] = useState(false);
+    const [isReadOnly, setIsReadOnly] = useState(true);
 
     useEffect(() => {
         isMountedRef.current = true;
-
         const fetchData = async () => {
             try {
                 const result = await getContent(pathname);
 
                 if (isMountedRef.current && result?.props) {
                     setData(result.props);
-                    setIsAuthor(result.props.author?.id === session?.user?.id);
+                    setIsReadOnly(result.props.author?.id !== session?.user?.id)
                 } else {
                     setData(null);
                     setIsAuthor(false);
+                }
+                if (!data && session?.user.roles.length > 0) {
+                    const hasAuthorRole = session?.user.roles.some((userRole: UserRole & { role: Role }) => userRole.role.roleName === "관리자");
+                    setIsReadOnly(!hasAuthorRole)
                 }
             } catch (err) {
                 if (isMountedRef.current) {
@@ -55,7 +60,7 @@ const Page = () => {
 
     return (
         <div>
-            <Editor saveDocument={saveDocument} isReadOnly={!isAuthor} initailData={data?.content} />
+            <Editor saveDocument={saveDocument} isReadOnly={isReadOnly} initailData={data?.content} />
         </div>
     );
 };

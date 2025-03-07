@@ -25,7 +25,8 @@ export type SessionUser = {
     name: string,
     email: string,
     image: string | null,
-    isUserAdmin: boolean,
+    // isUserAdmin: boolean,
+    roles?: Role[],
 }
 
 export type Stage = {
