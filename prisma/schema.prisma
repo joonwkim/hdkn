@@ -15,7 +15,7 @@ model TreeNode {
   url      String?
   expanded Boolean    @default(false)
   selected Boolean?   @default(false)
-  active   Boolean?   @default(true)
+  active   Boolean   @default(true)
   level    Int
   parentId String?    @db.ObjectId
   parent   TreeNode?  @relation("TreeRelation", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)

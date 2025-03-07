@@ -7,6 +7,7 @@ export async function getTreeNodes() {
         const treeNodes = await prisma.treeNode.findMany({
             where: {
                 parent: null,
+                active: true, 
             },
             include: {
                 parent: true,
@@ -19,22 +20,26 @@ export async function getTreeNodes() {
             orderBy: {
                 orderBy: 'asc'
             }
-
         });
+
         return {
             props: {
                 treeNodes,
             },
-            // Revalidate every 10 seconds
-            revalidate: 10,
+            revalidate: 10, // Ensure this is outside `props`
         };
     } catch (error) {
-        return ({ error });
+        return {
+            props: {
+                error: error instanceof Error ? error.message : 'Unknown error',
+            }
+        };
     }
 }
 
 export async function setNodeSelected(nodeId: string) {
     try {
+
         await prisma.treeNode.updateMany({
             where: {
                 selected: true,
@@ -60,9 +65,14 @@ export async function setNodeSelected(nodeId: string) {
     }
 }
 
-
 export async function updateExpandStatus(node: TreeNode) {
     try {
+        const collapsAll = await prisma.treeNode.updateMany({
+            data: {
+                expanded: false,
+            }
+        })
+        console.log('collapsAll: ', collapsAll)
         const result = await prisma.treeNode.update({
             where: {
                 id: node.id,
