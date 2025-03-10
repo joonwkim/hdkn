@@ -7,7 +7,7 @@ export async function getTreeNodes() {
         const treeNodes = await prisma.treeNode.findMany({
             where: {
                 parent: null,
-                active: true, 
+                active: true,
             },
             include: {
                 parent: true,
@@ -48,18 +48,20 @@ export async function setNodeSelected(nodeId: string) {
                 selected: false,
             }
         })
-        const node = await prisma.treeNode.update({
-            where: {
-                id: nodeId,
-                children: {
-                    none: {},
+        if (nodeId) {
+            const node = await prisma.treeNode.update({
+                where: {
+                    id: nodeId,
+                    children: {
+                        none: {},
+                    }
+                },
+                data: {
+                    selected: true,
                 }
-            },
-            data: {
-                selected: true,
-            }
-        })
-        return node;
+            })
+            return node;
+        }       
     } catch (error) {
         console.log(error)
     }
@@ -72,17 +74,19 @@ export async function updateExpandStatus(node: TreeNode) {
                 expanded: false,
             }
         })
-        console.log('collapsAll: ', collapsAll)
-        const result = await prisma.treeNode.update({
-            where: {
-                id: node.id,
-            },
-            data: {
-                expanded: !node.expanded
-            }
-        })
+        // console.log('collapsAll: ', collapsAll)
+        if (node) {
+            const result = await prisma.treeNode.update({
+                where: {
+                    id: node.id,
+                },
+                data: {
+                    expanded: !node.expanded
+                }
+            })
+            return result;
+        }
 
-        return result;
     } catch (error) {
         console.log(error)
     }

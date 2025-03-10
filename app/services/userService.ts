@@ -73,6 +73,7 @@ export async function getIsUserAdmin(userId: string): Promise<boolean> {
 export async function getSessionUserByEmail(emailInput: string): Promise<SessionUser | null> {
     try {
         const user = await getUserByEmail(emailInput);
+        console.log('getSessionUserByEmail user:', user)
 
         if (user) {
             const sessionUser: SessionUser = {

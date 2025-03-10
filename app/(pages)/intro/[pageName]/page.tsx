@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { LexicalDocument, Role, User, UserRole } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import { useIntroLayoutContext } from '../../layout';
+import { divide } from 'lodash-es';
 
 const Page = () => {
     const { data: session } = useSession();
@@ -31,7 +32,7 @@ const Page = () => {
                     setData(null);
                     setIsAuthor(false);
                 }
-                if (!data && session?.user.roles.length > 0) {
+                if (!data && session?.user.roles !== undefined && session?.user.roles.length > 0) {
                     const hasAuthorRole = session?.user.roles.some((userRole: UserRole & { role: Role }) => userRole.role.roleName === "관리자");
                     setIsReadOnly(!hasAuthorRole)
                 }
@@ -56,7 +57,13 @@ const Page = () => {
     };
 
     if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error}</p>;
+    if (error) return (
+        <div>
+            <div>  {`session?.user.roles: ${JSON.stringify(session?.user, null, 2)}`}</div>
+            <p>Error: {error}</p>
+        </div>
+
+    );
 
     return (
         <div>

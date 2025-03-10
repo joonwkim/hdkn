@@ -59,8 +59,10 @@ export const authOptions: NextAuthOptions = {
             return true;
         },
 
+
         async session({ session, token }) {
             if (token) {
+                // console.log('token:', token)
                 session.user = {
                     id: token.id,
                     name: token.name,
@@ -88,13 +90,13 @@ export const authOptions: NextAuthOptions = {
                     const nt = {
                         ...token,
                         id: sessionUser.id,
+                        roles: sessionUser.roles || [],
                         // notificationCount: sessionUser.notificationCount || 0,
-                        // isUserAdmin: sessionUser.isUserAdmin,
-                        // isAdmin: isAdmin,
-                        // membershipProcessedBys: dbUser.membershipProcessedBys || [],
-                        // membershipRequestedBys: dbUser.membershipRequestedBys || [],
+                        // membershipProcessedBys: sessionUser.membershipProcessedBys || [],
+                        // membershipRequestedBys: sessionUser.membershipRequestedBys || [],
                     };
-                    // console.log('new token: ', nt)
+                    console.log('new token: ', nt)
+                    console.log('new token: ', Object.keys(nt));
                     return nt;
                 }              
             }
