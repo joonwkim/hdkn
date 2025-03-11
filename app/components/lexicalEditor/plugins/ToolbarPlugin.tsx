@@ -389,7 +389,7 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
                 try {
                     const updatedState = activeEditor.getEditorState();
                     const serializedState = JSON.stringify(updatedState);
-                    console.log("serializedState:", serializedState);
+                    // console.log("serializedState:", serializedState);
                     saveDocument(serializedState);
                     // const imageNodes = getImageNodes(activeEditor);
                     // imageNodes.forEach((node) => {

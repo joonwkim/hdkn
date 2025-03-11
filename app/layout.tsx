@@ -33,10 +33,22 @@ export default function RootLayout({
 }>) {
 
   //#region theme control
+  const setEditorCaretColor = (newTheme: string) => {
+    const editorElement = document.querySelector('.editor-input');
+    if (editorElement instanceof HTMLElement) {
+      console.log('editor element', editorElement)
+      if (newTheme === 'dark') {
+        editorElement.style.setProperty('caret-color', 'white');
+      } else {
+        editorElement.style.setProperty('caret-color', '#444');
+      }
+    }
+  }
   const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>('light');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const applyTheme = useCallback((newTheme: 'light' | 'dark' | 'auto') => {
     document.documentElement.setAttribute('data-bs-theme', newTheme);
+    setEditorCaretColor(newTheme);  
   }, [])
 
   useEffect(() => {
@@ -53,6 +65,7 @@ export default function RootLayout({
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'auto') => {
     setTheme(newTheme);
     localStorage.setItem(THEME_KEY, newTheme);
+
     applyTheme(newTheme)
   };
 
