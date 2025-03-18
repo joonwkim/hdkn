@@ -95,8 +95,8 @@ export const authOptions: NextAuthOptions = {
                         // membershipProcessedBys: sessionUser.membershipProcessedBys || [],
                         // membershipRequestedBys: sessionUser.membershipRequestedBys || [],
                     };
-                    console.log('new token: ', nt)
-                    console.log('new token: ', Object.keys(nt));
+                    // console.log('new token: ', nt)
+                    // console.log('new token: ', Object.keys(nt));
                     return nt;
                 }              
             }
