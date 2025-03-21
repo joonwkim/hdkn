@@ -4,7 +4,7 @@ import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useSession } from "next-auth/react";
 
-type Post = {
+type Blog = {
     id: number;
     author: string;
     title: string;
@@ -17,12 +17,12 @@ type Post = {
 
 export default function BulletinBoard() {
     const { data: session } = useSession();
-    const [posts, setPosts] = useState<Post[]>([]);
+    const [blogs, setBlogs] = useState<Blog[]>([]);
     const [author, setAuthor] = useState("");
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [commentInputs, setCommentInputs] = useState<{ [key: number]: string }>({});
-    const [postsPerPage, setPostsPerPage] = useState(50);
+    const [blogsPerPage, setBlogPerPage] = useState(50);
     const [currentPage, setCurrentPage] = useState(1);
     const [viewMode, setViewMode] = useState("summary");
     const [isCustom, setIsCustom] = useState(false);
@@ -30,25 +30,22 @@ export default function BulletinBoard() {
     const [customInput, setCustomInput] = useState("");
     const [isWriting, setIsWriting] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
-    const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-    // const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+    const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
+    const totalPages = Math.ceil(blogs.length / blogsPerPage) || 1;
+    const startIndex = (currentPage - 1) * blogsPerPage;
+    const paginatedBlogs = blogs.slice(startIndex, startIndex + blogsPerPage);
 
-    const totalPages = Math.ceil(posts.length / postsPerPage) || 1;
-    const startIndex = (currentPage - 1) * postsPerPage;
-    const paginatedPosts = posts.slice(startIndex, startIndex + postsPerPage);
-
-    const handleNewPostClick = () => {
+    const handleNewBlogClick = () => {
         if (!session?.user) {
-            // setShowLoginPrompt(true);
             alert('등록된 사용자만 작성할 수 있습니다.')
         } else {
             setIsWriting(true);
         }
     };
 
-    const addPost = (author: string) => {
+    const addBlog = (author: string) => {
         if (!title || !content) return;
-        const newPost: Post = {
+        const newBlog: Blog = {
             id: Date.now(),
             author: session?.user.name,
             title,
@@ -58,88 +55,49 @@ export default function BulletinBoard() {
             dislikes: 0,
             comments: [],
         };
-        setPosts([newPost, ...posts]);
+        setBlogs([newBlog, ...blogs]);
         setTitle("");
         setContent("");
         setIsWriting(false);
     };
 
-    const handleLike = (postId: number) => {
+    const handleLike = (blogId: number) => {
         if (!session?.user) {
             alert('로그인 하셔서 의견주세요.')
         }
-        if (selectedPost != null && selectedPost.author === session?.user.name) {
+        if (selectedBlog != null && selectedBlog.author === session?.user.name) {
             alert('자신의 글에는 의견표시할 수 없습니다.')
         } else {
-            setPosts(posts.map(post =>
-                post.id === postId ? { ...post, likes: post.likes + 1 } : post
+            setBlogs(blogs.map(blog =>
+                blog.id === blogId ? { ...blog, likes: blog.likes + 1 } : blog
             ));
         }
     };
 
-    const handleDislike = (postId: number) => {
+    const handleDislike = (blogId: number) => {
         if (!session?.user) {
             alert('로그인 하셔서 의견주세요.')
         }
-        if (selectedPost != null && selectedPost.author === session?.user.name) {
+        if (selectedBlog != null && selectedBlog.author === session?.user.name) {
             alert('자신의 글에는 의견표시할 수 없습니다.')
         }
         else {
-            setPosts(posts.map(post =>
-                post.id === postId ? { ...post, dislikes: post.dislikes + 1 } : post
+            setBlogs(blogs.map(blog =>
+                blog.id === blogId ? { ...blog, dislikes: blog.dislikes + 1 } : blog
             ));
         }
     };
 
-    const handleCommentChange = (postId: number, value: string) => {
-        setCommentInputs({ ...commentInputs, [postId]: value });
+    const handleCommentChange = (blogId: number, value: string) => {
+        setCommentInputs({ ...commentInputs, [blogId]: value });
     };
 
-    const addComment = (postId: number) => {
-        if (!commentInputs[postId]) return;
-        setPosts(posts.map(post =>
-            post.id === postId ? { ...post, comments: [...post.comments, commentInputs[postId]] } : post
+    const addComment = (blogId: number) => {
+        if (!commentInputs[blogId]) return;
+        setBlogs(blogs.map(blog =>
+            blog.id === blogId ? { ...blog, comments: [...blog.comments, commentInputs[blogId]] } : blog
         ));
-        setCommentInputs({ ...commentInputs, [postId]: "" });
-    };
-
-    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
-
-        if (value === "custom") {
-            setIsCustom(true);
-            setCustomInput("");
-        } else {
-            setPostsPerPage(Number(value));
-            setIsCustom(false);
-        }
-    };
-
-    const handleCustomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        if (/^\d+$/.test(value) && Number(value) > 0) {
-            setCustomInput(value);
-        }
-    };
-
-    const confirmCustomValue = () => {
-        if (customInput) {
-            const customNumber = Number(customInput);
-            setCustomValue(customNumber);
-            setPostsPerPage(customNumber);
-            setIsCustom(false);
-        } else {
-            setIsCustom(false);
-        }
-    };
-
-    const handleCustomBlur = confirmCustomValue;
-
-    const handleCustomKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter" || e.key === "Tab") {
-            e.preventDefault();
-            confirmCustomValue();
-        }
+        setCommentInputs({ ...commentInputs, [blogId]: "" });
     };
 
     const renderPagination = () => {
@@ -195,11 +153,11 @@ export default function BulletinBoard() {
         );
     };
 
-    const handleMouseEnter = (post: Post) => {
-        setSelectedPost(post);
+    const handleMouseEnter = (blog: Blog) => {
+        setSelectedBlog(blog);
     }
-    const handleMouseLeave = (post: Post) => {
-        setSelectedPost(null)
+    const handleMouseLeave = (blog: Blog) => {
+        setSelectedBlog(null)
     }
 
     return (
@@ -212,7 +170,7 @@ export default function BulletinBoard() {
                 </div>
                 <div className="me-3">
 
-                    <button className="btn btn-outline-secondary btn-sm me-2" title="글쓰기" onClick={handleNewPostClick}>
+                    <button className="btn btn-outline-secondary btn-sm me-2" title="글쓰기" onClick={handleNewBlogClick}>
                         <i className="bi bi-file-plus"></i>
                     </button>
                     <button className="btn btn-outline-secondary btn-sm me-2" title="요약형태보기" onClick={() => setViewMode("summary")}>
@@ -224,7 +182,7 @@ export default function BulletinBoard() {
                     <button className="btn btn-outline-secondary btn-sm me-2" title="카드형태보기" onClick={() => setViewMode("table")}>
                         <i className="bi bi-table"></i>
                     </button>
-                    <button className="btn btn-outline-secondary btn-sm" title="postSetting" onClick={() => setShowSettings(!showSettings)}>
+                    <button className="btn btn-outline-secondary btn-sm" title="blogSetting" onClick={() => setShowSettings(!showSettings)}>
                         <i className="bi bi-gear"></i>
                     </button>
                 </div>
@@ -245,7 +203,7 @@ export default function BulletinBoard() {
                         onChange={(e) => setContent(e.target.value)}
                     />
                     <button className="btn btn-secondary me-2" onClick={() => setIsWriting(false)}>취소</button>
-                    <button className="btn btn-primary me-2" onClick={() => addPost("SessionUser")}>저장</button>
+                    <button className="btn btn-primary me-2" onClick={() => addBlog("SessionUser")}>저장</button>
                 </div>
             )}
 
@@ -258,13 +216,13 @@ export default function BulletinBoard() {
                                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" onClick={() => setShowSettings(false)}></button>
                             </div>
                             <div className="modal-body">
-                                <label><strong>Posts per Page:</strong></label>
+                                <label><strong>Blogs per Page:</strong></label>
                                 <input
                                     type="number"
-                                    title="postsetting"
+                                    title="blogsetting"
                                     className="form-control w-auto d-inline-block"
-                                    value={postsPerPage}
-                                    onChange={(e) => setPostsPerPage(Number(e.target.value))}
+                                    value={blogsPerPage}
+                                    onChange={(e) => setBlogPerPage(Number(e.target.value))}
                                 />
                             </div>
                             <div className="modal-footer">
@@ -277,20 +235,20 @@ export default function BulletinBoard() {
             <div>
                 {viewMode === "summary" && (
                     <div>
-                        {paginatedPosts.map((post) => (
-                            <div key={post.id} className="border-bottom p-2">
-                                <h5>{post.title}</h5>
-                                <strong>{post.author}</strong> - <small>{post.date}</small>
-                                <p>{post.content}</p>
+                        {paginatedBlogs.map((blog) => (
+                            <div key={blog.id} className="border-bottom p-2">
+                                <h5>{blog.title}</h5>
+                                <strong>{blog.author}</strong> - <small>{blog.date}</small>
+                                <p>{blog.content}</p>
                                 {/* Like & Dislike Buttons */}
-                                <div className="d-flex align-items-center gap-2" onMouseEnter={() => handleMouseEnter(post)} onMouseLeave={() => handleMouseLeave(post)}>
-                                    <button className="btn btn-outline-success btn-sm" onClick={() => handleLike(post.id)}>
-                                        👍 {post.likes}
+                                <div className="d-flex align-items-center gap-2" onMouseEnter={() => handleMouseEnter(blog)} onMouseLeave={() => handleMouseLeave(blog)}>
+                                    <button className="btn btn-outline-success btn-sm" onClick={() => handleLike(blog.id)}>
+                                        👍 {blog.likes}
                                     </button>
-                                    <button className="btn btn-outline-danger btn-sm" onClick={() => handleDislike(post.id)}>
-                                        👎 {post.dislikes}
+                                    <button className="btn btn-outline-danger btn-sm" onClick={() => handleDislike(blog.id)}>
+                                        👎 {blog.dislikes}
                                     </button>
-                                    <button className="btn btn-outline-primary btn-sm" onClick={() => addComment(post.id)}>
+                                    <button className="btn btn-outline-primary btn-sm" onClick={() => addComment(blog.id)}>
                                         💬 Comment
                                     </button>
                                 </div>
@@ -301,15 +259,15 @@ export default function BulletinBoard() {
                                         type="text"
                                         className="form-control form-control-sm"
                                         placeholder="Write a comment..."
-                                        value={commentInputs[post.id] || ""}
-                                        onChange={(e) => handleCommentChange(post.id, e.target.value)}
+                                        value={commentInputs[blog.id] || ""}
+                                        onChange={(e) => handleCommentChange(blog.id, e.target.value)}
                                     />
                                 </div>
 
                                 {/* Comments List */}
-                                {post.comments.length > 0 && (
+                                {blog.comments.length > 0 && (
                                     <ul className="list-group list-group-flush mt-2">
-                                        {post.comments.map((comment, index) => (
+                                        {blog.comments.map((comment, index) => (
                                             <li key={index} className="list-group-item small">
                                                 💬 {comment}
                                             </li>
@@ -322,12 +280,12 @@ export default function BulletinBoard() {
                 )}
                 {viewMode === "card" && (
                     <div className="row">
-                        {paginatedPosts.map((post) => (
-                            <div key={post.id} className="col-md-4 mb-3">
+                        {paginatedBlogs.map((blog) => (
+                            <div key={blog.id} className="col-md-4 mb-3">
                                 <div className="card">
                                     <div className="card-body">
-                                        <h5 className="card-title">{post.title}</h5>
-                                        <p className="card-text">{post.content}</p>
+                                        <h5 className="card-title">{blog.title}</h5>
+                                        <p className="card-text">{blog.content}</p>
                                     </div>
                                 </div>
                             </div>
@@ -344,11 +302,11 @@ export default function BulletinBoard() {
                             </tr>
                         </thead>
                         <tbody>
-                            {paginatedPosts.map((post) => (
-                                <tr key={post.id}>
-                                    <td>{post.title}</td>
-                                    <td>{post.content}</td>
-                                    <td>{post.date}</td>
+                            {paginatedBlogs.map((blog) => (
+                                <tr key={blog.id}>
+                                    <td>{blog.title}</td>
+                                    <td>{blog.content}</td>
+                                    <td>{blog.date}</td>
                                 </tr>
                             ))}
                         </tbody>

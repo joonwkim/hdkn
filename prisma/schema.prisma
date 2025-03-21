@@ -15,7 +15,7 @@ model TreeNode {
   url      String?
   expanded Boolean    @default(false)
   selected Boolean?   @default(false)
-  active   Boolean   @default(true)
+  active   Boolean    @default(true)
   // level    Int
   parentId String?    @db.ObjectId
   parent   TreeNode?  @relation("TreeRelation", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -41,15 +41,6 @@ model LexicalDocument {
   @@unique([userId, title])
 }
 
-// model Image {
-//   id           String          @id @default(auto()) @map("_id") @db.ObjectId
-//   data         Bytes
-//   contentType  String
-//   lexicalDocId String          @db.ObjectId
-//   lexicalDoc   LexicalDocument @relation(fields: [lexicalDocId], references: [id])
-//   createdAt    DateTime        @default(now())
-// }
-
 model Todo {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
@@ -74,42 +65,31 @@ model Role {
 }
 
 model User {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  email         String    @unique
-  emailVerified DateTime?
-  password      String?
-  image         String?
-
-  isActive     Boolean  @default(true)
-  terms        Boolean  @default(true)
-  googleLogin  Boolean  @default(false)
-  provider     String?
-  refreshToken String[]
-
-  notificationCount Int @default(0)
-
-  roles UserRole[] // Define the relation to UserRole
-
-  profile Profile?
-
-  knowHows Knowhow[]
-  votes    Vote[]
-
+  id                     String              @id @default(auto()) @map("_id") @db.ObjectId
+  name                   String
+  email                  String              @unique
+  emailVerified          DateTime?
+  password               String?
+  image                  String?
+  isActive               Boolean             @default(true)
+  terms                  Boolean             @default(true)
+  googleLogin            Boolean             @default(false)
+  provider               String?
+  refreshToken           String[]
+  notificationCount      Int                 @default(0)
+  roles                  UserRole[]
+  profile                Profile?
+  blogs                  Blog[]
+  votes                  Vote[]
   membershipProcessedBys MembershipRequest[] @relation("membershipProcessedBys")
   membershipRequestedBys MembershipRequest[] @relation("membershipRequestedBys")
-
-  bulletinBoard   BulletinBoard[]
-  bulletinComment BulletinComment[]
-
-  userGroups        UserGroup[]
-  messages          Message[]
-  messageRecipients MessageRecipient[]
-
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  bulletinCommentVotes BulletinCommentVote[]
-  LexicalDocument      LexicalDocument[]
+  comments               Comment[]
+  userGroups             UserGroup[]
+  messages               Message[]
+  messageRecipients      MessageRecipient[]
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  LexicalDocument        LexicalDocument[]
 }
 
 model UserRole {
@@ -123,19 +103,6 @@ model UserRole {
   @@unique([userId, roleId]) // Ensure unique user-role pairs
   @@index([userId]) // Optional index for better query performance
   @@index([roleId]) // Optional index for better query performance
-}
-
-model BulletinCommentVote {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  thumbsStatus ThumbsStatus
-  forked       Boolean      @default(false)
-
-  comment   BulletinComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  commentId String          @db.ObjectId
-
-  bulletinCommentVoter   User   @relation(fields: [bulletinCommentVoterId], references: [id])
-  bulletinCommentVoterId String @db.ObjectId
 }
 
 model Group {
@@ -191,18 +158,11 @@ model MessageRecipient {
   isRead  Boolean @default(false)
 }
 
-model KnowhowType {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
-  name String @unique
-
-  knowHows Knowhow[]
-}
-
 model Category {
   id   String @id @default(auto()) @map("_id") @db.ObjectId
   name String @unique
 
-  knowHows Knowhow[]
+  blogs Blog[]
 }
 
 enum ThumbsStatus {
@@ -217,11 +177,13 @@ model Vote {
   thumbsStatus ThumbsStatus
   forked       Boolean      @default(false)
 
-  knowhow   Knowhow @relation(fields: [knowHowId], references: [id], onDelete: Cascade)
-  knowHowId String  @db.ObjectId
+  blog      Blog   @relation(fields: [knowHowId], references: [id], onDelete: Cascade)
+  knowHowId String @db.ObjectId
 
-  voter   User   @relation(fields: [voterId], references: [id])
-  voterId String @db.ObjectId
+  voter     User     @relation(fields: [voterId], references: [id])
+  voterId   String   @db.ObjectId
+  Comment   Comment? @relation(fields: [commentId], references: [id])
+  commentId String?  @db.ObjectId
 }
 
 model MembershipRequest {
@@ -229,8 +191,8 @@ model MembershipRequest {
 
   membershipRequestStatus MembershipRequestStatus
 
-  knowhow   Knowhow @relation(fields: [knowhowId], references: [id])
-  knowhowId String  @db.ObjectId
+  blog   Blog   @relation(fields: [blogId], references: [id])
+  blogId String @db.ObjectId
 
   membershipProcessedBy   User?   @relation("membershipProcessedBys", fields: [membershipProcessedById], references: [id])
   membershipProcessedById String? @db.ObjectId
@@ -244,185 +206,70 @@ model MembershipRequest {
   updatedAt DateTime @updatedAt
 }
 
-model StageContents {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  title       String?
-  description String?
-
-  stageId String @db.ObjectId
-  stage   Stage  @relation(fields: [stageId], references: [id])
-
-  // thumbnailCloudinaryData CloudinaryData? @relation(fields: [cloudinaryDataId], references: [id])
-  // cloudinaryDataId        String?         @db.ObjectId
-
-  knowhowDetailInfo   KnowhowDetailInfo? @relation(fields: [knowhowDetailInfoId], references: [id])
-  knowhowDetailInfoId String?            @db.ObjectId
-}
-
 model Stage {
   id         String @id @default(auto()) @map("_id") @db.ObjectId
   stageTitle String
 
   stage Int @default(0)
 
-  parentKnowhowId String  @db.ObjectId
-  parentKnowhow   Knowhow @relation(fields: [parentKnowhowId], references: [id])
+  parentKnowhowId String @db.ObjectId
+  parentKnowhow   Blog   @relation(fields: [parentKnowhowId], references: [id])
 
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  stageContents StageContents[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // stageContents StageContents[]
 }
 
-model Knowhow {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  title       String
-  description String
-
-  viewCount       Int     @default(0)
-  thumbsUpCount   Int     @default(0)
-  thumbsDownCount Int     @default(0)
-  isPublic        Boolean @default(true)
-
+model Blog {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  content   String
+  viewCount Int     @default(0)
+  likes     Int     @default(0)
+  dislikes  Int     @default(0)
+  isPublic  Boolean @default(true)
   author   User   @relation(fields: [authorId], references: [id])
   authorId String @db.ObjectId
-
   category   Category? @relation(fields: [categoryId], references: [id])
   categoryId String?   @db.ObjectId
-
   isGroupType Boolean @default(false)
-
-  knowhowType   KnowhowType? @relation(fields: [knowHowTypeId], references: [id])
-  knowHowTypeId String?      @db.ObjectId
-
   tagIds String[] @db.ObjectId
   tags   Tag[]    @relation(fields: [tagIds], references: [id])
-
-  isProjectType Boolean @default(false)
-  stageTitle    String?
-  stage         Int     @default(0)
-  levelInStage  Int     @default(0)
-
   votes Vote[]
-
-  knowhowDetailInfo KnowhowDetailInfo?
   membershipRequest MembershipRequest[]
-
-  parentId String?   @db.ObjectId
-  parent   Knowhow?  @relation("KnowhowParentChildren", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children Knowhow[] @relation("KnowhowParentChildren")
-
+  parentId String? @db.ObjectId
+  parent   Blog?   @relation("KnowhowParentChildren", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children Blog[]  @relation("KnowhowParentChildren")
   stages Stage[]
-
-  // thumbnailCloudinaryData CloudinaryData? @relation(fields: [cloudinaryDataId], references: [id])
-  // cloudinaryDataId        String?         @db.ObjectId
-
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  bulletinBoards BulletinBoard[]
-
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  comments Comment[]
   @@unique([title, authorId])
 }
 
-model BulletinBoard {
+model Comment {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  title   String
-  message String
+  comment  String
+  likes    Int    @default(0)
+  dislikes Int    @default(0)
 
-  knowhowId String  @db.ObjectId
-  knowhow   Knowhow @relation(fields: [knowhowId], references: [id])
-
-  writerId String @db.ObjectId
-  writer   User   @relation(fields: [writerId], references: [id])
-
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  bulletinComments BulletinComment[]
-}
-
-model BulletinComment {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  comment         String
-  thumbsUpCount   Int    @default(0)
-  thumbsDownCount Int    @default(0)
-
-  bulletinBoardId String        @db.ObjectId
-  bulletinBoard   BulletinBoard @relation(fields: [bulletinBoardId], references: [id])
+  // bulletinBoardId String        @db.ObjectId
+  // bulletinBoard   BulletinBoard @relation(fields: [bulletinBoardId], references: [id])
 
   commentWriterId String @db.ObjectId
   commentWriter   User   @relation(fields: [commentWriterId], references: [id])
 
-  parentBulletinCommentId String?           @db.ObjectId
-  parentBulletinComment   BulletinComment?  @relation("CommentParentChildren", fields: [parentBulletinCommentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children                BulletinComment[] @relation("CommentParentChildren")
+  parentCommentId String?   @db.ObjectId
+  parentComment   Comment?  @relation("CommentParentChildren", fields: [parentCommentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children        Comment[] @relation("CommentParentChildren")
 
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  bulletinCommentVotes BulletinCommentVote[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  votes     Vote[]
+  Blog      Blog?    @relation(fields: [blogId], references: [id])
+  blogId    String?  @db.ObjectId
 }
-
-model KnowhowDetailInfo {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  thumbnailType ThumbnailType
-
-  detailText String?
-
-  knowhow   Knowhow @relation(fields: [knowHowId], references: [id])
-  knowHowId String  @unique @db.ObjectId
-
-  youtubeDatas   YouTubeData[] @relation(fields: [youtubeDataIds], references: [id])
-  youtubeDataIds String[]      @db.ObjectId
-
-  // cloudinaryDatas   CloudinaryData[] @relation(fields: [cloudinaryDataIds], references: [id])
-  // cloudinaryDataIds String[]         @db.ObjectId
-  stageContents StageContents[]
-}
-
-model YouTubeData {
-  id              String        @id @default(auto()) @map("_id") @db.ObjectId
-  watchUrl        String
-  embedUrl        String
-  thumbnailType   ThumbnailType
-  thumbnailUrl    String
-  thumbnailWidth  Int           @default(320)
-  thumbnailHeight Int           @default(180)
-
-  knowhowDetailInfos   KnowhowDetailInfo[] @relation(fields: [knowhowDetailInfoIds], references: [id])
-  knowhowDetailInfoIds String[]            @db.ObjectId
-}
-
-enum ThumbnailType {
-  DEFAULT
-  MEDIUM
-  HIGH
-  STANDARD
-  MAXRES
-}
-
-// model CloudinaryData {
-//   id            String  @id @default(auto()) @map("_id") @db.ObjectId
-//   asset_id      String?
-//   public_id     String?
-//   filename      String?
-//   format        String?
-//   bytes         Int?
-//   folder        String  @default("openplace")
-//   secure_url    String?
-//   thumbnail_url String?
-//   path          String
-
-//   knowhow         Knowhow[]
-//   lexicalDocuments LexicalDocument[]
-
-//   knowhowDetailInfos   KnowhowDetailInfo[] @relation(fields: [knowhowDetailInfoIds], references: [id])
-//   knowhowDetailInfoIds String[]            @db.ObjectId
-//   stageContents        StageContents[]
-
-//   @@unique([folder, path])
-// }
 
 enum MembershipRequestStatus {
   NONE
@@ -439,6 +286,6 @@ model Tag {
 
   name String @unique
 
-  knowHowIds String[]  @db.ObjectId
-  knowHows   Knowhow[] @relation(fields: [knowHowIds], references: [id])
+  knowHowIds String[] @db.ObjectId
+  blogs      Blog[]   @relation(fields: [knowHowIds], references: [id])
 }

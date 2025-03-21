@@ -1,6 +1,5 @@
 import BulletinBoard from "./BulletinBoard";
 
-
 const Page = () => {
   return (
     <div>
