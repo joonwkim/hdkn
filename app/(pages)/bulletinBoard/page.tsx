@@ -1,9 +1,11 @@
 import BulletinBoard from "./BulletinBoard";
 
-export default function Page() {
+
+const Page = () => {
   return (
     <div>
       <BulletinBoard />
     </div>
   );
-}
+};
+export default Page;
