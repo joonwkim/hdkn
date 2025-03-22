@@ -18,16 +18,13 @@ type Blog = {
 export default function BulletinBoard() {
     const { data: session } = useSession();
     const [blogs, setBlogs] = useState<Blog[]>([]);
-    const [author, setAuthor] = useState("");
+    // const [author, setAuthor] = useState("");
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [commentInputs, setCommentInputs] = useState<{ [key: number]: string }>({});
     const [blogsPerPage, setBlogPerPage] = useState(50);
     const [currentPage, setCurrentPage] = useState(1);
     const [viewMode, setViewMode] = useState("summary");
-    const [isCustom, setIsCustom] = useState(false);
-    const [customValue, setCustomValue] = useState<number | null>(null);
-    const [customInput, setCustomInput] = useState("");
     const [isWriting, setIsWriting] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
@@ -43,7 +40,7 @@ export default function BulletinBoard() {
         }
     };
 
-    const addBlog = (author: string) => {
+    const addBlog = () => {
         if (!title || !content) return;
         const newBlog: Blog = {
             id: Date.now(),
@@ -203,7 +200,7 @@ export default function BulletinBoard() {
                         onChange={(e) => setContent(e.target.value)}
                     />
                     <button className="btn btn-secondary me-2" onClick={() => setIsWriting(false)}>취소</button>
-                    <button className="btn btn-primary me-2" onClick={() => addBlog("SessionUser")}>저장</button>
+                    <button className="btn btn-primary me-2" onClick={() => addBlog()}>저장</button>
                 </div>
             )}
 

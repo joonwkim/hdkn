@@ -16,7 +16,6 @@ model TreeNode {
   expanded Boolean    @default(false)
   selected Boolean?   @default(false)
   active   Boolean    @default(true)
-  // level    Int
   parentId String?    @db.ObjectId
   parent   TreeNode?  @relation("TreeRelation", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children TreeNode[] @relation("TreeRelation")
@@ -34,9 +33,6 @@ model LexicalDocument {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    String   @db.ObjectId
-  // images           Image[] 
-  // CloudinaryData   CloudinaryData? @relation(fields: [cloudinaryDataId], references: [id])
-  // cloudinaryDataId String?         @db.ObjectId
 
   @@unique([userId, title])
 }
@@ -67,7 +63,7 @@ model Role {
 model User {
   id                     String              @id @default(auto()) @map("_id") @db.ObjectId
   name                   String
-  email                  String              @unique
+  email                  String
   emailVerified          DateTime?
   password               String?
   image                  String?
@@ -90,6 +86,8 @@ model User {
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
   LexicalDocument        LexicalDocument[]
+
+  @@index([email])
 }
 
 model UserRole {
@@ -147,8 +145,8 @@ model Message {
 
 model MessageRecipient {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  recepient   User?   @relation(fields: [recepientId], references: [id])
-  recepientId String? @db.ObjectId
+  recipient   User?   @relation(fields: [recipientId], references: [id])
+  recipientId String? @db.ObjectId
 
   message   Message @relation(fields: [messageId], references: [id])
   messageId String  @db.ObjectId
@@ -159,9 +157,8 @@ model MessageRecipient {
 }
 
 model Category {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
-  name String @unique
-
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String @unique
   blogs Blog[]
 }
 
@@ -176,116 +173,109 @@ model Vote {
 
   thumbsStatus ThumbsStatus
   forked       Boolean      @default(false)
+  voter        User         @relation(fields: [voterId], references: [id])
+  voterId      String       @db.ObjectId
 
-  blog      Blog   @relation(fields: [knowHowId], references: [id], onDelete: Cascade)
-  knowHowId String @db.ObjectId
+  blog   Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  blogId String @db.ObjectId
 
-  voter     User     @relation(fields: [voterId], references: [id])
-  voterId   String   @db.ObjectId
   Comment   Comment? @relation(fields: [commentId], references: [id])
   commentId String?  @db.ObjectId
 }
 
 model MembershipRequest {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
+  id                      String                  @id @default(auto()) @map("_id") @db.ObjectId
   membershipRequestStatus MembershipRequestStatus
-
-  blog   Blog   @relation(fields: [blogId], references: [id])
-  blogId String @db.ObjectId
-
-  membershipProcessedBy   User?   @relation("membershipProcessedBys", fields: [membershipProcessedById], references: [id])
-  membershipProcessedById String? @db.ObjectId
-
-  membershipRequestedBy   User   @relation("membershipRequestedBys", fields: [membershipRequestedById], references: [id])
-  membershipRequestedById String @db.ObjectId
-
-  processedAt DateTime @updatedAt
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  blog                    Blog                    @relation(fields: [blogId], references: [id])
+  blogId                  String                  @db.ObjectId
+  membershipProcessedBy   User?                   @relation("membershipProcessedBys", fields: [membershipProcessedById], references: [id])
+  membershipProcessedById String?                 @db.ObjectId
+  membershipRequestedBy   User                    @relation("membershipRequestedBys", fields: [membershipRequestedById], references: [id])
+  membershipRequestedById String                  @db.ObjectId
+  processedAt             DateTime                @updatedAt
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
 }
 
 model Stage {
-  id         String @id @default(auto()) @map("_id") @db.ObjectId
-  stageTitle String
-
-  stage Int @default(0)
-
-  parentKnowhowId String @db.ObjectId
-  parentKnowhow   Blog   @relation(fields: [parentKnowhowId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  // stageContents StageContents[]
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  stageTitle   String
+  stage        Int      @default(0)
+  parentblogId String   @db.ObjectId
+  parentblog   Blog     @relation(fields: [parentblogId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Blog {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  title     String
-  content   String
-  viewCount Int     @default(0)
-  likes     Int     @default(0)
-  dislikes  Int     @default(0)
-  isPublic  Boolean @default(true)
-  author   User   @relation(fields: [authorId], references: [id])
-  authorId String @db.ObjectId
-  category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId String?   @db.ObjectId
-  isGroupType Boolean @default(false)
-  tagIds String[] @db.ObjectId
-  tags   Tag[]    @relation(fields: [tagIds], references: [id])
-  votes Vote[]
+  id                String              @id @default(auto()) @map("_id") @db.ObjectId
+  title             String
+  content           String
+  viewCount         Int                 @default(0)
+  likes             Int                 @default(0)
+  dislikes          Int                 @default(0)
+  isPublic          Boolean             @default(true)
+  bloger            User                @relation(fields: [blogerId], references: [id])
+  blogerId          String              @db.ObjectId
+  category          Category?           @relation(fields: [categoryId], references: [id])
+  categoryId        String?             @db.ObjectId
+  isGroupType       Boolean             @default(false)
+  votes             Vote[]
   membershipRequest MembershipRequest[]
-  parentId String? @db.ObjectId
-  parent   Blog?   @relation("KnowhowParentChildren", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children Blog[]  @relation("KnowhowParentChildren")
-  stages Stage[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  comments Comment[]
-  @@unique([title, authorId])
+  parentId          String?             @db.ObjectId
+  parent            Blog?               @relation("blogParentChildren", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children          Blog[]              @relation("blogParentChildren")
+  stages            Stage[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  comments          Comment[]
+  tags              BlogTag[]
+
+  @@unique([title, blogerId])
+  @@index([title])
+  @@index([blogerId])
+}
+
+model Tag {
+  id    String    @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  blogs BlogTag[]
+
+  @@index([name])
+}
+
+model BlogTag {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  blog   Blog   @relation(fields: [blogId], references: [id])
+  blogId String @db.ObjectId
+  tag    Tag    @relation(fields: [tagId], references: [id])
+  tagId  String @db.ObjectId
+
+  @@unique([blogId, tagId])
 }
 
 model Comment {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  comment  String
-  likes    Int    @default(0)
-  dislikes Int    @default(0)
-
-  // bulletinBoardId String        @db.ObjectId
-  // bulletinBoard   BulletinBoard @relation(fields: [bulletinBoardId], references: [id])
-
-  commentWriterId String @db.ObjectId
-  commentWriter   User   @relation(fields: [commentWriterId], references: [id])
-
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  comment         String
+  likes           Int       @default(0)
+  dislikes        Int       @default(0)
+  commenterId     String    @db.ObjectId
+  commenter       User      @relation(fields: [commenterId], references: [id])
   parentCommentId String?   @db.ObjectId
   parentComment   Comment?  @relation("CommentParentChildren", fields: [parentCommentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children        Comment[] @relation("CommentParentChildren")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  votes     Vote[]
-  Blog      Blog?    @relation(fields: [blogId], references: [id])
-  blogId    String?  @db.ObjectId
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  votes           Vote[]
+  Blog            Blog?     @relation(fields: [blogId], references: [id])
+  blogId          String?   @db.ObjectId
 }
 
 enum MembershipRequestStatus {
-  NONE
   REQUESTED
   APPROVED
   JOINED
   REJECTED
   PENDING
   CLOSED
-}
-
-model Tag {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  name String @unique
-
-  knowHowIds String[] @db.ObjectId
-  blogs      Blog[]   @relation(fields: [knowHowIds], references: [id])
 }
