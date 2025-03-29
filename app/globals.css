@@ -30,11 +30,6 @@ body {
   padding: 16px;
 }
 
-footer {
-  height: 40px;
-  flex-shrink: 0;
-  background: #212529;
-  color: white;
-  text-align: center;
-  line-height: 40px;
+.main-content {
+  height: calc(100vh - 110px);
 }

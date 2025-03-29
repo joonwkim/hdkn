@@ -48,7 +48,7 @@ export default function RootLayout({
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const applyTheme = useCallback((newTheme: 'light' | 'dark' | 'auto') => {
     document.documentElement.setAttribute('data-bs-theme', newTheme);
-    setEditorCaretColor(newTheme);  
+    setEditorCaretColor(newTheme);
   }, [])
 
   useEffect(() => {
@@ -112,18 +112,19 @@ export default function RootLayout({
         <SessionProvider>
           <BootstrapClient />
           <Header theme={theme} onThemeChange={handleThemeChange} onWidowSidbarBtnClick={onWidowSidbarBtnClick} sidebarOpen={sidebarOpen} />
-          {sidebarOpen ? (<><div className='dFlex'>
-            <div ref={sidebarRef} className='sidebar'>
-              <TreeView theme={theme} />
-            </div>
-            <div onMouseDown={handleMouseDown} className='resizer' />
-            <div className='container'>
+          <div className="main-content">
+            {sidebarOpen ? (<><div className='dFlex'>
+              <div ref={sidebarRef} className='sidebar'>
+                <TreeView theme={theme} />
+              </div>
+              <div onMouseDown={handleMouseDown} className='resizer' />
+              <div className='container'>
+                {children}
+              </div>
+            </div></>) : (<><div className='container'>
               {children}
-            </div>
-          </div></>) : (<><div className='container'>
-            {children}
-          </div>  </>)}
-
+            </div>  </>)}
+          </div>
           <Footer />
         </SessionProvider>
 

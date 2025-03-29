@@ -9,9 +9,7 @@ const Page = async () => {
   }
 
   return (
-    <div>
-      <BulletinBoard blogs={blogsData.props} /> 
-    </div>
+    <BulletinBoard blogs={blogsData.props} />
   );
 };
 

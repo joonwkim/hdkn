@@ -1,12 +1,9 @@
-.parent {
-    position: relative;
-    height: 500px;
-    overflow: auto;
-}
+/* */
 
-.sticky-child {
-    position: sticky;
-    top: 0;
-    background-color: var(--bg-color);
-    color: var(--text-color);
+.blog-content {
+    height: calc(100vh - 56px - 40px);
+    /* Navbar + footer space */
+    overflow-y: auto;
+    /* Scroll here only */
+    /* padding-bottom: 20px; */
 }

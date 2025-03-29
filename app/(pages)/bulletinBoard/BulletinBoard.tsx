@@ -3,7 +3,7 @@
 import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useSession } from "next-auth/react";
-import { Blog } from "@prisma/client";
+import { Blog, User } from "@prisma/client";
 import { BlogWithRefTable } from "@/app/services/blogService";
 import { deleteSelectedBlogAction, upsertBlogAction } from "@/app/actions/blog";
 import './styles.css'
@@ -23,7 +23,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     const [isWriting, setIsWriting] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false)
     const [showSettings, setShowSettings] = useState(false);
-    const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
+    const [selectedBlog, setSelectedBlog] = useState<BlogWithRefTable | null>(null);
     const totalPages = Math.ceil(blogs.length / blogsPerPage) || 1;
     const startIndex = (currentPage - 1) * blogsPerPage;
     const paginatedBlogs = blogs.slice(startIndex, startIndex + blogsPerPage);
@@ -36,29 +36,38 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         }
     };
 
-    const onBlogSelected = (blog: Blog) => {
-        if (blog.authorId === session?.user.id) {
-            setSelectedBlog(blog)
-
-
-        }
+    const onBlogSelected = (blog: BlogWithRefTable) => {
+        setSelectedBlog(blog)
     }
 
     const handleNewBlogClick = () => {
         if (!session?.user) {
-            alert('등록된 사용자만 작성할 수 있습니다.')
+            alert('로그인 사용자만 게시판 글을 작성할 수 있습니다.')
         } else {
             setIsWriting(true);
         }
     };
     const handleEditBlogClick = async () => {
-        if (selectedBlog) {
-            setIsWriting(true);
-            setIsUpdating(true);
-            setTitle(selectedBlog.title);
-            setContent(selectedBlog.content);
-            handleFocus();
+        if (!session?.user) {
+            alert('로그인 사용자만 게시판 글을 편집 수 있습니다.')
         }
+        else {
+            if (selectedBlog) {
+                if (selectedBlog.authorId !== session.user.id) {
+                    alert('작성자만 수정할 수 있습니다.')
+                } else {
+                    setIsWriting(true);
+                    setIsUpdating(true);
+                    setTitle(selectedBlog.title);
+                    setContent(selectedBlog.content);
+                    handleFocus();
+                }
+
+            } else {
+                alert('수정하고자 하는 게시글을 선택하세요.')
+            }
+        }
+
     };
     const handleDeleteBlogClick = async () => {
         if (selectedBlog) {
@@ -177,7 +186,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     }
 
     return (
-        <div className="container parent">
+        <div>
             <div className="d-flex justify-content-between align-items-center border-bottom p-2 sticky-child z-3">
                 <div className="flex-grow-1 text-center">
                     <h2>자유게시판</h2>
@@ -186,7 +195,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                     <button className="btn btn-outline-secondary btn-sm me-2" title="글쓰기" onClick={handleNewBlogClick} disabled={isWriting}>
                         <i className="bi bi-file-plus"></i>
                     </button>
-                    <button className="btn btn-outline-secondary btn-sm me-2" title="변경하기" onClick={handleEditBlogClick} disabled={!selectedBlog}>
+                    <button className="btn btn-outline-secondary btn-sm me-2" title="변경하기" onClick={handleEditBlogClick} >
                         <i className="bi bi-pencil"></i>
                     </button>
                     <button className="btn btn-outline-secondary btn-sm me-2" title="삭제하기" onClick={handleDeleteBlogClick} disabled={!selectedBlog}>
@@ -206,7 +215,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                     </button>
                 </div>
             </div>
-            <div>
+            <div className="blog-content">
                 {isWriting && (
                     <div className="mb-3">
                         <input
@@ -274,17 +283,6 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                                             💬 Comment ({blog.comments.length})
                                         </button>
                                     </div>
-
-                                    {/* Comment Input */}
-                                    {/* <div className="mt-2">
-                                    <input
-                                        type="text"
-                                        className="form-control form-control-sm"
-                                        placeholder="Write a comment..."
-                                        value={commentInputs[blog.id] || ""}
-                                        onChange={(e) => handleCommentChange(blog, e.target.value)}
-                                    />
-                                </div> */}
 
                                     {/* Comments List */}
                                     {blog.comments.length > 0 && (
