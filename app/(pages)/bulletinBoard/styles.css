@@ -1,0 +1,12 @@
+.parent {
+    position: relative;
+    height: 500px;
+    overflow: auto;
+}
+
+.sticky-child {
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}

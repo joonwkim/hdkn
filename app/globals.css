@@ -1,3 +1,9 @@
+.html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
 .dFlex {
   display: flex;
 }
@@ -22,4 +28,13 @@
 .mainContent {
   flex-grow: 1;
   padding: 16px;
+}
+
+footer {
+  height: 40px;
+  flex-shrink: 0;
+  background: #212529;
+  color: white;
+  text-align: center;
+  line-height: 40px;
 }

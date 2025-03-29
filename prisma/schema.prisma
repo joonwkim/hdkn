@@ -63,7 +63,7 @@ model Role {
 model User {
   id                     String              @id @default(auto()) @map("_id") @db.ObjectId
   name                   String
-  email                  String
+  email                  String              @unique
   emailVerified          DateTime?
   password               String?
   image                  String?
@@ -87,7 +87,7 @@ model User {
   updatedAt              DateTime            @updatedAt
   LexicalDocument        LexicalDocument[]
 
-  @@index([email])
+  // @@index([email])
 }
 
 model UserRole {
@@ -157,9 +157,10 @@ model MessageRecipient {
 }
 
 model Category {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
-  name  String @unique
-  blogs Blog[]
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  name   String  @unique
+  Blog   Blog?   @relation(fields: [blogId], references: [id])
+  blogId String? @db.ObjectId
 }
 
 enum ThumbsStatus {
@@ -215,10 +216,9 @@ model Blog {
   likes             Int                 @default(0)
   dislikes          Int                 @default(0)
   isPublic          Boolean             @default(true)
-  bloger            User                @relation(fields: [blogerId], references: [id])
-  blogerId          String              @db.ObjectId
-  category          Category?           @relation(fields: [categoryId], references: [id])
-  categoryId        String?             @db.ObjectId
+  author            User                @relation(fields: [authorId], references: [id])
+  authorId          String              @db.ObjectId
+  categories        Category[]
   isGroupType       Boolean             @default(false)
   votes             Vote[]
   membershipRequest MembershipRequest[]
@@ -231,9 +231,9 @@ model Blog {
   comments          Comment[]
   tags              BlogTag[]
 
-  @@unique([title, blogerId])
+  @@unique([title, authorId])
   @@index([title])
-  @@index([blogerId])
+  @@index([authorId])
 }
 
 model Tag {

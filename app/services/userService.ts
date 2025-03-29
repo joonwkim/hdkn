@@ -10,7 +10,6 @@ export async function getUsers() {
     try {
         const users = await prisma.user.findMany({
             include: {
-                knowHows: true,
                 votes: true,
                 membershipProcessedBys: true,
                 membershipRequestedBys: true,
@@ -107,13 +106,11 @@ export async function getUserByEmail(emailInput: string): Promise<User & { roles
                 votes: true,
                 membershipProcessedBys: {
                     include: {
-                        knowhow: true,
                         membershipRequestedBy: true,
                     }
                 },
                 membershipRequestedBys: {
                     include: {
-                        knowhow: true,
                         membershipProcessedBy: true,
                     }
                 },

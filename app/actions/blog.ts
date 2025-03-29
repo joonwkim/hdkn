@@ -3,22 +3,26 @@
 import { revalidatePath } from "next/cache";
 import { setNodeSelected, updateExpandStatus } from "../services/menu";
 import { TreeNode } from "../types/treeMenu";
+import { deleteSelectedBlog, upsertBlog } from "../services/blogService";
+import { Blog } from "@prisma/client";
 
-export async function setNodeSelectedAction(nodeId: string) {
+export async function upsertBlogAction( userId:string, title:string, content:string ) {
     try {
-        await setNodeSelected(nodeId);
+        await upsertBlog({ userId, title, content });
         revalidatePath('/');
         return true;
     } catch (error) {
         console.log(error)
     }
 }
-export async function updateExpandStatusAction(node: TreeNode) {
+export async function deleteSelectedBlogAction( blog:Blog) {
     try {
-        await updateExpandStatus(node);
+        const result = await deleteSelectedBlog(blog);
         revalidatePath('/');
         return true;
     } catch (error) {
         console.log(error)
     }
 }
+
+

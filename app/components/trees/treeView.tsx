@@ -31,24 +31,10 @@ const TreeView: React.FC<TreeViewProps> = ({ nodes, theme }) => {
         fetch();
     }, [])
 
-    // const toggleNode = (id: string, nodeList: TreeNode[]): TreeNode[] => {
-    //     return nodeList.map(node => {
-    //         if (node.id === id) {
-    //             return { ...node, expanded: !node.expanded };
-    //         } else if (node.children) {
-    //             return { ...node, children: toggleNode(id, node.children) };
-    //         }
-    //         return node;
-    //     });
-    // };
-
     const handleToggle = async (node: TreeNode) => {
         await updateExpandStatusAction(node);
         const data = await getTreeNodes();
         setTreeData(data);
-        // const updatedTree = toggleNode(node.id, treeData);
-        // console.log('updatedTree: ', updatedTree)
-        // setTreeData(updatedTree);
     };
 
     const handleNodeClick = async (node: TreeNode) => {
