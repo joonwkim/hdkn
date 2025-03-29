@@ -178,10 +178,10 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         );
     };
 
-    const handleMouseEnter = (blog: Blog) => {
+    const handleMouseEnter = (blog: BlogWithRefTable) => {
         setSelectedBlog(blog);
     }
-    const handleMouseLeave = (blog: Blog) => {
+    const handleMouseLeave = (blog: BlogWithRefTable) => {
         setSelectedBlog(null)
     }
 
@@ -301,7 +301,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                     {viewMode === "card" && (
                         <div className="row">
                             {paginatedBlogs.map((blog) => (
-                                <div key={blog.id} className="col-md-4 mb-3">
+                                <div key={blog.id} className="col-md-4 mb-3" onClick={() => onBlogSelected(blog)}>
                                     <div className="card">
                                         <div className="card-body">
                                             <h5 className="card-title">{blog.title}</h5>
@@ -323,7 +323,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                             </thead>
                             <tbody>
                                 {paginatedBlogs.map((blog) => (
-                                    <tr key={blog.id}>
+                                    <tr key={blog.id} onClick={() => onBlogSelected(blog)}>
                                         <td>{blog.title}</td>
                                         <td>{blog.content}</td>
                                         <td>{blog.updatedAt.toDateString()}</td>
