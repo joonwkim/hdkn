@@ -3,10 +3,13 @@
 import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useSession } from "next-auth/react";
-import { Blog, User } from "@prisma/client";
+import { Blog, ThumbsStatus, User } from "@prisma/client";
 import { BlogWithRefTable } from "@/app/services/blogService";
-import { deleteSelectedBlogAction, upsertBlogAction } from "@/app/actions/blog";
+import { deleteSelectedBlogAction, upsertBlogAction, voteOnBlogAction } from "@/app/actions/blog";
 import './styles.css'
+import '../../lib/date'
+import BlogFooter from "./components/BlogFooter";
+import BlogComment from "./components/BlogComment";
 
 type BlogsProps = {
     blogs: BlogWithRefTable[]
@@ -89,6 +92,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     };
 
     const handleLike = (blogId: string) => {
+        alert('handleLike')
         if (!session?.user) {
             alert('로그인 하셔서 의견주세요.')
         }
@@ -184,9 +188,32 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     const handleMouseLeave = (blog: BlogWithRefTable) => {
         setSelectedBlog(null)
     }
+    const checkLoginStatus = (blog: BlogWithRefTable) => {
+        if (!session) {
+            alert('로그인을 하셔야 선택할 수 있습니다.');
+            return false;
+        }
+        else if (session?.user?.id === blog.author?.id) {
+            alert('작성자는 자기에게 좋아요를 선택할 수 없습니다.');
+            return false;
+        }
+        return true;
+    };
+
+    const handleVote = async (blog: BlogWithRefTable, status: ThumbsStatus) => {
+        if (checkLoginStatus(blog)) {
+            await voteOnBlogAction({ userId: session?.user.id, blogId: blog.id, thumbsStatus: status })
+        }
+    }
+    const handleforked = async (blog: BlogWithRefTable, status: ThumbsStatus) => {
+        if (checkLoginStatus(blog)) {
+            // await voteOnBlogAction({ userId: session?.user.id, blogId: blog.id, thumbsStatus: status })
+        }
+    }
 
     return (
         <div>
+            {/* toolbar controls */}
             <div className="d-flex justify-content-between align-items-center border-bottom p-2 sticky-child z-3">
                 <div className="flex-grow-1 text-center">
                     <h2>자유게시판</h2>
@@ -210,12 +237,13 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                     <button className="btn btn-outline-secondary btn-sm me-2" title="카드형태보기" onClick={() => setViewMode("table")}>
                         <i className="bi bi-table"></i>
                     </button>
-                    <button className="btn btn-outline-secondary btn-sm" title="blogSetting" onClick={() => setShowSettings(!showSettings)}>
+                    <button className="btn btn-outline-secondary btn-sm" title="페이지 세팅" onClick={() => setShowSettings(!showSettings)}>
                         <i className="bi bi-gear"></i>
                     </button>
                 </div>
             </div>
             <div className="blog-content">
+                {/* 글 작성하기 */}
                 {isWriting && (
                     <div className="mb-3">
                         <input
@@ -237,67 +265,38 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                         <button className="btn btn-primary me-2" onClick={() => addBlog()}>저장</button>
                     </div>
                 )}
-
-                {showSettings && (
-                    <div className="modal fade show d-block" tabIndex={-1} role="dialog" >
-                        <div className="modal-dialog">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Settings</h5>
-                                    <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" onClick={() => setShowSettings(false)}></button>
-                                </div>
-                                <div className="modal-body">
-                                    <label><strong>Blogs per Page:</strong></label>
-                                    <input
-                                        type="number"
-                                        title="blogsetting"
-                                        className="form-control w-auto d-inline-block"
-                                        value={blogsPerPage}
-                                        onChange={(e) => setBlogPerPage(Number(e.target.value))}
-                                    />
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-primary" onClick={() => setShowSettings(false)}>닫기</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                {/* 보기형태 */}
                 <div>
+                    {/* 요약보기 */}
                     {viewMode === "summary" && (
                         <div>
                             {paginatedBlogs.map((blog) => (
                                 <div key={blog.id} className="border-bottom p-2" onClick={() => onBlogSelected(blog)}>
                                     <h5>{blog.title}</h5>
-                                    <strong>{blog.author.name}</strong> - <small>{blog.updatedAt.toDateString()}</small>
+                                    <strong>{blog.author.name}</strong> - <small>{blog.updatedAt.toKrDateString()}</small>
                                     <p>{blog.content}</p>
                                     {/* Like & Dislike Buttons */}
-                                    <div className="d-flex align-items-center gap-2" onMouseEnter={() => handleMouseEnter(blog)} onMouseLeave={() => handleMouseLeave(blog)}>
-                                        <button className="btn btn-outline-success btn-sm" onClick={() => handleLike(blog.id)} disabled={selectedBlog?.id === blog.id}>
-                                            👍 {blog.likes}
-                                        </button>
-                                        <button className="btn btn-outline-danger btn-sm" onClick={() => handleDislike(blog.id)} disabled={selectedBlog?.id === blog.id}>
-                                            👎 {blog.dislikes}
-                                        </button>
-                                        <button className="btn btn-outline-primary btn-sm" onClick={() => addComment(blog.id)}>
-                                            💬 Comment ({blog.comments.length})
-                                        </button>
-                                    </div>
+                                    <BlogFooter blog={blog} handleVote={handleVote} handleforked={handleforked} />
+                                    {/* <button className="btn btn-outline-primary btn-sm" onClick={() => addComment(blog.id)}>
+                                        💬 Comment ({blog.comments.length})
+                                    </button> */}
 
                                     {/* Comments List */}
-                                    {blog.comments.length > 0 && (
+                                    {/* {blog.comments.length > 0 && (
                                         <ul className="list-group list-group-flush mt-2">
                                             {blog.comments.map((comment, index) => (
-                                                <li key={index} className="list-group-item small">
+                                                <li key={index} className="list-group-item small themed-icon">
                                                     💬
                                                 </li>
                                             ))}
                                         </ul>
-                                    )}
+                                    )} */}
+                                    <BlogComment blog={blog} handleVote={handleVote} handleforked={handleforked} />
                                 </div>
                             ))}
                         </div>
                     )}
+                    {/* 카드보기 */}
                     {viewMode === "card" && (
                         <div className="row">
                             {paginatedBlogs.map((blog) => (
@@ -312,13 +311,16 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                             ))}
                         </div>
                     )}
+                    {/* 테이블보기 */}
                     {viewMode === "table" && (
                         <table className="table">
                             <thead>
                                 <tr>
                                     <th>Title</th>
                                     <th>Content</th>
-                                    <th>Date</th>
+                                    <th>작성자</th>
+                                    <th>작성일</th>
+                                    <th>조회</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -326,7 +328,9 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                                     <tr key={blog.id} onClick={() => onBlogSelected(blog)}>
                                         <td>{blog.title}</td>
                                         <td>{blog.content}</td>
-                                        <td>{blog.updatedAt.toDateString()}</td>
+                                        <td>{blog.author.name}</td>
+                                        <td>{blog.updatedAt.toKrDateString()}</td>
+                                        <td>{blog.viewCount}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -339,6 +343,32 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                     <nav className="mt-3">
                         {renderPagination()}
                     </nav>
+                )}
+                {/* Pagination settings */}
+                {showSettings && (
+                    <div className="modal fade show d-block" tabIndex={-1} role="dialog" >
+                        <div className="modal-dialog">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">페이지 세팅</h5>
+                                    <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" onClick={() => setShowSettings(false)}></button>
+                                </div>
+                                <div className="modal-body">
+                                    <label className="me-2"><strong>페이지당 게시글 수:</strong></label>
+                                    <input
+                                        type="number"
+                                        title="blogsetting"
+                                        className="form-control w-auto d-inline-block"
+                                        value={blogsPerPage}
+                                        onChange={(e) => setBlogPerPage(Number(e.target.value))}
+                                    />
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-primary" onClick={() => setShowSettings(false)}>닫기</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 )}
             </div>
         </div>

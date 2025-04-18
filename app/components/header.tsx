@@ -3,6 +3,7 @@ import React from 'react'
 import { Container, Dropdown, Nav, Navbar } from 'react-bootstrap';
 import { useSession, signIn, signOut } from "next-auth/react";
 import Image from "next/image";
+import GoogleLogin from '../(pages)/icons/GoogleLogin';
 
 interface ThemeProps {
     theme: 'light' | 'dark' | 'auto';
@@ -41,40 +42,28 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
                         <button className="btn btn-outline-success" type="submit">Search</button>
                     </form>
                     {session ? (<div>
-                        {session?.user?.image ? (<Image
-                            className='ms-3'
-                            id="userpicture"
-                            unoptimized
-                            src={session.user?.image}
-                            alt=''
-                            title={session.user?.name ? session.user.name : ''}
-                            width="30"
-                            height="30"
-                            style={{
-                                borderRadius: '50%',
-                                maxWidth: "100%",
-                                height: "auto"
-                            }} />) : ''}
+                        {session?.user?.image ? (
+                            <Image
+                                className='ms-3'
+                                id="userpicture"
+                                unoptimized
+                                src={session.user?.image}
+                                alt=''
+                                title={session.user?.name ? session.user.name : ''}
+                                width="30"
+                                height="30"
+                                style={{
+                                    borderRadius: '50%',
+                                    maxWidth: "100%",
+                                    height: "auto"
+                                }} />
+                        ) : ''}
                         <button className="btn btn-outline-danger border border-0 me-3" onClick={() => signOut()} title='나가기'>
                             <i className="bi bi-box-arrow-right"></i>
                         </button>
                     </div>
                     ) : (
-                        <div className='ms-2 d-flex'>
-                            <button className="btn btn-outline-light border border-0 me-3" onClick={() => googleLogin()} title='로그인'>
-                                <Image
-                                    src='https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg'
-                                    alt="google login"
-                                    width={24}
-                                    height={20}
-                                    style={{
-                                        cursor: 'pointer',
-                                        maxWidth: "100%",
-                                        height: "auto"
-                                    }} />
-                            </button>
-                        </div>
-
+                        <GoogleLogin />
                     )}
                     <Nav className="ml-auto ms-2">
                         <Dropdown>

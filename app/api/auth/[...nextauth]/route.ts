@@ -79,7 +79,7 @@ export const authOptions: NextAuthOptions = {
         },
         async jwt({ token, user }) {
             if (user) {
-                console.log("Adding user data to token!!!");
+                // console.log("Adding user data to token!!!");
                 token.id = user.id;
             }
 

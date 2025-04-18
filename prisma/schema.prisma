@@ -75,17 +75,21 @@ model User {
   notificationCount      Int                 @default(0)
   roles                  UserRole[]
   profile                Profile?
-  blogs                  Blog[]
-  votes                  Vote[]
   membershipProcessedBys MembershipRequest[] @relation("membershipProcessedBys")
   membershipRequestedBys MembershipRequest[] @relation("membershipRequestedBys")
-  comments               Comment[]
-  userGroups             UserGroup[]
-  messages               Message[]
-  messageRecipients      MessageRecipient[]
-  createdAt              DateTime            @default(now())
-  updatedAt              DateTime            @updatedAt
-  LexicalDocument        LexicalDocument[]
+
+  blogs    Blog[]
+  votes    Vote[]
+  comments Comment[]
+  views    BlogView[]
+  forks    BlogFork[]
+
+  userGroups        UserGroup[]
+  messages          Message[]
+  messageRecipients MessageRecipient[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  LexicalDocument   LexicalDocument[]
 
   // @@index([email])
 }
@@ -182,6 +186,8 @@ model Vote {
 
   Comment   Comment? @relation(fields: [commentId], references: [id])
   commentId String?  @db.ObjectId
+
+  @@unique([voterId, blogId])
 }
 
 model MembershipRequest {
@@ -213,14 +219,11 @@ model Blog {
   title             String
   content           String
   viewCount         Int                 @default(0)
-  likes             Int                 @default(0)
-  dislikes          Int                 @default(0)
   isPublic          Boolean             @default(true)
   author            User                @relation(fields: [authorId], references: [id])
   authorId          String              @db.ObjectId
   categories        Category[]
   isGroupType       Boolean             @default(false)
-  votes             Vote[]
   membershipRequest MembershipRequest[]
   parentId          String?             @db.ObjectId
   parent            Blog?               @relation("blogParentChildren", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -230,10 +233,37 @@ model Blog {
   updatedAt         DateTime            @updatedAt
   comments          Comment[]
   tags              BlogTag[]
+  votes             Vote[]
+  views             BlogView[]
+  forks             BlogFork[]
 
   @@unique([title, authorId])
   @@index([title])
   @@index([authorId])
+}
+
+model BlogView {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  blogId   String   @db.ObjectId
+  userId   String   @db.ObjectId
+  viewedAt DateTime @default(now())
+
+  blog Blog @relation(fields: [blogId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([blogId, userId], name: "unique_blog_view")
+}
+
+model BlogFork {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  blogId   String   @db.ObjectId
+  userId   String   @db.ObjectId
+  forkedAt DateTime @default(now())
+
+  blog Blog @relation(fields: [blogId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([blogId, userId], name: "unique_blog_fork")
 }
 
 model Tag {

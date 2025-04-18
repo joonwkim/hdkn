@@ -1,0 +1,24 @@
+/* Default theme (optional fallback) */
+.themed-icon path {
+    fill: currentColor;
+}
+
+/* Light theme */
+[data-bs-theme="light"] .themed-icon path {
+    fill: #000;
+    /* Black for light mode */
+}
+
+/* Dark theme */
+[data-bs-theme="dark"] .themed-icon path {
+    fill: #fff;
+    /* White for dark mode */
+}
+
+.fork-icon path {
+    fill: currentColor;
+}
+
+.forked path {
+    fill: red !important;
+}

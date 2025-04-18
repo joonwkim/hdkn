@@ -1,0 +1,27 @@
+.cursorHand {
+    cursor: pointer;
+}
+
+.dropdown-card {
+    min-width: 280px;
+    border-radius: 1rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.comment-input {
+    border-radius: 0;
+    outline: none;
+}
+
+.comment-input:focus {
+    border-bottom-color: #0070f3;
+}
+
+.auto-expand:focus {
+    border-bottom: 2px solid #0d6efd;
+}
+
+.custom-checkbox-width {
+    width: 1.5em;
+    /* Set your desired width */
+}
