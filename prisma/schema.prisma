@@ -82,7 +82,7 @@ model User {
   votes    Vote[]
   comments Comment[]
   views    BlogView[]
-  forks    BlogFork[]
+  // forks    BlogFork[]
 
   userGroups        UserGroup[]
   messages          Message[]
@@ -176,10 +176,10 @@ enum ThumbsStatus {
 model Vote {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  thumbsStatus ThumbsStatus
-  forked       Boolean      @default(false)
-  voter        User         @relation(fields: [voterId], references: [id])
-  voterId      String       @db.ObjectId
+  thumbsStatus ThumbsStatus?
+  forked       Boolean       @default(false)
+  voter        User          @relation(fields: [voterId], references: [id])
+  voterId      String        @db.ObjectId
 
   blog   Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
   blogId String @db.ObjectId
@@ -235,7 +235,7 @@ model Blog {
   tags              BlogTag[]
   votes             Vote[]
   views             BlogView[]
-  forks             BlogFork[]
+  // forks             BlogFork[]
 
   @@unique([title, authorId])
   @@index([title])
@@ -254,17 +254,17 @@ model BlogView {
   @@unique([blogId, userId], name: "unique_blog_view")
 }
 
-model BlogFork {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  blogId   String   @db.ObjectId
-  userId   String   @db.ObjectId
-  forkedAt DateTime @default(now())
+// model BlogFork {
+//   id       String   @id @default(auto()) @map("_id") @db.ObjectId
+//   blogId   String   @db.ObjectId
+//   userId   String   @db.ObjectId
+//   forkedAt DateTime @default(now())
 
-  blog Blog @relation(fields: [blogId], references: [id])
-  user User @relation(fields: [userId], references: [id])
+//   blog Blog @relation(fields: [blogId], references: [id])
+//   user User @relation(fields: [userId], references: [id])
 
-  @@unique([blogId, userId], name: "unique_blog_fork")
-}
+//   @@unique([blogId, userId], name: "unique_blog_fork")
+// }
 
 model Tag {
   id    String    @id @default(auto()) @map("_id") @db.ObjectId

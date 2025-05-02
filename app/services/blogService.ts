@@ -26,7 +26,7 @@ export type BlogWithRefTable = Prisma.BlogGetPayload<{
       }
     },
     views: true,
-    forks: true,
+    // forks: true,
     tags: true,
   }
 }>;
@@ -55,7 +55,7 @@ export async function getBlogs(): Promise<{ props: BlogWithRefTable[]; revalidat
           }
         },
         views: true,
-        forks: true,
+        // forks: true,
         tags: true,
       },
       orderBy: {
@@ -148,23 +148,25 @@ export async function deleteSelectedBlog(blog: Blog) {
   }
 }
 
-export async function voteOnBlog({ userId, blogId, thumbsStatus, }: { userId: string; blogId: string; thumbsStatus: ThumbsStatus; }) {
+export async function upsertVoteOnBlog({ userId, blogId, thumbsStatus, forked }: { userId: string; blogId: string; thumbsStatus: ThumbsStatus | undefined | null; forked: boolean | undefined }) {
   try {
-    console.log('voteOnBlog:', userId, blogId, thumbsStatus,)
+    console.log('upsertVoteOnBlog:', userId, blogId, thumbsStatus, forked)
     const result = await prisma.vote.upsert({
       where: {
         voterId_blogId: { voterId: userId, blogId },
       },
       update: {
         thumbsStatus,
+        forked: forked,
       },
       create: {
         voterId: userId,
         blogId,
         thumbsStatus,
+        forked,
       },
     });
-    console.log('voteOnBlog:', result)
+    // console.log('voteOnBlog:', result)
     return result;
   } catch (err) {
     console.error("voteOnBlog error:", err);
@@ -172,26 +174,26 @@ export async function voteOnBlog({ userId, blogId, thumbsStatus, }: { userId: st
   }
 }
 
-export async function forkBlog({ userId, blogId, }: { userId: string; blogId: string; }) {
-  try {
-    const result = await prisma.blogFork.upsert({
-      where: {
-        unique_blog_fork: { blogId, userId },
-      },
-      update: {
-        forkedAt: new Date(),
-      },
-      create: {
-        blogId,
-        userId,
-      },
-    });
-    return result;
-  } catch (err) {
-    console.error("forkBlog error:", err);
-    return null;
-  }
-}
+// export async function forkBlog({ userId, blogId, }: { userId: string; blogId: string; }) {
+//   try {
+//     const result = await prisma.blogFork.upsert({
+//       where: {
+//         unique_blog_fork: { blogId, userId },
+//       },
+//       update: {
+//         forkedAt: new Date(),
+//       },
+//       create: {
+//         blogId,
+//         userId,
+//       },
+//     });
+//     return result;
+//   } catch (err) {
+//     console.error("forkBlog error:", err);
+//     return null;
+//   }
+// }
 
 export async function recordBlogView({ userId, blogId, }: { userId: string; blogId: string; }) {
   try {

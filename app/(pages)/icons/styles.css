@@ -3,6 +3,10 @@
     fill: currentColor;
 }
 
+.themed path {
+    fill: red !important;
+}
+
 /* Light theme */
 [data-bs-theme="light"] .themed-icon path {
     fill: #000;
@@ -15,6 +19,7 @@
     /* White for dark mode */
 }
 
+/* 
 .fork-icon path {
     fill: currentColor;
 }
@@ -22,3 +27,11 @@
 .forked path {
     fill: red !important;
 }
+
+.thumbed-icon path {
+    fill: currentColor;
+}
+
+.thumbed path {
+    fill: red !important;
+} */

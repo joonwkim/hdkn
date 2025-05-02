@@ -5,7 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useSession } from "next-auth/react";
 import { Blog, ThumbsStatus, User } from "@prisma/client";
 import { BlogWithRefTable } from "@/app/services/blogService";
-import { deleteSelectedBlogAction, upsertBlogAction, voteOnBlogAction } from "@/app/actions/blog";
+import { deleteSelectedBlogAction, upsertBlogAction, } from "@/app/actions/blog";
 import './styles.css'
 import '../../lib/date'
 import BlogFooter from "./components/BlogFooter";
@@ -38,11 +38,9 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
         }
     };
-
     const onBlogSelected = (blog: BlogWithRefTable) => {
         setSelectedBlog(blog)
     }
-
     const handleNewBlogClick = () => {
         if (!session?.user) {
             alert('로그인 사용자만 게시판 글을 작성할 수 있습니다.')
@@ -65,12 +63,10 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                     setContent(selectedBlog.content);
                     handleFocus();
                 }
-
             } else {
                 alert('수정하고자 하는 게시글을 선택하세요.')
             }
         }
-
     };
     const handleDeleteBlogClick = async () => {
         if (selectedBlog) {
@@ -91,44 +87,8 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         setSelectedBlog(null);
     };
 
-    const handleLike = (blogId: string) => {
-        alert('handleLike')
-        if (!session?.user) {
-            alert('로그인 하셔서 의견주세요.')
-        }
-        // if (selectedBlog != null && selectedBlog.author === session?.user.name) {
-        //     alert('자신의 글에는 의견표시할 수 없습니다.')
-        // } else {
-        //     setBlogs(blogs.map(blog =>
-        //         blog.id === blogId ? { ...blog, likes: blog.likes + 1 } : blog
-        //     ));
-        // }
-    };
-
-    const handleDislike = (blogId: string) => {
-        if (!session?.user) {
-            alert('로그인 하셔서 의견주세요.')
-        }
-        // if (selectedBlog != null && selectedBlog.author === session?.user.name) {
-        //     alert('자신의 글에는 의견표시할 수 없습니다.')
-        // }
-        // else {
-        //     setBlogs(blogs.map(blog =>
-        //         blog.id === blogId ? { ...blog, dislikes: blog.dislikes + 1 } : blog
-        //     ));
-        // }
-    };
-
     const handleCommentChange = (blogId: number, value: string) => {
         setCommentInputs({ ...commentInputs, [blogId]: value });
-    };
-
-    const addComment = (blogId: string) => {
-        // if (!commentInputs[blogId]) return;
-        // setBlogs(blogs.map(blog =>
-        //     blog.id === blogId ? { ...blog, comments: [...blog.comments, commentInputs[blogId]] } : blog
-        // ));
-        // setCommentInputs({ ...commentInputs, [blogId]: "" });
     };
 
     const renderPagination = () => {
@@ -200,11 +160,11 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         return true;
     };
 
-    const handleVote = async (blog: BlogWithRefTable, status: ThumbsStatus) => {
-        if (checkLoginStatus(blog)) {
-            await voteOnBlogAction({ userId: session?.user.id, blogId: blog.id, thumbsStatus: status })
-        }
-    }
+    // const handleVote = async (blog: BlogWithRefTable, status: ThumbsStatus) => {
+    //     if (checkLoginStatus(blog)) {
+    //         await voteOnBlogAction({ userId: session?.user.id, blogId: blog.id, thumbsStatus: status })
+    //     }
+    // }
     const handleforked = async (blog: BlogWithRefTable, status: ThumbsStatus) => {
         if (checkLoginStatus(blog)) {
             // await voteOnBlogAction({ userId: session?.user.id, blogId: blog.id, thumbsStatus: status })
@@ -276,22 +236,8 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                                     <strong>{blog.author.name}</strong> - <small>{blog.updatedAt.toKrDateString()}</small>
                                     <p>{blog.content}</p>
                                     {/* Like & Dislike Buttons */}
-                                    <BlogFooter blog={blog} handleVote={handleVote} handleforked={handleforked} />
-                                    {/* <button className="btn btn-outline-primary btn-sm" onClick={() => addComment(blog.id)}>
-                                        💬 Comment ({blog.comments.length})
-                                    </button> */}
-
-                                    {/* Comments List */}
-                                    {/* {blog.comments.length > 0 && (
-                                        <ul className="list-group list-group-flush mt-2">
-                                            {blog.comments.map((comment, index) => (
-                                                <li key={index} className="list-group-item small themed-icon">
-                                                    💬
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )} */}
-                                    <BlogComment blog={blog} handleVote={handleVote} handleforked={handleforked} />
+                                    <BlogFooter blog={blog} userId={session?.user.id} />
+                                    <BlogComment blog={blog} />
                                 </div>
                             ))}
                         </div>

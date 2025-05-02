@@ -1,29 +1,38 @@
 'use client'
 import { BlogWithRefTable } from '@/app/services/blogService';
 import { getDaysFromToday, getHoursFromToday, getMinsFromToday } from '@/app/utils/dateTimeLib';
-import { getDislikesCount, getIsForked, getLikesCount, getViewCount } from '../utils/votes';
+import { getDislikesCount, getLikesCount, getUserVote, getViewCount } from '../utils/votes';
 import React, { useEffect, useState } from 'react'
-import { useSession } from "next-auth/react";
 import EyeFill from '../../icons/eyeFill';
 import Thumbup from '../../icons/thumbUp';
 import ThumbDown from '../../icons/thumbDown';
 import Fork from '../../icons/fork';
 import './styles.css'
-import { ThumbsStatus } from '@prisma/client';
-import { voteOnBlogAction } from '@/app/actions/blog';
+import { ThumbsStatus, Vote } from '@prisma/client';
+import { upsertVoteOnBlogAction, } from '@/app/actions/blog';
 
 export interface BlogFooterProps {
     blog: BlogWithRefTable,
-    handleVote: (blog: BlogWithRefTable, thumbsStatus: ThumbsStatus) => void,
-    handleforked: (blog: BlogWithRefTable, thumbsStatus: ThumbsStatus) => void,
+    userId?: string,
 }
-
-const BlogFooter = ({ blog, handleVote }: BlogFooterProps) => {
-    const { data: session } = useSession();
-    const [thumbsStatus, setThumbsStatus] = useState<ThumbsStatus>(ThumbsStatus.None);
+const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
+    const [thumbsStatus, setThumbsStatus] = useState<ThumbsStatus | undefined | null>(ThumbsStatus.None);
     const [likes, setLikes] = useState<number>(getLikesCount(blog.votes))
     const [dislikes, setDislikes] = useState<number>(getDislikesCount(blog.votes))
+    const [vote, setVote] = useState<Vote | null>(null);
     const [viewCount, setViewCount] = useState<number>(getViewCount(blog.views))
+    const [forked, setForked] = useState<boolean | undefined>(false)
+
+    useEffect(() => {
+        if (userId) {
+            const vt = getUserVote(blog.votes, userId)
+            if (vt) {
+                setThumbsStatus(vt.thumbsStatus);
+                setForked(vt.forked);
+            }
+            setVote(vt);
+        }
+    }, [userId, blog.votes])
 
     const getDaysOrHoursFromNow = () => {
         const days = getDaysFromToday(blog?.createdAt);
@@ -36,64 +45,51 @@ const BlogFooter = ({ blog, handleVote }: BlogFooterProps) => {
         }
         return (<>{mins} <span>분전</span></>);
     };
-    // login status
     const checkLoginStatus = () => {
-        if (!session) {
+        if (!userId) {
             alert('로그인을 하셔야 선택할 수 있습니다.');
             return false;
         }
-        else if (session?.user?.id === blog.author?.id) {
+        else if (userId === blog.author?.id) {
             alert('작성자는 자기에게 좋아요를 선택할 수 없습니다.');
             return false;
         }
         return true;
     };
-    // const handleThumbUp = async () => {
 
-    //     if (checkLoginStatus()) {
+    const handleVote = async (status: ThumbsStatus) => {
+        if (checkLoginStatus() && userId) {
+            const alreadyVoted = vote?.thumbsStatus === status;
+            const changingVote = vote && vote.thumbsStatus !== status;
+            if (alreadyVoted) {
+                alert('1회만 참여 할 수 있습니다.');
+                return;
+            }
+            if (status === ThumbsStatus.ThumbsUp) {
+                setLikes((prev) => prev + 1);
+                if (changingVote && dislikes > 0) setDislikes((prev) => prev - 1);
+            } else if (status === ThumbsStatus.ThumbsDown) {
+                setDislikes((prev) => prev + 1);
+                if (changingVote && likes > 0) setLikes((prev) => prev - 1);
+            }
+            const result = await upsertVoteOnBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: status, forked: vote?.forked }) as Vote;
+        }
+    }
 
-    //         // if (thumbsStatus === ThumbsStatus.None) {
-    //         //     setThumbsStatus();
-    //         //     // blog.thumbsUpCount++;
-    //         // } else if (thumbsStatus === ThumbsStatus.ThumbsDown) {
-    //         //     setThumbsStatus(ThumbsStatus.ThumbsUp);
-    //         //     // blog.thumbsUpCount++;
-    //         //     // blog.thumbsDownCount--;
-    //         // } else if (thumbsStatus === ThumbsStatus.ThumbsUp) {
-    //         //     setThumbsStatus(ThumbsStatus.None);
-    //         //     // blog.thumbsUpCount--;
-    //         // }
-    //         await voteOnBlogAction({ userId: session?.user.id, blogId: blog.id, thumbsStatus: ThumbsStatus.ThumbsUp })
-    //     }
-    // };
-    // const handleThumbDown = async () => {
-    //     if (checkLoginStatus()) {
-    //         // alert('handleThumbDown clicked')
-    //         // if (thumbsStatus === ThumbsStatus.None) {
-    //         //     setThumbsStatus(ThumbsStatus.ThumbsDown);
-
-    //         // } else if (thumbsStatus === ThumbsStatus.ThumbsDown) {
-    //         //     setThumbsStatus(ThumbsStatus.None);
-    //         //     // blog.thumbsDownCount--;
-
-    //         // } else if (thumbsStatus === ThumbsStatus.ThumbsUp) {
-    //         //     setThumbsStatus(ThumbsStatus.ThumbsDown);
-    //         // }
-    //         await voteOnBlogAction({ userId: session?.user.id, blogId: blog.id, thumbsStatus: ThumbsStatus.ThumbsDown })
-    //     }
-    // };
-    const handleforked = () => {
-        // if (checkLoginStatus()) {
-        //     if (forked === true) {
-        //         setforked(false);
-        //     }
-        //     else {
-        //         setforked(true);
-        //     }
-        // }
+    const handleforked = async () => {
+        if (checkLoginStatus() && userId) {
+            const result = await upsertVoteOnBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: vote?.thumbsStatus, forked: !forked }) as Vote;
+            setForked((prev) => !prev)
+        }
     };
     return (
         <div>
+            <div className='d-flex'>
+                <div>dislikes: </div>
+                <div className='ms-2'>
+                    {dislikes}
+                </div>
+            </div>
             <small className="text-muted">
                 {getDaysOrHoursFromNow()}
                 <span className="ms-2 me-2">
@@ -101,20 +97,15 @@ const BlogFooter = ({ blog, handleVote }: BlogFooterProps) => {
                     <span>{viewCount}</span>
                 </span>
                 <span className="ms-2 me-2">
-                    <Thumbup className="ms-1 cursorHand" onClick={() => handleVote(blog, ThumbsStatus.ThumbsUp)} fill={thumbsStatus === ThumbsStatus.ThumbsUp ? "red" : ''} title="좋아요" />
+                    <Thumbup className="ms-1 cursorHand" onClick={() => handleVote(ThumbsStatus.ThumbsUp)} title="좋아요" isThumbUp={thumbsStatus === ThumbsStatus.ThumbsUp ? true : false} />
                     <span className="ms-2 me-2">{likes}</span>
-                    <ThumbDown className="ms-1 cursorHand" onClick={() => handleVote(blog, ThumbsStatus.ThumbsDown)} fill={thumbsStatus === ThumbsStatus.ThumbsDown ? "red" : ''} title="싫어요" />
+                    <ThumbDown className="ms-1 cursorHand" onClick={() => handleVote(ThumbsStatus.ThumbsDown)} title="싫어요" isThumbDown={thumbsStatus === ThumbsStatus.ThumbsDown ? true : false} />
                     <span className="ms-2 me-3">{dislikes}</span>
 
                 </span>
             </small>
             <span className="mt-3">
-                <Fork
-                    className="ms-1 mt-1 cursorHand"
-                    onClick={handleforked}
-                    title="찜했어요"
-                    isForked={getIsForked(blog.forks, session?.user.id)}
-                />
+                <Fork className="ms-1 mt-1 cursorHand" onClick={handleforked} title="찜했어요" isForked={forked} />
             </span>
         </div>
     );
