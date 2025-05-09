@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useSession } from "next-auth/react";
 import { Blog, ThumbsStatus, User } from "@prisma/client";
 import { BlogWithRefTable } from "@/app/services/blogService";
 import { deleteSelectedBlogAction, upsertBlogAction, } from "@/app/actions/blog";
-import './styles.css'
-import '../../lib/date'
+
 import BlogFooter from "./components/BlogFooter";
 import BlogComment from "./components/BlogComment";
+import './styles.css'
+import '../../lib/date'
+import Editor, { EditorHandle } from "@/app/components/lexicalEditor/Editor";
 
 type BlogsProps = {
     blogs: BlogWithRefTable[]
@@ -31,6 +33,10 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     const startIndex = (currentPage - 1) * blogsPerPage;
     const paginatedBlogs = blogs.slice(startIndex, startIndex + blogsPerPage);
 
+    //for editor
+    const [isAuthor, setIsAuthor] = useState(false);
+    const editorRef = useRef<EditorHandle>(null);
+
     const handleFocus = () => {
         const inputElement = document.getElementById("contentTextarea") as HTMLInputElement;
         if (inputElement) {
@@ -38,8 +44,13 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
         }
     };
+
     const onBlogSelected = (blog: BlogWithRefTable) => {
-        setSelectedBlog(blog)
+        if (blog === selectedBlog) {
+            setSelectedBlog(null);
+        } else {
+            setSelectedBlog(blog)
+        }
     }
     const handleNewBlogClick = () => {
         if (!session?.user) {
@@ -74,17 +85,34 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         }
     };
 
-    const addBlog = () => {
-        if (!title.trim() || !content.trim()) {
-            alert("제목과 내용을 입력해주세요!");
-            return;
+    const addBlog = async () => {
+        if (editorRef.current) {
+            const serialized = await editorRef.current.getSerializedState();
+            if (serialized) {
+                setContent(serialized);
+                if (!isUpdating) {
+                    if (!title.trim()) {
+                        alert("제목을 입력해주세요!");
+                        return;
+                    }
+                }
+                console.log('serialized: ')
+                const result = upsertBlogAction(session?.user.id, title, serialized)
+
+            } else {
+                if (selectedBlog?.content) {
+                    const result = upsertBlogAction(session?.user.id, title, selectedBlog?.content)
+                }
+            }
+            setTitle("");
+            setContent("");
+            setIsWriting(false);
+            setIsUpdating(false);
+            setSelectedBlog(null);
+            console.log('add Blog :', editorRef.current)
+        } else {
+            console.log('add Blog:')
         }
-        const result = upsertBlogAction(session?.user.id, title, content)
-        setTitle("");
-        setContent("");
-        setIsWriting(false);
-        setIsUpdating(false);
-        setSelectedBlog(null);
     };
 
     const handleCommentChange = (blogId: number, value: string) => {
@@ -142,33 +170,8 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         );
     };
 
-    const handleMouseEnter = (blog: BlogWithRefTable) => {
-        setSelectedBlog(blog);
-    }
-    const handleMouseLeave = (blog: BlogWithRefTable) => {
-        setSelectedBlog(null)
-    }
-    const checkLoginStatus = (blog: BlogWithRefTable) => {
-        if (!session) {
-            alert('로그인을 하셔야 선택할 수 있습니다.');
-            return false;
-        }
-        else if (session?.user?.id === blog.author?.id) {
-            alert('작성자는 자기에게 좋아요를 선택할 수 없습니다.');
-            return false;
-        }
-        return true;
-    };
-
-    // const handleVote = async (blog: BlogWithRefTable, status: ThumbsStatus) => {
-    //     if (checkLoginStatus(blog)) {
-    //         await voteOnBlogAction({ userId: session?.user.id, blogId: blog.id, thumbsStatus: status })
-    //     }
-    // }
-    const handleforked = async (blog: BlogWithRefTable, status: ThumbsStatus) => {
-        if (checkLoginStatus(blog)) {
-            // await voteOnBlogAction({ userId: session?.user.id, blogId: blog.id, thumbsStatus: status })
-        }
+    const cardClassName = (id: string) => {
+        return `card ${id === selectedBlog?.id ? 'border-primary border-2' : ''}`;
     }
 
     return (
@@ -214,19 +217,15 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                             onChange={(e) => setTitle(e.target.value)}
                             disabled={isUpdating}
                         />
-                        <textarea
-                            id="contentTextarea"
-                            className="form-control mb-2"
-                            placeholder="Write your message..."
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                        />
+                        <div className="mt-3">
+                            <Editor ref={editorRef} isReadOnly={isAuthor} initailData={content} />
+                        </div>
                         <button className="btn btn-secondary me-2" onClick={() => setIsWriting(false)}>취소</button>
                         <button className="btn btn-primary me-2" onClick={() => addBlog()}>저장</button>
                     </div>
                 )}
                 {/* 보기형태 */}
-                <div>
+                <div className="mt-3">
                     {/* 요약보기 */}
                     {viewMode === "summary" && (
                         <div>
@@ -234,8 +233,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                                 <div key={blog.id} className="border-bottom p-2" onClick={() => onBlogSelected(blog)}>
                                     <h5>{blog.title}</h5>
                                     <strong>{blog.author.name}</strong> - <small>{blog.updatedAt.toKrDateString()}</small>
-                                    <p>{blog.content}</p>
-                                    {/* Like & Dislike Buttons */}
+                                    <Editor ref={editorRef} isReadOnly={true} initailData={blog.content} />
                                     <BlogFooter blog={blog} userId={session?.user.id} />
                                     <BlogComment blog={blog} />
                                 </div>
@@ -247,10 +245,11 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                         <div className="row">
                             {paginatedBlogs.map((blog) => (
                                 <div key={blog.id} className="col-md-4 mb-3" onClick={() => onBlogSelected(blog)}>
-                                    <div className="card">
+                                    <div className={cardClassName(blog.id)}>
                                         <div className="card-body">
                                             <h5 className="card-title">{blog.title}</h5>
-                                            <p className="card-text">{blog.content}</p>
+                                            <Editor ref={editorRef} isReadOnly={true} initailData={blog.content} />
+                                            {/* <p className="card-text">{content}</p> */}
                                         </div>
                                     </div>
                                 </div>
@@ -273,7 +272,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                                 {paginatedBlogs.map((blog) => (
                                     <tr key={blog.id} onClick={() => onBlogSelected(blog)}>
                                         <td>{blog.title}</td>
-                                        <td>{blog.content}</td>
+                                        <td>{content}</td>
                                         <td>{blog.author.name}</td>
                                         <td>{blog.updatedAt.toKrDateString()}</td>
                                         <td>{blog.viewCount}</td>
@@ -301,13 +300,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                                 </div>
                                 <div className="modal-body">
                                     <label className="me-2"><strong>페이지당 게시글 수:</strong></label>
-                                    <input
-                                        type="number"
-                                        title="blogsetting"
-                                        className="form-control w-auto d-inline-block"
-                                        value={blogsPerPage}
-                                        onChange={(e) => setBlogPerPage(Number(e.target.value))}
-                                    />
+                                    <input type="number" title="blogsetting" className="form-control w-auto d-inline-block" value={blogsPerPage} onChange={(e) => setBlogPerPage(Number(e.target.value))} />
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-primary" onClick={() => setShowSettings(false)}>닫기</button>

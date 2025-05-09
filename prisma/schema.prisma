@@ -235,6 +235,7 @@ model Blog {
   tags              BlogTag[]
   votes             Vote[]
   views             BlogView[]
+  selected          Boolean             @default(false)
   // forks             BlogFork[]
 
   @@unique([title, authorId])

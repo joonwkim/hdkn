@@ -61,7 +61,7 @@ export async function setNodeSelected(nodeId: string) {
                 }
             })
             return node;
-        }       
+        }
     } catch (error) {
         console.log(error)
     }
@@ -74,7 +74,7 @@ export async function updateExpandStatus(node: TreeNode) {
                 expanded: false,
             }
         })
-        // console.log('collapsAll: ', collapsAll)
+        console.log('collapsAll: ', collapsAll)
         if (node) {
             const result = await prisma.treeNode.update({
                 where: {

@@ -1,6 +1,6 @@
 'use client'
 //#region import export interface
-import React, { createContext, Dispatch, useCallback, useEffect, useState } from 'react'
+import React, { createContext, Dispatch, forwardRef, JSX, useCallback, useEffect, useImperativeHandle, useState } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { DropdownItem, getRichTextAction, RichTextAction, ToolbarItem } from '../data/toolbarData';
 import Toolbar from '../../controls/toolbar';
@@ -21,6 +21,7 @@ import { INSERT_LAYOUT_COMMAND } from './LayoutPlugin';
 import { $createStickyNode } from '../nodes/StickyNode';
 import { INSERT_YOUTUBE_COMMAND } from './YouTubePlugin';
 import { deleteImageFromCloudinary } from '@/app/actions/cloudinary';
+import { EditorHandle } from '../Editor';
 // import { resizeCloudinaryImage } from '@/app/actions/cloudinary';
 export type InsertImagePayload = Readonly<ImagePayload>;
 export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> = createCommand('INSERT_IMAGE_COMMAND');
@@ -41,12 +42,12 @@ export const CellContext = createContext<CellContextShape>({
 interface LexicalToolbarProps {
     isReadOnly: boolean,
     lexicalToolbarData: ToolbarItem[],
+    // disableSaveButton?: boolean,
     setIsLinkEditMode: Dispatch<boolean>,
-    saveDocument: (content: string) => void,
+    saveDocument?: (content: string) => void,
 }
 //#endregion
-
-const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, saveDocument }: LexicalToolbarProps) => {
+const ToolbarPlugin = forwardRef<EditorHandle, LexicalToolbarProps>(({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, saveDocument, }, ref) => {
     const [editor] = useLexicalComposerContext();
     const [toolbarData, setToolbarData] = useState<ToolbarItem[]>(lexicalToolbarData)
     const [activeEditor, setActiveEditor] = useState(editor);
@@ -54,6 +55,8 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
     const [canRedo, setCanRedo] = useState(false);
     const [isLink, setIsLink] = useState(false);
     const [selectedBlockType, setSelectedBlockType] = useState<DropdownItem | undefined>()
+    const [disableSaveButton, setDisableSaveButton] = useState<boolean>(saveDocument !== null)
+
     const $updateDropdownItemForBlockFormatItmes = useCallback((action: RichTextAction) => {
         const updatedToolbarData = toolbarData.map(item => ({ ...item, dropdownItems: item.dropdownItems?.map(dropdown => dropdown.id === action ? { ...dropdown, active: true } : { ...dropdown, active: false }) }));
         const si = updatedToolbarData[4].dropdownItems?.find(item => item.id === action);
@@ -71,7 +74,6 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
 
     //updateToolbar
     const $updateToolbar = useCallback(() => {
-
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
             const anchorNode = selection.anchor.getNode();
@@ -109,6 +111,17 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
             }
         }
     }, [$upDataLinkButton, $updateDropdownItemForBlockFormatItmes, activeEditor, isLink]);
+
+    useImperativeHandle(ref, () => ({
+        getSerializedState: async () => {
+            let json = '';
+            await editor.update(() => {
+                const editorState = editor.getEditorState();
+                json = JSON.stringify(editorState.toJSON());
+            });
+            return json;
+        },
+    }));
 
     useEffect(() => {
         return editor.registerCommand(
@@ -390,7 +403,7 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
                     const updatedState = activeEditor.getEditorState();
                     const serializedState = JSON.stringify(updatedState);
                     // console.log("serializedState:", serializedState);
-                    saveDocument(serializedState);
+                    if (saveDocument) saveDocument(serializedState);
                     // const imageNodes = getImageNodes(activeEditor);
                     // imageNodes.forEach((node) => {
                     //     console.log('node to save: ', node)
@@ -419,7 +432,7 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
     };
     return (
         <div>
-            <Toolbar toolbarData={toolbarData} canUndo={canUndo} canRedo={canRedo}
+            <Toolbar toolbarData={toolbarData} canUndo={canUndo} canRedo={canRedo} disableSaveButton={disableSaveButton}
                 handleToolbarSelect={handleToolbarSelect} selectedItem={selectedBlockType}
                 handleInsertImage={handleInsertImage} handleInsertTable={handleInsertTable}
                 handleInsertColumnsLayout={handleInsertColumnsLayout}
@@ -428,6 +441,6 @@ const ToolbarPlugin = ({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, save
         </div>
 
     )
-}
+});
 
 export default ToolbarPlugin

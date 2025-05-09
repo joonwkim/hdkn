@@ -84,12 +84,12 @@ const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
     };
     return (
         <div>
-            <div className='d-flex'>
+            {/* <div className='d-flex'>
                 <div>dislikes: </div>
                 <div className='ms-2'>
                     {dislikes}
                 </div>
-            </div>
+            </div> */}
             <small className="text-muted">
                 {getDaysOrHoursFromNow()}
                 <span className="ms-2 me-2">

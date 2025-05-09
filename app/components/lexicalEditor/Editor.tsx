@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -37,15 +37,30 @@ import LoadInitialDataPlugin from './plugins/LoadInitialDataPlugin';
 interface EditorProps {
     isReadOnly: boolean,
     initailData?: string,
-    saveDocument: (content: string) => void,
+    // disableSaveButton?: boolean,
+    saveDocument?: (content: string) => void,
 }
+export type EditorHandle = {
+    getSerializedState: () => Promise<string>;
+};
 
-const Editor = ({ saveDocument, isReadOnly, initailData }: EditorProps) => {
+const Editor = forwardRef<EditorHandle, EditorProps>(({ saveDocument, isReadOnly, initailData, }, ref) => {
+    const toolbarPluginRef = useRef<EditorHandle>(null);
     const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null);
     const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false);
     const [isLinkEditMode, setIsLinkEditMode] = useState<boolean>(false);
     const placeholder = '내용을 기술하세요...';
     const onRef = (_floatingAnchorElem: HTMLDivElement) => { if (_floatingAnchorElem !== null) { setFloatingAnchorElem(_floatingAnchorElem); } };
+
+    useImperativeHandle(ref, () => ({
+        getSerializedState: async () => {
+            let serialized = '';
+            if (toolbarPluginRef.current) {
+                serialized = await toolbarPluginRef.current.getSerializedState();
+            }
+            return serialized;
+        },
+    }));
 
     useEffect(() => {
         const updateViewPortWidth = () => {
@@ -84,7 +99,7 @@ const Editor = ({ saveDocument, isReadOnly, initailData }: EditorProps) => {
                 <div className='editor-container tree-view'>
                     <LexicalComposer initialConfig={editorConfig}>
                         <div className="editor-scroller">
-                            {!isReadOnly && <ToolbarPlugin lexicalToolbarData={toolbarData} isReadOnly={isReadOnly} setIsLinkEditMode={setIsLinkEditMode} saveDocument={saveDocument} />}
+                            {!isReadOnly && <ToolbarPlugin ref={toolbarPluginRef} lexicalToolbarData={toolbarData} isReadOnly={isReadOnly} setIsLinkEditMode={setIsLinkEditMode} saveDocument={saveDocument} />}
                             <div className='editor' ref={onRef}>
                                 <RichTextPlugin
                                     contentEditable={
@@ -142,6 +157,6 @@ const Editor = ({ saveDocument, isReadOnly, initailData }: EditorProps) => {
 
 
     );
-}
+});
 
-export default Editor
+export default Editor;

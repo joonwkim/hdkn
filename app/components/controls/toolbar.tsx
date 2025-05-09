@@ -12,16 +12,15 @@ interface ToolbarProps {
     selectedItem: DropdownItem | undefined;
     canUndo: boolean,
     canRedo: boolean,
+    disableSaveButton?: boolean,
     handleToolbarSelect: (item: ToolbarItem) => void,
     handleInsertImage: (payload: InsertImagePayload) => void,
-    // handleInsertInlineImage: (payload: InlineImagePayload) => void,
     handleInsertTable: (payload: InsertTableCommandPayload) => void,
     handleInsertColumnsLayout: (payload: { value: string }) => void,
     handleEmbedYoutube: (payload: { value: string }) => void,
 }
 
-const Toolbar = ({ toolbarData, canUndo, canRedo, selectedItem, handleToolbarSelect,
-    handleInsertImage, handleInsertTable, handleInsertColumnsLayout, handleEmbedYoutube }: ToolbarProps) => {
+const Toolbar = ({ toolbarData, canUndo, canRedo, disableSaveButton, selectedItem, handleToolbarSelect, handleInsertImage, handleInsertTable, handleInsertColumnsLayout, handleEmbedYoutube }: ToolbarProps) => {
 
     const getDisabled = (item: ToolbarItem) => {
         if (item.id === RichTextAction.Undo) { return !canUndo; }
@@ -34,9 +33,10 @@ const Toolbar = ({ toolbarData, canUndo, canRedo, selectedItem, handleToolbarSel
     const getClassName = (item: ToolbarItem) => {
         if (item.active === true) {
             return 'btn btn-outline-secondary border-0 active'
-        }       
+        }
         return 'btn btn-outline-secondary border-0'
     }
+
     return (
         <div className='btn-toolbar' role='group' aria-label='Toolbar with button groups'>
             {toolbarData.map((item: ToolbarItem, index: number) => (
@@ -47,26 +47,27 @@ const Toolbar = ({ toolbarData, canUndo, canRedo, selectedItem, handleToolbarSel
                             handleDropdownSelect={handleToolbarSelect} />
                     ) : (item.isDevider ? (<div className="divider"></div>) :
                         (item.isModal ? (<>
-                                {/* <button className='btn btn-outline-secondary border-0' data-bs-target={item.databstarget} data-bs-toggle={item.databstoggle} title={item.title} >
+                            {/* <button className='btn btn-outline-secondary border-0' data-bs-target={item.databstarget} data-bs-toggle={item.databstoggle} title={item.title} >
                                 <i className={item.icon}></i>
                             </button> */}
-                                {/* <InsertImageModal onClick={onClick} />
+                            {/* <InsertImageModal onClick={onClick} />
                                 <InsertInlineImageModal />
                                 <InsertColumnsLayoutModal /> */}
-                            </>) : (
-                                    <button className={getClassName(item)} title={item.title} data-bs-toggle="button" disabled={getDisabled(item)}
-                                        onClick={() => handleToolbarSelect(item)}>
-                                        <i className={item.icon}></i>
-                                    </button>)
+                        </>) : (<>{!(disableSaveButton && item.id === RichTextAction.Save) && (
+                            <button className={getClassName(item)} title={item.title} data-bs-toggle="button" disabled={getDisabled(item)} onClick={() => handleToolbarSelect(item)}                                >
+                                <i className={item.icon}></i>
+                            </button>
+                        )}</>)
                         )
                     )}
                 </div>
-            ))}
+            ))
+            }
             <ImageModal onClick={handleInsertImage} />
             <TableModal onClick={handleInsertTable} />
             <ColumnsLayoutModal onClick={handleInsertColumnsLayout} />
             <EmbedYoutubeModal onClick={handleEmbedYoutube} />
-        </div>
+        </div >
     );
 }
 

@@ -166,34 +166,13 @@ export async function upsertVoteOnBlog({ userId, blogId, thumbsStatus, forked }:
         forked,
       },
     });
-    // console.log('voteOnBlog:', result)
+    console.log('voteOnBlog:', result)
     return result;
   } catch (err) {
     console.error("voteOnBlog error:", err);
     return null;
   }
 }
-
-// export async function forkBlog({ userId, blogId, }: { userId: string; blogId: string; }) {
-//   try {
-//     const result = await prisma.blogFork.upsert({
-//       where: {
-//         unique_blog_fork: { blogId, userId },
-//       },
-//       update: {
-//         forkedAt: new Date(),
-//       },
-//       create: {
-//         blogId,
-//         userId,
-//       },
-//     });
-//     return result;
-//   } catch (err) {
-//     console.error("forkBlog error:", err);
-//     return null;
-//   }
-// }
 
 export async function recordBlogView({ userId, blogId, }: { userId: string; blogId: string; }) {
   try {

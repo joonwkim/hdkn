@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-/* config options here */
   compiler: {
     styledComponents: true,
   },
@@ -16,8 +15,19 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/dhhev1lrj/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.vercel.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
-    domains: ['img.youtube.com', 'res.cloudinary.com', 'assets.vercel.com',],
   },
   experimental: {
     serverActions: {
@@ -27,3 +37,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
