@@ -5,33 +5,6 @@ import { findUpdateGoogleUser, getSessionUserByEmail, } from "@/app/services/use
 
 export const authOptions: NextAuthOptions = {
     providers: [
-        // CredentialsProvider({
-        //     name: 'Credentials',
-        //     credentials: {
-        //         email: { label: "Email", type: "text", placeholder: "Your email" },
-        //         password: { label: "Password", type: "password" },
-        //     },
-        //     async authorize(credentials) {
-        //         if (!credentials?.email || !credentials.password) {
-        //             return null;
-        //         }
-        //         try {
-        //             const input = {
-        //                 email: credentials?.email,
-        //                 password: credentials?.password
-        //             };
-        //             const user = await loginAction(input);
-        //             if (user === 'password do not match' || user === 'user not registered') {
-        //                 throw 'password do not match or user not registered';
-        //             }
-        //             return user;
-        //         } catch (error) {
-        //             console.error("Error in authorize:", error);
-        //             return null;
-        //         }              
-        //     },
-
-        // }),
         GoogleProvider({
             clientId: process.env.GOOGLE_ID || "",
             clientSecret: process.env.GOOGLE_SECRET || "",
@@ -59,7 +32,6 @@ export const authOptions: NextAuthOptions = {
             return true;
         },
 
-
         async session({ session, token }) {
             if (token) {
                 // console.log('token:', token)
@@ -72,7 +44,9 @@ export const authOptions: NextAuthOptions = {
                     notificationCount: token.notificationCount || 0,
                     membershipProcessedBys: token.membershipProcessedBys || [],
                     membershipRequestedBys: token.membershipRequestedBys || [],
+                    preference: token.preference || undefined,
                 };
+                // console.log('session: ', session)
                 return session;
             }
             return session;
@@ -91,6 +65,7 @@ export const authOptions: NextAuthOptions = {
                         ...token,
                         id: sessionUser.id,
                         roles: sessionUser.roles || [],
+                        preference: sessionUser.preference || undefined,
                         // notificationCount: sessionUser.notificationCount || 0,
                         // membershipProcessedBys: sessionUser.membershipProcessedBys || [],
                         // membershipRequestedBys: sessionUser.membershipRequestedBys || [],
@@ -98,7 +73,7 @@ export const authOptions: NextAuthOptions = {
                     // console.log('new token: ', nt)
                     // console.log('new token: ', Object.keys(nt));
                     return nt;
-                }              
+                }
             }
             return token;
         },

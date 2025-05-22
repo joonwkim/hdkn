@@ -1,6 +1,6 @@
 'use server';
 import { revalidatePath } from "next/cache";
-import { createUser, getUserByEmail, updateUser, updateUserPassword } from "../services/userService";
+import { createUser, getUserByEmail, saveUserPreference, updateUser, updateUserPassword } from "../services/userService";
 import { generateRandomPassword, getHashedPassword, } from "../lib/password";
 import { sendMail } from "../lib/mailServer";
 import { RegisterForm } from "../auth/types";
@@ -56,4 +56,11 @@ export async function findUserAction(email: string) {
 export async function updateUserAction(id: string, input: Prisma.UserCreateInput) {
     await updateUser(id, input);
     revalidatePath('/');
+}
+
+export async function saveUserPreferenceAction({ userId, viewType, pageSize }: { userId: string, viewType: string, pageSize: number }) {
+    await saveUserPreference({ userId, viewType, pageSize })
+    revalidatePath('/');
+
+
 }

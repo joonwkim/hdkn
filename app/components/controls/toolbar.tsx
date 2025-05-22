@@ -54,9 +54,12 @@ const Toolbar = ({ toolbarData, canUndo, canRedo, disableSaveButton, selectedIte
                                 <InsertInlineImageModal />
                                 <InsertColumnsLayoutModal /> */}
                         </>) : (<>{!(disableSaveButton && item.id === RichTextAction.Save) && (
-                            <button className={getClassName(item)} title={item.title} data-bs-toggle="button" disabled={getDisabled(item)} onClick={() => handleToolbarSelect(item)}                                >
+                            <button className={getClassName(item)} title={item.title} disabled={getDisabled(item)} onClick={() => handleToolbarSelect(item)}                                >
                                 <i className={item.icon}></i>
                             </button>
+                            // <button className={getClassName(item)} title={item.title} data-bs-toggle="button" disabled={getDisabled(item)} onClick={() => handleToolbarSelect(item)}                                >
+                            //     <i className={item.icon}></i>
+                            // </button>
                         )}</>)
                         )
                     )}

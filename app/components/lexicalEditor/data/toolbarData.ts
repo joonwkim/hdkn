@@ -37,6 +37,7 @@ export enum RichTextAction {
     YouTubeVideo = 'ytVideo',
     Modal = 'modal',
     BlockFormatItems = 'blockFormatItems',
+    Cancel = 'cancel',
     Save = 'save',
 }
 export function getRichTextAction(action: string): RichTextAction | undefined {
@@ -132,8 +133,9 @@ export const toolbarData: ToolbarItem[] = [
     { name: '들여쓰기', icon: 'bi-text-indent-left', title: '들여쓰기', id: RichTextAction.Indent },
     { name: '내어쓰기', icon: 'bi-text-indent-right', title: '내어쓰기', id: RichTextAction.Outdent },
 
-    { isDevider: true, id: RichTextAction.Divider },
     { name: '삽입', isDropdown: true, title: '삽입', dropdownItems: insertItems },
+    { isDevider: true, id: RichTextAction.Divider },
+    { name: '취소', icon: 'bi-x-lg', title: '취소', id: RichTextAction.Cancel },
     { name: '저장', icon: 'bi-floppy', title: '저장', id: RichTextAction.Save },
 
     { isDevider: true, id: RichTextAction.Divider },

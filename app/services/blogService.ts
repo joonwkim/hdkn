@@ -65,7 +65,7 @@ export async function getBlogs(): Promise<{ props: BlogWithRefTable[]; revalidat
     // console.log("Fetched blogs:", blogs);
     return {
       props: blogs,
-      revalidate: 10,
+      revalidate: 0,
     };
 
   } catch (error) {

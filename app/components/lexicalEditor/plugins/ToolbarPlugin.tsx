@@ -44,10 +44,11 @@ interface LexicalToolbarProps {
     lexicalToolbarData: ToolbarItem[],
     // disableSaveButton?: boolean,
     setIsLinkEditMode: Dispatch<boolean>,
+    cancel?: () => void,
     saveDocument?: (content: string) => void,
 }
 //#endregion
-const ToolbarPlugin = forwardRef<EditorHandle, LexicalToolbarProps>(({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, saveDocument, }, ref) => {
+const ToolbarPlugin = forwardRef<EditorHandle, LexicalToolbarProps>(({ lexicalToolbarData, isReadOnly, setIsLinkEditMode, cancel, saveDocument, }, ref) => {
     const [editor] = useLexicalComposerContext();
     const [toolbarData, setToolbarData] = useState<ToolbarItem[]>(lexicalToolbarData)
     const [activeEditor, setActiveEditor] = useState(editor);
@@ -55,7 +56,7 @@ const ToolbarPlugin = forwardRef<EditorHandle, LexicalToolbarProps>(({ lexicalTo
     const [canRedo, setCanRedo] = useState(false);
     const [isLink, setIsLink] = useState(false);
     const [selectedBlockType, setSelectedBlockType] = useState<DropdownItem | undefined>()
-    const [disableSaveButton, setDisableSaveButton] = useState<boolean>(saveDocument !== null)
+    const [disableSaveButton, setDisableSaveButton] = useState<boolean>(saveDocument === null)
 
     const $updateDropdownItemForBlockFormatItmes = useCallback((action: RichTextAction) => {
         const updatedToolbarData = toolbarData.map(item => ({ ...item, dropdownItems: item.dropdownItems?.map(dropdown => dropdown.id === action ? { ...dropdown, active: true } : { ...dropdown, active: false }) }));
@@ -398,6 +399,15 @@ const ToolbarPlugin = forwardRef<EditorHandle, LexicalToolbarProps>(({ lexicalTo
                 });
                 break;
             }
+            case RichTextAction.Cancel: {
+                try {
+                    if (cancel) cancel();
+
+                } catch (error) {
+                    console.error('Error Closing document:', error);
+                }
+                break;
+            }
             case RichTextAction.Save: {
                 try {
                     const updatedState = activeEditor.getEditorState();
@@ -431,7 +441,7 @@ const ToolbarPlugin = forwardRef<EditorHandle, LexicalToolbarProps>(({ lexicalTo
         activeEditor.dispatchCommand(INSERT_YOUTUBE_COMMAND, payload.value);
     };
     return (
-        <div>
+        <div className='mb-3'>
             <Toolbar toolbarData={toolbarData} canUndo={canUndo} canRedo={canRedo} disableSaveButton={disableSaveButton}
                 handleToolbarSelect={handleToolbarSelect} selectedItem={selectedBlockType}
                 handleInsertImage={handleInsertImage} handleInsertTable={handleInsertTable}
@@ -439,7 +449,6 @@ const ToolbarPlugin = forwardRef<EditorHandle, LexicalToolbarProps>(({ lexicalTo
                 handleEmbedYoutube={handleEmbedYoutube}
             />
         </div>
-
     )
 });
 

@@ -14,8 +14,14 @@ declare module "next-auth/jwt" {
 declare module "next-auth" {
     interface Session {
         user: User & {
-            id: UserId
-            roles: Role[]
+            id: UserId;
+            roles: Role[];
+            preference?: {
+                viewType: string;
+                pageSize: number;
+                sortOrder: string;
+                theme?: string;
+            };
         }
     }
 }

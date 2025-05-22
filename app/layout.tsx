@@ -102,10 +102,10 @@ export default function RootLayout({
   };
 
   //#endregion
-
   const onWidowSidbarBtnClick = () => {
     setSidebarOpen(!sidebarOpen);
   }
+
   return (
     <html lang="en" data-bs-theme="" id="hdkn">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>

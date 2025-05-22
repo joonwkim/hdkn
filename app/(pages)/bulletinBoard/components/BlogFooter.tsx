@@ -17,13 +17,15 @@ export interface BlogFooterProps {
 }
 const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
     const [thumbsStatus, setThumbsStatus] = useState<ThumbsStatus | undefined | null>(ThumbsStatus.None);
-    const [likes, setLikes] = useState<number>(getLikesCount(blog.votes))
-    const [dislikes, setDislikes] = useState<number>(getDislikesCount(blog.votes))
+    const [likes, setLikes] = useState<number>(0)
+    const [dislikes, setDislikes] = useState<number>(0)
     const [vote, setVote] = useState<Vote | null>(null);
     const [viewCount, setViewCount] = useState<number>(getViewCount(blog.views))
     const [forked, setForked] = useState<boolean | undefined>(false)
 
     useEffect(() => {
+        setLikes(getLikesCount(blog.votes));
+        setDislikes(getDislikesCount(blog.votes));
         if (userId) {
             const vt = getUserVote(blog.votes, userId)
             if (vt) {

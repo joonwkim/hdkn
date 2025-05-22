@@ -1,3 +1,4 @@
+export const revalidate = 0;
 import { getBlogs } from "@/app/services/blogService";
 import BulletinBoard from "./BulletinBoard";
 
@@ -9,7 +10,7 @@ const Page = async () => {
   }
 
   return (
-    <BulletinBoard blogs={blogsData.props} />
+    <BulletinBoard key={Date.now()} blogs={blogsData.props} />
   );
 };
 

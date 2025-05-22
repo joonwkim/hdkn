@@ -38,13 +38,14 @@ interface EditorProps {
     isReadOnly: boolean,
     initailData?: string,
     // disableSaveButton?: boolean,
+    cancel?: () => void,
     saveDocument?: (content: string) => void,
 }
 export type EditorHandle = {
     getSerializedState: () => Promise<string>;
 };
 
-const Editor = forwardRef<EditorHandle, EditorProps>(({ saveDocument, isReadOnly, initailData, }, ref) => {
+const Editor = forwardRef<EditorHandle, EditorProps>(({ cancel, saveDocument, isReadOnly, initailData, }, ref) => {
     const toolbarPluginRef = useRef<EditorHandle>(null);
     const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null);
     const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false);
@@ -57,6 +58,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({ saveDocument, isReadOnly
             let serialized = '';
             if (toolbarPluginRef.current) {
                 serialized = await toolbarPluginRef.current.getSerializedState();
+                console.log('useImperativeHandle, getSerializedState:', serialized)
             }
             return serialized;
         },
@@ -89,17 +91,13 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({ saveDocument, isReadOnly
         theme: EditorTheme,
     };
 
-
     return (
         <>
-            {/* <button onClick={toggleEditMode}>
-                {isReadOnly ? 'Switch to Edit Mode' : 'Switch to Read-Only'}
-            </button> */}
             <div className='editor-shell'>
                 <div className='editor-container tree-view'>
                     <LexicalComposer initialConfig={editorConfig}>
                         <div className="editor-scroller">
-                            {!isReadOnly && <ToolbarPlugin ref={toolbarPluginRef} lexicalToolbarData={toolbarData} isReadOnly={isReadOnly} setIsLinkEditMode={setIsLinkEditMode} saveDocument={saveDocument} />}
+                            {!isReadOnly && <ToolbarPlugin ref={toolbarPluginRef} lexicalToolbarData={toolbarData} isReadOnly={isReadOnly} setIsLinkEditMode={setIsLinkEditMode} cancel={cancel} saveDocument={saveDocument} />}
                             <div className='editor' ref={onRef}>
                                 <RichTextPlugin
                                     contentEditable={

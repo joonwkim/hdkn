@@ -1,7 +1,7 @@
 import prisma from '@/prisma/prisma';
 import bcrypt from "bcrypt";
 import { getHashedPassword } from '../lib/password';
-import { Prisma, User, UserRole, } from '@prisma/client';
+import { Prisma, User, UserPreference, UserRole, } from '@prisma/client';
 import { GoogleUser } from '../auth/types';
 import { SessionUser } from '../lib/types';
 import { use } from 'react';
@@ -81,6 +81,7 @@ export async function getSessionUserByEmail(emailInput: string): Promise<Session
                 email: user.email,
                 image: user.image,
                 roles: user.roles,
+                preference: user.preference,
             }
             return sessionUser;
         }
@@ -91,7 +92,7 @@ export async function getSessionUserByEmail(emailInput: string): Promise<Session
     }
 }
 
-export async function getUserByEmail(emailInput: string): Promise<User & { roles: UserRole[] } | null> {
+export async function getUserByEmail(emailInput: string): Promise<User & { roles: UserRole[], preference?: UserPreference } | null> {
     try {
         const user: Prisma.UserGetPayload<{ include: { roles: { include: { role: true; }; }; }; }> | null = await prisma.user.findFirst({
             where: {
@@ -103,6 +104,7 @@ export async function getUserByEmail(emailInput: string): Promise<User & { roles
                         role: true,
                     }
                 },
+                preference: true,
                 votes: true,
                 membershipProcessedBys: {
                     include: {
@@ -116,6 +118,7 @@ export async function getUserByEmail(emailInput: string): Promise<User & { roles
                 },
             }
         });
+        // console.log('getUserByEmail: ', user)
         return user;
     } catch (error) {
         console.log('getUserByEmail error: ', error)
@@ -250,5 +253,33 @@ export const getUserRolesByUserId = async (userId: string) => {
             userId: userId
         }
     })
+}
+
+export async function getOrCreateUserPreferences(userId: string) {
+    const prefs = await prisma.userPreference.findUnique({ where: { userId } });
+
+    if (prefs) return prefs;
+
+    return await prisma.userPreference.create({
+        data: {
+            userId,
+            viewType: 'card',
+            pageSize: 10,
+            sortOrder: 'updatedAt_desc',
+        },
+    });
+}
+
+export async function saveUserPreference({ userId, viewType, pageSize }: { userId: string, viewType: string, pageSize: number }) {
+    const result = await prisma.userPreference.update({
+        where: {
+            userId: userId,
+        },
+        data: {
+            viewType: viewType,
+            pageSize: pageSize,
+        }
+    })
+    return result;
 }
 

@@ -1,3 +1,5 @@
+import { UserPreference } from "@prisma/client";
+
 export interface CustomFile extends File {
     secure_url: string;
 }
@@ -27,6 +29,7 @@ export type SessionUser = {
     image: string | null,
     // isUserAdmin: boolean,
     roles?: UserRole[],
+    preference?: UserPreference,
 }
 
 export type Stage = {
@@ -57,10 +60,10 @@ export type StageContents = {
 // export type ChildHeader = {
 //     title: string,
 //     description: string,
-   
+
 //     thumbnailUrl?: string,
 //     // stage: number,
-   
+
 //     // levelInStage: number,
 // }
 

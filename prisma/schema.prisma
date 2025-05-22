@@ -75,6 +75,7 @@ model User {
   notificationCount      Int                 @default(0)
   roles                  UserRole[]
   profile                Profile?
+  preference             UserPreference?
   membershipProcessedBys MembershipRequest[] @relation("membershipProcessedBys")
   membershipRequestedBys MembershipRequest[] @relation("membershipRequestedBys")
 
@@ -92,6 +93,16 @@ model User {
   LexicalDocument   LexicalDocument[]
 
   // @@index([email])
+}
+
+model UserPreference {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String  @unique @db.ObjectId
+  viewType  String  @default("card") // 'card' | 'table' 
+  pageSize  Int     @default(10)
+  sortOrder String  @default("createdAt_desc")
+  theme     String? // optional: "light" | "dark"
+  user      User    @relation(fields: [userId], references: [id])
 }
 
 model UserRole {

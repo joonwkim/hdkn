@@ -73,6 +73,7 @@ export function getImageNodes(editor: LexicalEditor): ImageNode[] {
 
   return imageNodes;
 }
+
 // export function getImageNodes(rootNode: RootNode): ImageNode[] {
 //   const imageNodes: ImageNode[] = [];
 
@@ -95,8 +96,27 @@ export function getImageNodes(editor: LexicalEditor): ImageNode[] {
 //   return imageNodes;
 // }
 
+export function getContent(serialized: string): string {
 
+  let parsed;
+  try {
+    parsed = JSON.parse(serialized);
+  } catch (e) {
+    console.error('Invalid JSON:', e);
+    return '';
+  }
 
+  function extractText(node: any): string {
+    if (!node) return '';
+    if (node.text) return node.text;
+    if (Array.isArray(node.children)) {
+      return node.children.map(extractText).join(' ');
+    }
+    return '';
+  }
+
+  return extractText(parsed.root).trim();
+}
 export function logRootChildren(editor: LexicalEditor) {
   console.log('logRootChildren', editor)
   editor.update(() => {
