@@ -5,6 +5,8 @@ import { Prisma, User, UserPreference, UserRole, } from '@prisma/client';
 import { GoogleUser } from '../auth/types';
 import { SessionUser } from '../lib/types';
 import { use } from 'react';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../api/auth/[...nextauth]/route';
 
 export async function getUsers() {
     try {
@@ -280,6 +282,30 @@ export async function saveUserPreference({ userId, viewType, pageSize }: { userI
             pageSize: pageSize,
         }
     })
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+        throw new Error('Unauthorized');
+    }
+
+    // const result = await prisma.userPreference.update({
+    //     where: {
+    //         userId: userId,
+    //     },
+    //     data: {
+    //         viewType: viewType,
+    //         pageSize: pageSize,
+    //     }
+    // })
+
+    // console.log('saveUserPreference:', result)
+
+    // console.log('session user: ', session.user.preference)
+
+    // await prisma.user.update({
+    //     where: { email: session.user.email },
+    //     data: { preference: { ...result } },
+    // });
+
     return result;
 }
 

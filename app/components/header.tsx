@@ -1,11 +1,9 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
 import { Container, Dropdown, Nav, Navbar } from 'react-bootstrap';
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn, signOut, } from "next-auth/react";
 import Image from "next/image";
 import GoogleLogin from '../(pages)/icons/GoogleLogin';
-import { divide } from 'lodash-es';
-import { stringify } from 'querystring';
 import { saveUserPreferenceAction } from '../actions/userAction';
 
 interface ThemeProps {
@@ -16,7 +14,7 @@ interface ThemeProps {
 }
 
 const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: ThemeProps) => {
-    const { data: session } = useSession();
+    const { data: session, update } = useSession();
     const [showPopover, setShowPopover] = useState(false);
     const [viewType, setViewType] = useState<string>('')
     const [blogsPerPage, setBlogPerPage] = useState(50);
@@ -48,11 +46,13 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
     const saveViewMode = async (viewType: string) => {
         await saveUserPreferenceAction({ userId: session?.user.id, viewType, pageSize: blogsPerPage })
         setViewType(viewType);
+        update();
     }
 
     const saveBlogPerPage = async (pageSize: number) => {
         await saveUserPreferenceAction({ userId: session?.user.id, viewType: viewType, pageSize })
         setBlogPerPage(pageSize);
+        update();
     }
 
     return (

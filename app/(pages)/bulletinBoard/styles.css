@@ -7,3 +7,8 @@
     /* Scroll here only */
     /* padding-bottom: 20px; */
 }
+
+.lexical-editor-cardview {
+    max-height: 100px;
+    overflow-y: auto;
+}

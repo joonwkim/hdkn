@@ -21,16 +21,15 @@ type BlogsProps = {
 
 const BulletinBoard = ({ blogs }: BlogsProps) => {
     //#region session and state
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const [title, setTitle] = useState("");
-    const [content, setContent] = useState("");
+    // const [content, setContent] = useState("");
     const [commentInputs, setCommentInputs] = useState<{ [key: number]: string }>({});
     const [blogsPerPage, setBlogPerPage] = useState(50);
     const [currentPage, setCurrentPage] = useState(1);
     const [viewType, setViewType] = useState("summary");
     const [isWriting, setIsWriting] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false)
-    const [showSettings, setShowSettings] = useState(false);
     const [selectedBlog, setSelectedBlog] = useState<BlogWithRefTable | null>(null);
     const [initialDataForUpdate, setInitialDateForUpdate] = useState<string>('')
     const totalPages = Math.ceil(blogs.length / blogsPerPage) || 1;
@@ -41,21 +40,24 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     //#endregion
 
     useEffect(() => {
-        alert(session?.user.preference.viewType)
-        setViewType(session?.user.preference.viewType);
-        setBlogPerPage(session?.user.preference.pageSize)
-        // if (session?.user.preference) {
-        //     setViewType(session?.user.preference.viewType);
-        //     setBlogPerPage(session?.user.preference.pageSize)
-        // } else {
-        //     setViewType('card');
-        //     setBlogPerPage(20)
-        // }
+
+
     }, [session?.user.preference])
+    useEffect(() => {
+
+        if (session?.user.preference) {
+            setViewType(session?.user.preference.viewType);
+            setBlogPerPage(session?.user.preference.pageSize)
+
+        } else {
+            setViewType('card');
+            setBlogPerPage(3)
+        }
+    }, [session?.user.preference, status])
 
     const resetAll = () => {
         setTitle("");
-        setContent("");
+        // setContent("");
         setIsWriting(false);
         setIsUpdating(false);
         setSelectedBlog(null);
@@ -69,11 +71,17 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         }
     };
     const onBlogSelected = (blog: BlogWithRefTable) => {
+        if (session && blog.authorId === session.user.id) {
+            setIsAuthor(true);
+        } else {
+            setIsAuthor(false);
+        }
         if (blog === selectedBlog) {
             setSelectedBlog(null);
         } else {
             setSelectedBlog(blog)
         }
+
     }
     const handleAddNewBlogClick = () => {
         if (!session?.user) {
@@ -97,7 +105,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                     setIsWriting(true);
                     setIsUpdating(true);
                     setTitle(selectedBlog.title);
-                    setContent(selectedBlog.content);
+                    // setContent(selectedBlog.content);
                     handleFocus();
                 }
             } else {
@@ -121,6 +129,13 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     const handleCommentChange = (blogId: number, value: string) => {
         setCommentInputs({ ...commentInputs, [blogId]: value });
     };
+
+    const getCardClassName = (id: string) => {
+        return `card ${id === selectedBlog?.id ? 'border-primary border-2' : ''}`;
+    }
+    const getTableClassName = (id: string) => {
+        return `${id === selectedBlog?.id ? 'border-primary border-2' : ''}`;
+    }
     const renderPagination = () => {
         const maxVisiblePages = 5; // Adjust this to show more/less pages around the current one
         const pages = [];
@@ -171,47 +186,37 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             </ul>
         );
     };
-    const getCardClassName = (id: string) => {
-        return `card ${id === selectedBlog?.id ? 'border-primary border-2' : ''}`;
-    }
-    const getTableClassName = (id: string) => {
-        return `${id === selectedBlog?.id ? 'border-primary border-2' : ''}`;
-    }
     return (
         <div>
-            {/* <div>{JSON.stringify(session?.user.preference)}</div> */}
-            {/* toolbar controls */}
-            {/* <div>{
-                `user preference: ${JSON.stringify(session?.user.preference, null, 2)}`
-            }</div> */}
             <div className="d-flex justify-content-between align-items-center border-bottom p-2 sticky-child z-3">
                 {/* title */}
                 <div className="flex-grow-1 text-center">
                     <h2>자유게시판</h2>
                 </div>
                 {/* toolbuttons */}
-                <div className="me-3">
-                    <button className="btn btn-outline-secondary btn-sm me-2" title="글쓰기" onClick={handleAddNewBlogClick} disabled={isWriting}>
-                        <i className="bi bi-file-plus"></i>
-                    </button>
-                    <button className="btn btn-outline-secondary btn-sm me-2" title="변경하기" onClick={handleEditBlogClick} >
-                        <i className="bi bi-pencil"></i>
-                    </button>
-                    <button className="btn btn-outline-secondary btn-sm me-2" title="삭제하기" onClick={handleDeleteBlogClick} disabled={!selectedBlog}>
-                        <i className="bi bi-trash"></i>
-                    </button>
-                    <button className="btn btn-outline-secondary btn-sm me-2" title="요약형태보기" onClick={() => setViewType("summary")}>
-                        <i className="bi bi-view-stacked"></i>
-                    </button>
-                    <button className="btn btn-outline-secondary btn-sm me-2" title="카드형태보기" onClick={() => setViewType("card")}>
-                        <i className="bi bi-grid"></i>
-                    </button>
-                    <button className="btn btn-outline-secondary btn-sm me-2" title="테이블형태보기" onClick={() => setViewType("table")}>
-                        <i className="bi bi-table"></i>
-                    </button>
-                    {/* <button className="btn btn-outline-secondary btn-sm" title="페이지 세팅" onClick={() => setShowSettings(!showSettings)}>
-                        <i className="bi bi-gear"></i>
-                    </button> */}
+                <div className="me-3 d-flex ">
+                    <div title={session?.user ? "글쓰기" : "로그인 후 사용하세요."}>
+                        <button
+                            className="btn btn-outline-secondary btn-sm me-2"
+                            title={isWriting ? "작성 중입니다..." : "글쓰기"}
+                            onClick={handleAddNewBlogClick}
+                            disabled={!session?.user}
+                        >
+                            <i className="bi bi-file-plus"></i>
+                        </button>
+                    </div>
+                    <div title={isAuthor ? "글 수정" : "작성자 만 수정할 수 있습니다."}>
+                        <button className="btn btn-outline-secondary btn-sm me-2" title="글 수정" onClick={handleEditBlogClick} disabled={!isAuthor}>
+                            <i className="bi bi-pencil"></i>
+                        </button>
+                    </div>
+                    <div title={isAuthor ? "글 삭제" : "작성자 만 삭제할 수 있습니다."}>
+                        <button className="btn btn-outline-secondary btn-sm me-2" title="글 삭제" onClick={handleDeleteBlogClick} disabled={!isAuthor}>
+                            <i className="bi bi-trash"></i>
+                        </button>
+                    </div>
+
+
                 </div>
             </div>
             {/* contents */}
@@ -246,18 +251,20 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                             ))}
                         </div>
                     )}
-                    <div>{`viewType:${session?.user.preference.viewType}`}</div>
-                    {viewType}
+
                     {/* 카드보기 */}
                     {viewType === "card" && (
                         <div className="row">
                             {paginatedBlogs.map((blog) => (
                                 <div key={blog.id} className="col-md-4 mb-3" onClick={() => onBlogSelected(blog)}>
                                     <div className={getCardClassName(blog.id)}>
+                                        <div className='card-header'>
+                                            <h5>   {blog.title}</h5>
+                                        </div>
                                         <div className="card-body">
-                                            <h5 className="card-title">{blog.title}</h5>
-                                            <Editor isReadOnly={true} initailData={blog.content} />
-                                            {/* <p className="card-text">{content}</p> */}
+                                            <div className="lexical-editor-cardview" >
+                                                <Editor isReadOnly={true} initailData={blog.content} />
+                                            </div>
                                         </div>
                                         <div className='card-footer'>
                                             <BlogFooter blog={blog} userId={session?.user.id} />
@@ -266,6 +273,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                                 </div>
                             ))}
                         </div>
+
                     )}
                     {/* 테이블보기 */}
                     {viewType === "table" && (
@@ -304,26 +312,6 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                         {renderPagination()}
                     </nav>
                 )}
-                {/* Pagination settings */}
-                {/* {showSettings && (
-                    <div className="modal fade show d-block" tabIndex={-1} role="dialog" >
-                        <div className="modal-dialog">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">페이지 세팅</h5>
-                                    <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" onClick={() => setShowSettings(false)}></button>
-                                </div>
-                                <div className="modal-body">
-                                    <label className="me-2"><strong>페이지당 게시글 수:</strong></label>
-                                    <input type="number" title="blogsetting" className="form-control w-auto d-inline-block" value={blogsPerPage} onChange={(e) => setBlogPerPage(Number(e.target.value))} />
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-primary" onClick={() => setShowSettings(false)}>닫기</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )} */}
             </div>
         </div>
     );
