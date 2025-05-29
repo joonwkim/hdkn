@@ -41,11 +41,11 @@ const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
         const hours = getHoursFromToday(blog?.createdAt);
         const mins = getMinsFromToday(blog?.createdAt);
         if (days > 0) {
-            return (<>{days} <span>일전</span></>);
+            return (<>{days} <span className='fs-7'>일전</span></>);
         } else if (hours > 0) {
-            return (<>{hours} <span>시간전</span></>);
+            return (<>{hours} <span className='fs-7'>시간전</span></>);
         }
-        return (<>{mins} <span>분전</span></>);
+        return (<>{mins} <span className='fs-7'>분전</span></>);
     };
     const checkLoginStatus = () => {
         if (!userId) {
@@ -58,7 +58,6 @@ const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
         }
         return true;
     };
-
     const handleVote = async (status: ThumbsStatus) => {
         if (checkLoginStatus() && userId) {
             const alreadyVoted = vote?.thumbsStatus === status;
@@ -77,7 +76,6 @@ const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
             const result = await upsertVoteOnBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: status, forked: vote?.forked }) as Vote;
         }
     }
-
     const handleforked = async () => {
         if (checkLoginStatus() && userId) {
             const result = await upsertVoteOnBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: vote?.thumbsStatus, forked: !forked }) as Vote;
@@ -112,5 +110,4 @@ const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
         </div>
     );
 }
-
 export default BlogFooter

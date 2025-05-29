@@ -14,6 +14,7 @@ import '../../lib/date'
 import Editor, { EditorHandle } from "@/app/components/lexicalEditor/Editor";
 import { getDislikesCount, getLikesCount } from './utils/votes';
 import { getContent } from '@/app/components/lexicalEditor/utils/getSelectedNode';
+import UserAvartar from '../icons/UserAvartar';
 
 type BlogsProps = {
     blogs: BlogWithRefTable[]
@@ -37,27 +38,27 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     const paginatedBlogs = blogs.slice(startIndex, startIndex + blogsPerPage);
     const router = useRouter();
     const [isAuthor, setIsAuthor] = useState(false);
+    const [showBlog, setShowBlog] = useState(false);
+    const [selectedBlogContent, SetSelectedBlogContent] = useState('');
+
     //#endregion
+    useEffect(() => {
+        if (selectedBlog) {
+            SetSelectedBlogContent(selectedBlog.content)
+        }
+    }, [selectedBlog]);
 
     useEffect(() => {
-
-
-    }, [session?.user.preference])
-    useEffect(() => {
-
         if (session?.user.preference) {
             setViewType(session?.user.preference.viewType);
             setBlogPerPage(session?.user.preference.pageSize)
-
         } else {
             setViewType('card');
             setBlogPerPage(3)
         }
     }, [session?.user.preference, status])
-
     const resetAll = () => {
         setTitle("");
-        // setContent("");
         setIsWriting(false);
         setIsUpdating(false);
         setSelectedBlog(null);
@@ -75,13 +76,14 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             setIsAuthor(true);
         } else {
             setIsAuthor(false);
+            setShowBlog(true);
+
         }
         if (blog === selectedBlog) {
             setSelectedBlog(null);
         } else {
-            setSelectedBlog(blog)
+            setSelectedBlog(blog);
         }
-
     }
     const handleAddNewBlogClick = () => {
         if (!session?.user) {
@@ -102,7 +104,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                     alert('작성자만 수정할 수 있습니다.')
                 } else {
                     setInitialDateForUpdate(selectedBlog.content);
-                    setIsWriting(true);
+                    // setIsWriting(true);
                     setIsUpdating(true);
                     setTitle(selectedBlog.title);
                     // setContent(selectedBlog.content);
@@ -126,10 +128,20 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             resetAll();
         }
     };
+    const handleSaveEditedBlog = async (content: string) => {
+        const result = await upsertBlogAction(session?.user.id, title, content)
+        if (result) {
+            console.log('Refreshing...');
+            router.refresh();
+            resetAll();
+        }
+    };
+    const handleCancel = () => {
+        resetAll();
+    };
     const handleCommentChange = (blogId: number, value: string) => {
         setCommentInputs({ ...commentInputs, [blogId]: value });
     };
-
     const getCardClassName = (id: string) => {
         return `card ${id === selectedBlog?.id ? 'border-primary border-2' : ''}`;
     }
@@ -139,7 +151,6 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     const renderPagination = () => {
         const maxVisiblePages = 5; // Adjust this to show more/less pages around the current one
         const pages = [];
-
         if (totalPages <= maxVisiblePages) {
             // Show all pages if totalPages is small
             for (let i = 1; i <= totalPages; i++) {
@@ -169,19 +180,19 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         return (
             <ul className="pagination justify-content-center">
                 <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                    <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)} title="이전으로 가기"><i className="bi bi-chevron-double-left"></i></button>
+                    <button className="page-link" onClick={() => { setCurrentPage(currentPage - 1); setShowBlog(false) }} title="이전으로 가기"><i className="bi bi-chevron-double-left"></i></button>
                 </li>
                 {pages.map((page, index) => (
                     <li key={index} className={`page-item ${page === currentPage ? "active" : ""}`}>
                         {typeof page === "number" ? (
-                            <button className="page-link" onClick={() => setCurrentPage(page)}>{page}</button>
+                            <button className="page-link" onClick={() => { setCurrentPage(page), setShowBlog(false) }}>{page}</button>
                         ) : (
                             <span className="page-link">...</span> // Ellipsis
                         )}
                     </li>
                 ))}
                 <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                    <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)} title="다음으로"><i className="bi bi-chevron-double-right"></i></button>
+                    <button className="page-link" onClick={() => { setCurrentPage(currentPage + 1), setShowBlog(false) }} title="다음으로"><i className="bi bi-chevron-double-right"></i></button>
                 </li>
             </ul>
         );
@@ -215,8 +226,6 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                             <i className="bi bi-trash"></i>
                         </button>
                     </div>
-
-
                 </div>
             </div>
             {/* contents */}
@@ -224,57 +233,84 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                 {/* 글 작성하기 */}
                 {isWriting && (
                     <div className="mb-3">
-                        <input type="text" className="form-control mb-2" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} disabled={isUpdating} />
+                        <input type="text" className="form-control mb-2" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
                         <div className="mt-3">
-                            <Editor initailData={initialDataForUpdate} cancel={() => setIsWriting(false)} saveDocument={handleSaveNewBlog} isReadOnly={isAuthor} />
+                            <Editor initialData={initialDataForUpdate} cancel={() => setIsWriting(false)} saveDocument={handleSaveNewBlog} isReadOnly={isAuthor} />
                         </div>
                         {/* <button className="btn btn-secondary me-2" onClick={() => setIsWriting(false)}>취소</button>
                         <button className="btn btn-primary me-2" onClick={() => handleAddBlog()}>저장</button> */}
                     </div>
                 )}
+                {/* 세부 글 보기 */}
+                {showBlog && selectedBlog && (
+                    <div className="border-bottom p-2">
+                        <div> <strong>{`제목: ${selectedBlog.title}`}</strong></div>
+                        <div className='d-flex my-2'>
+                            <UserAvartar url={selectedBlog.author.image} name={selectedBlog.author.name} />
+                            <div className='ms-1'>
+                                <div className='fs-7'>{`작성자: ${selectedBlog.author.name}`}</div>
+                                <div className='fs-7'>{`작성일: ${selectedBlog.createdAt.toKrDateString()}`}</div>
+                            </div>
+                        </div>
+                        <div className='mb-3'>
+                            <Editor isReadOnly={true} initialData={selectedBlogContent} />
+                        </div>
+                        <div className='border-top'>
+                            <BlogFooter blog={selectedBlog} userId={session?.user.id} />
+                        </div>
+                        <BlogComment blog={selectedBlog} />
+                    </div>
+                )}
+                {/* 글 편집하기 */}
+                {isUpdating && selectedBlog && (
+                    <div className="border-bottom p-2">
+                        <div> <strong>{`제목: ${selectedBlog.title}`}</strong></div>
+                        <div className='d-flex my-2'>
+                            <UserAvartar url={selectedBlog.author.image} name={selectedBlog.author.name} />
+                            <div className='ms-1'>
+                                <div className='fs-7'>{`작성자: ${selectedBlog.author.name}`}</div>
+                                <div className='fs-7'>{`작성일: ${selectedBlog.createdAt.toKrDateString()}`}</div>
+                            </div>
+                        </div>
+
+                        <div className='mb-3'>
+                            <Editor isReadOnly={false} initialData={selectedBlog.content} saveDocument={handleSaveEditedBlog} cancel={handleCancel} />
+                        </div>
+                        <div className='border-top'>
+                            <BlogFooter blog={selectedBlog} userId={session?.user.id} />
+                        </div>
+                        <BlogComment blog={selectedBlog} />
+                    </div>
+                )}
                 {/* 보기 */}
                 <div className="mt-3">
                     {/* 요약보기 */}
-                    {viewType === "summary" && (
-                        <div>
-                            {paginatedBlogs.map((blog) => (
-                                <div key={blog.id} className="border-bottom p-2" onClick={() => onBlogSelected(blog)}>
-                                    <h5>{blog.title}</h5>
-                                    <strong>{blog.author.name}</strong> - <small>{blog.updatedAt.toKrDateString()}</small>
-                                    {/* <Editor isReadOnly={true} initailData={blog.content} /> */}
-                                    <div className='my-3'>
-                                        {getContent(blog.content)}
-                                    </div>
-                                    <BlogFooter blog={blog} userId={session?.user.id} />
-                                    <BlogComment blog={blog} />
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
                     {/* 카드보기 */}
                     {viewType === "card" && (
                         <div className="row">
                             {paginatedBlogs.map((blog) => (
                                 <div key={blog.id} className="col-md-4 mb-3" onClick={() => onBlogSelected(blog)}>
-                                    <div className={getCardClassName(blog.id)}>
-                                        <div className='card-header'>
-                                            <h5>   {blog.title}</h5>
+                                    <div className={getCardClassName(blog.id) + ' w-100'}>
+                                        <div className="card-header">
+                                            <div className="fs-5 text-truncate">{`제목: ${blog.title}`}</div>
+                                            <div className="fs-7 text-truncate">{`작성자: ${blog.author.name}`}</div>
                                         </div>
+
                                         <div className="card-body">
-                                            <div className="lexical-editor-cardview" >
-                                                <Editor isReadOnly={true} initailData={blog.content} />
+                                            <div className="lexical-editor-cardview">
+                                                <Editor isReadOnly={true} initialData={blog.content} />
                                             </div>
                                         </div>
-                                        <div className='card-footer'>
+
+                                        <div className="card-footer">
                                             <BlogFooter blog={blog} userId={session?.user.id} />
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
-
                     )}
+
                     {/* 테이블보기 */}
                     {viewType === "table" && (
                         <table className="table">

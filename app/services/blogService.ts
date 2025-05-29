@@ -76,7 +76,7 @@ export async function getBlogs(): Promise<{ props: BlogWithRefTable[]; revalidat
 
 export async function upsertBlog({ userId, title, content }: { userId: string, title: string, content: string }) {
   try {
-    console.log("upsert blogs...");
+    // console.log("upsert blogs...");
     const result = await prisma.blog.upsert({
       where: {
         title_authorId: {
@@ -134,7 +134,7 @@ export async function upsertBlogComment({ id, commenterId, blogId, comment, }: U
 
 export async function deleteSelectedBlog(blog: Blog) {
   try {
-    console.log("delte blog...");
+    // console.log("delte blog...");
     const result = await prisma.blog.delete({
       where: {
         id: blog.id
@@ -150,7 +150,7 @@ export async function deleteSelectedBlog(blog: Blog) {
 
 export async function upsertVoteOnBlog({ userId, blogId, thumbsStatus, forked }: { userId: string; blogId: string; thumbsStatus: ThumbsStatus | undefined | null; forked: boolean | undefined }) {
   try {
-    console.log('upsertVoteOnBlog:', userId, blogId, thumbsStatus, forked)
+    // console.log('upsertVoteOnBlog:', userId, blogId, thumbsStatus, forked)
     const result = await prisma.vote.upsert({
       where: {
         voterId_blogId: { voterId: userId, blogId },
@@ -166,7 +166,7 @@ export async function upsertVoteOnBlog({ userId, blogId, thumbsStatus, forked }:
         forked,
       },
     });
-    console.log('voteOnBlog:', result)
+    // console.log('voteOnBlog:', result)
     return result;
   } catch (err) {
     console.error("voteOnBlog error:", err);

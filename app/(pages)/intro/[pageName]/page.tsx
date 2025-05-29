@@ -67,7 +67,7 @@ const Page = () => {
 
     return (
         <div>
-            <Editor saveDocument={saveDocument} isReadOnly={isReadOnly} initailData={data?.content} />
+            <Editor saveDocument={saveDocument} isReadOnly={isReadOnly} initialData={data?.content} />
         </div>
     );
 };

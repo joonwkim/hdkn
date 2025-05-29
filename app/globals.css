@@ -44,3 +44,7 @@ body {
 .popover-pagesize {
   width: 140px !important;
 }
+
+.fs-7 {
+  font-size: .7rem;
+}

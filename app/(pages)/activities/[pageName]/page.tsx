@@ -55,7 +55,7 @@ const Page = () => {
 
     return (
         <div>
-            <Editor saveDocument={saveDocument} isReadOnly={!isAuthor} initailData={data?.content} />
+            <Editor saveDocument={saveDocument} isReadOnly={!isAuthor} initialData={data?.content} />
         </div>
     );
 };

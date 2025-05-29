@@ -36,7 +36,7 @@ import LoadInitialDataPlugin from './plugins/LoadInitialDataPlugin';
 // import TreeViewPlugin from './plugins/TreeViewPlugin';
 interface EditorProps {
     isReadOnly: boolean,
-    initailData?: string,
+    initialData?: string,
     // disableSaveButton?: boolean,
     cancel?: () => void,
     saveDocument?: (content: string) => void,
@@ -45,7 +45,7 @@ export type EditorHandle = {
     getSerializedState: () => Promise<string>;
 };
 
-const Editor = forwardRef<EditorHandle, EditorProps>(({ cancel, saveDocument, isReadOnly, initailData, }, ref) => {
+const Editor = forwardRef<EditorHandle, EditorProps>(({ cancel, saveDocument, isReadOnly, initialData, }, ref) => {
     const toolbarPluginRef = useRef<EditorHandle>(null);
     const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null);
     const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false);
@@ -63,6 +63,8 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({ cancel, saveDocument, is
             return serialized;
         },
     }));
+
+
 
     useEffect(() => {
         const updateViewPortWidth = () => {
@@ -136,8 +138,8 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({ cancel, saveDocument, is
                                     />
 
                                 </>)}
-                                {initailData && (
-                                    <LoadInitialDataPlugin initialData={initailData}
+                                {initialData && (
+                                    <LoadInitialDataPlugin initialData={initialData}
                                         onImageResize={(node) => {
                                             console.log("Image resized:", node);
                                         }}
