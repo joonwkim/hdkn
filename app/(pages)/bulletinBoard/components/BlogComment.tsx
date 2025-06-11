@@ -10,14 +10,20 @@ import './styles.css'
 import UserAvartar from '../../icons/UserAvartar';
 import { upsertBlogCommentAction } from '@/app/actions/blog';
 import SortCommentIcon from '../../icons/SortCommentIcon';
+import { BlogWithRefTable } from '@/app/services/blogService';
 
-const BlogComment = ({ blog }: BlogFooterProps) => {
+export interface BlogCommentProps {
+    blog: BlogWithRefTable,
+}
+
+const BlogComment = ({ blog }: BlogCommentProps) => {
     const { data: session } = useSession();
     const [comment, setComment] = useState("");
     const [sort, setSort] = useState<'popular' | 'latest' | 'oldest'>('latest');
     const [comments, setComments] = useState(blog.comments)
     const [isAddingComment, setIsAddingComment] = useState(false)
     const [isAsce, setIsAsce] = useState(true);
+    const [showPopover, setShowPopover] = useState(false);
 
     const addComment = async () => {
         if (session?.user) {
@@ -103,8 +109,8 @@ const BlogComment = ({ blog }: BlogFooterProps) => {
                                         <ExpandingTextarea text={comment} handleSaveBtnClick={(value) => setComment(value)} />
                                     </div>
                                     <div className='d-flex mt-1 justify-content-end me-4' >
-                                        <button className='btn btn-sm btn-outline-secondary' onClick={() => setIsAddingComment(false)}>cancel</button>
-                                        <button className='btn btn-sm btn-outline-primary ms-2' onClick={addComment} disabled={comment === ""}>comment</button>
+                                        <button className='btn btn-sm btn-outline-secondary' onClick={() => setIsAddingComment(false)}>취소</button>
+                                        <button className='btn btn-sm btn-outline-primary ms-2' onClick={addComment} disabled={comment === ""}>등록</button>
                                     </div>
                                 </div>
 
@@ -137,10 +143,22 @@ const BlogComment = ({ blog }: BlogFooterProps) => {
                     {comments.map((comment, index) => (
                         <li key={index} className="ps-0 ms-0 list-group-item small d-flex">
                             <UserAvartar url={comment.commenter?.image} name={comment.commenter?.name} />
-                            <div className='ms-2'>
+                            <div className='ms-2 w-100'>
+                                <div className='d-flex justify-content-between'>
+                                    <div className='fs-7'>{comment.commenter.name}</div>
+                                    <div>
+                                        <i className="bi bi-three-dots"></i>
+                                        {showPopover && (
+                                            <div>
+                                                test
+                                            </div>
+                                        )}
+                                    </div>
+
+                                </div>
+
                                 {comment.comment}
                             </div>
-
                         </li>
                     ))}
                 </ul>

@@ -94,6 +94,9 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
                                                 <div className="mb-2">
                                                     <div>보기형태:</div>
                                                     <div className="ms-2 d-flex gap-2">
+                                                        <button className={`btn btn-sm ${viewType === "summary" ? "btn-secondary" : "btn-outline-secondary"}`} title="요약형태보기" onClick={() => saveViewMode("summary")}>
+                                                            <i className="bi bi-view-stacked"></i>
+                                                        </button>
                                                         <button className={`btn btn-sm ${viewType === "card" ? "btn-secondary" : "btn-outline-secondary"}`} title="카드형태보기" onClick={() => saveViewMode("card")}>
                                                             <i className="bi bi-grid"></i>
                                                         </button>

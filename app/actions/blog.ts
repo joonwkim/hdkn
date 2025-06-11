@@ -2,11 +2,18 @@
 import { revalidatePath } from "next/cache";
 // import { setNodeSelected, updateExpandStatus } from "../services/menu";
 // import { TreeNode } from "../types/treeMenu";
-import { deleteSelectedBlog, getBlogs, recordBlogView, upsertBlog, upsertBlogComment, upsertVoteOnBlog, voteOnComment } from "../services/blogService";
+import { createNewBlog, deleteSelectedBlog, getBlogs, recordBlogView, updateBlog, upsertBlogComment, upsertVoteOnBlog, voteOnComment } from "../services/blogService";
 import { Blog, ThumbsStatus } from "@prisma/client";
 
-export async function upsertBlogAction(userId: string, title: string, content: string) {
-    await upsertBlog({ userId, title, content });
+export async function createNewBlogAction(userId: string, title: string, content: string) {
+    // console.log('upsertBlogAction title:', title)
+    await createNewBlog({ userId, title, content });
+    revalidatePath('/bulletinBoard');
+    return true;
+}
+export async function updateBlogAction(blogId: string, content: string) {
+    // console.log('upsertBlogAction title:', title)
+    await updateBlog({ blogId, content });
     revalidatePath('/bulletinBoard');
     return true;
 }

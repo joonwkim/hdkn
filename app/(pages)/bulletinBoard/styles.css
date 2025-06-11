@@ -12,3 +12,9 @@
     max-height: 100px;
     overflow-y: auto;
 }
+
+.lexical-editor-summaryview {
+    min-height: 50px;
+    max-height: 150px;
+    overflow-y: hidden;
+}

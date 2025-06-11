@@ -18,8 +18,10 @@ const LoadInitialDataPlugin: React.FC<LoadInitialDataPluginProps> = ({ initialDa
             try {
                 const parsedState = JSON.parse(initialData);
                 editor.update(() => {
-                    const editorState: EditorState = editor.parseEditorState(parsedState);
-                    editor.setEditorState(editorState);
+                    if (parsedState) {
+                        const editorState: EditorState = editor.parseEditorState(parsedState);
+                        editor.setEditorState(editorState);
+                    }
                 });
             } catch (error) {
                 console.error("Error parsing initial editor state:", error);

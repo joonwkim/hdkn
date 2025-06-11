@@ -59,6 +59,7 @@ export async function updateUserAction(id: string, input: Prisma.UserCreateInput
 }
 
 export async function saveUserPreferenceAction({ userId, viewType, pageSize }: { userId: string, viewType: string, pageSize: number }) {
+    // console.log('saveUserPreferenceAction userId: ', userId)
     await saveUserPreference({ userId, viewType, pageSize })
     revalidatePath('/');
 }

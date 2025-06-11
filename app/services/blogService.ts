@@ -59,9 +59,12 @@ export async function getBlogs(): Promise<{ props: BlogWithRefTable[]; revalidat
         tags: true,
       },
       orderBy: {
-        updatedAt: "desc"
+        createdAt: "desc"
       }
     });
+    // blogs.forEach((b) => {
+    //   console.log('blog: ', b.createdAt.toDateString(), b.title)
+    // })
     // console.log("Fetched blogs:", blogs);
     return {
       props: blogs,
@@ -74,27 +77,35 @@ export async function getBlogs(): Promise<{ props: BlogWithRefTable[]; revalidat
   }
 }
 
-export async function upsertBlog({ userId, title, content }: { userId: string, title: string, content: string }) {
+export async function createNewBlog({ userId, title, content }: { userId: string, title: string, content: string }) {
   try {
-    // console.log("upsert blogs...");
-    const result = await prisma.blog.upsert({
-      where: {
-        title_authorId: {
-          authorId: userId,
-          title: title,
-        },
-      },
-      create: {
+    // console.log("upsert blog title: ", title);
+    const result = await prisma.blog.create({
+      data: {
+        authorId: userId,
         title: title,
         content: content,
-        authorId: userId,
-      },
-      update: {
-        content: content,
-        updatedAt: new Date(),
-      },
+      }
     })
-    // console.log("upsert blogs:", result);
+    // console.log("create new blog result:", result);
+    return result;
+  } catch (error) {
+    console.log('upsertBlog error:', error)
+    return null;
+  }
+}
+export async function updateBlog({ blogId, content }: { blogId: string, content: string }) {
+  try {
+    // console.log("upsert blog title: ", title);
+    const result = await prisma.blog.update({
+      where: {
+        id: blogId,
+      },
+      data: {
+        content: content,
+      }
+    })
+    // console.log("upsert blog result:", result);
     return result;
   } catch (error) {
     console.log('upsertBlog error:', error)
@@ -140,7 +151,7 @@ export async function deleteSelectedBlog(blog: Blog) {
         id: blog.id
       },
     })
-    console.log("delted blog:", result);
+    // console.log("deleted blog:", result);
     return result;
   } catch (error) {
     console.log('delete blog error:', error)

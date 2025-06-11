@@ -249,7 +249,7 @@ model Blog {
   selected          Boolean             @default(false)
   // forks             BlogFork[]
 
-  @@unique([title, authorId])
+  // @@unique([title, authorId])
   @@index([title])
   @@index([authorId])
 }

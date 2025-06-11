@@ -9,13 +9,15 @@ import ThumbDown from '../../icons/thumbDown';
 import Fork from '../../icons/fork';
 import './styles.css'
 import { ThumbsStatus, Vote } from '@prisma/client';
-import { upsertVoteOnBlogAction, } from '@/app/actions/blog';
+// import { upsertVoteOnBlogAction, } from '@/app/actions/blog';
 
 export interface BlogFooterProps {
     blog: BlogWithRefTable,
     userId?: string,
+    handleVote: (status: ThumbsStatus) => void,
+    handleforked: () => void,
 }
-const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
+const BlogFooter = ({ blog, userId, handleVote, handleforked }: BlogFooterProps) => {
     const [thumbsStatus, setThumbsStatus] = useState<ThumbsStatus | undefined | null>(ThumbsStatus.None);
     const [likes, setLikes] = useState<number>(0)
     const [dislikes, setDislikes] = useState<number>(0)
@@ -47,49 +49,28 @@ const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
         }
         return (<>{mins} <span className='fs-7'>분전</span></>);
     };
-    const checkLoginStatus = () => {
-        if (!userId) {
-            alert('로그인을 하셔야 선택할 수 있습니다.');
-            return false;
-        }
-        else if (userId === blog.author?.id) {
-            alert('작성자는 자기에게 좋아요를 선택할 수 없습니다.');
-            return false;
-        }
-        return true;
-    };
-    const handleVote = async (status: ThumbsStatus) => {
-        if (checkLoginStatus() && userId) {
-            const alreadyVoted = vote?.thumbsStatus === status;
-            const changingVote = vote && vote.thumbsStatus !== status;
-            if (alreadyVoted) {
-                alert('1회만 참여 할 수 있습니다.');
-                return;
-            }
-            if (status === ThumbsStatus.ThumbsUp) {
-                setLikes((prev) => prev + 1);
-                if (changingVote && dislikes > 0) setDislikes((prev) => prev - 1);
-            } else if (status === ThumbsStatus.ThumbsDown) {
-                setDislikes((prev) => prev + 1);
-                if (changingVote && likes > 0) setLikes((prev) => prev - 1);
-            }
-            const result = await upsertVoteOnBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: status, forked: vote?.forked }) as Vote;
-        }
-    }
-    const handleforked = async () => {
-        if (checkLoginStatus() && userId) {
-            const result = await upsertVoteOnBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: vote?.thumbsStatus, forked: !forked }) as Vote;
-            setForked((prev) => !prev)
-        }
-    };
+
+    // const handleVote = async (status: ThumbsStatus) => {
+    //     if (checkLoginStatus() && userId) {
+    //         const alreadyVoted = vote?.thumbsStatus === status;
+    //         const changingVote = vote && vote.thumbsStatus !== status;
+    //         if (alreadyVoted) {
+    //             alert('1회만 참여 할 수 있습니다.');
+    //             return;
+    //         }
+    //         if (status === ThumbsStatus.ThumbsUp) {
+    //             setLikes((prev) => prev + 1);
+    //             if (changingVote && dislikes > 0) setDislikes((prev) => prev - 1);
+    //         } else if (status === ThumbsStatus.ThumbsDown) {
+    //             setDislikes((prev) => prev + 1);
+    //             if (changingVote && likes > 0) setLikes((prev) => prev - 1);
+    //         }
+    //         const result = await upsertVoteOnBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: status, forked: vote?.forked }) as Vote;
+    //     }
+    // }
+
     return (
         <div>
-            {/* <div className='d-flex'>
-                <div>dislikes: </div>
-                <div className='ms-2'>
-                    {dislikes}
-                </div>
-            </div> */}
             <small className="text-muted">
                 {getDaysOrHoursFromNow()}
                 <span className="ms-2 me-2">
@@ -101,7 +82,6 @@ const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
                     <span className="ms-2 me-2">{likes}</span>
                     <ThumbDown className="ms-1 cursorHand" onClick={() => handleVote(ThumbsStatus.ThumbsDown)} title="싫어요" isThumbDown={thumbsStatus === ThumbsStatus.ThumbsDown ? true : false} />
                     <span className="ms-2 me-3">{dislikes}</span>
-
                 </span>
             </small>
             <span className="mt-3">
