@@ -26,7 +26,6 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     const [blogsPerPage, setBlogPerPage] = useState(50);
     const [currentPage, setCurrentPage] = useState(1);
     const [viewType, setViewType] = useState("summary");
-    // const [isUpdating, setIsUpdating] = useState(false)
     const [selectedBlog, setSelectedBlog] = useState<BlogWithRefTable | null>(null);
     // const [initialDataForUpdate, setInitialDateForUpdate] = useState<string>('')
     const totalPages = Math.ceil(blogs.length / blogsPerPage) || 1;
@@ -35,7 +34,6 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     const router = useRouter();
     const [isAuthor, setIsAuthor] = useState(false);
     const [showBlog, setShowBlog] = useState(false);
-    const [selectedBlogContent, SetSelectedBlogContent] = useState('');
     const [viewMode, setViewMode] = useState<'view' | 'edit' | 'new'>('view')
     //#endregion
 
@@ -49,12 +47,6 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         }
     }, [session?.user.preference, status])
 
-    useEffect(() => {
-        if (selectedBlog) {
-            SetSelectedBlogContent(selectedBlog.content)
-        }
-    }, [selectedBlog]);
-
     const resetAll = () => {
         setTitle("");
         setViewMode('view');
@@ -67,42 +59,18 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
         }
     };
-    const onBlogSelected = (blog: BlogWithRefTable) => {
-        setSelectedBlog(blog);
-        const author = blog.authorId === session?.user.id;
-        setIsAuthor(author);
-        setViewMode(author ? 'edit' : 'view');
-        const element = document.querySelector('.blog-content');
-        if (element) {
-            element.scrollTop = 0;
+    const handleBlogSelectionChanged = (blog: BlogWithRefTable) => {
+        if (selectedBlog?.id !== blog.id) {
+            setSelectedBlog(blog);
+            const author = blog.authorId === session?.user.id;
+            setIsAuthor(author);
+            setViewMode(author ? 'edit' : 'view');
+            const element = document.querySelector('.blog-content');
+            if (element) {
+                element.scrollTop = 0;
+            }
         }
 
-        // setViewMode(author ? 'edit' : 'view');
-
-
-
-        // if (session && blog.authorId === session.user.id) {
-        //     setIsAuthor(true);
-        // } else {
-        //     setIsAuthor(false);
-        //     setShowBlog(true);
-
-        // }
-        // if (blog !== selectedBlog) {
-        //     setSelectedBlog(blog);
-
-        // }
-        // if (blog === selectedBlog) {
-        //     setSelectedBlog(null);
-
-        // } else {
-        //     setSelectedBlog(blog);
-        //     if (isAuthor) {
-        //         setIsUpdating(true);
-        //     } else {
-        //         setShowBlog(true);
-        //     }
-        // }
     }
     const handleAddNewBlogClick = () => {
         if (!session?.user) {
@@ -122,7 +90,6 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                 if (selectedBlog.authorId !== session.user.id) {
                     alert('작성자만 수정할 수 있습니다.')
                 } else {
-                    // setInitialDateForUpdate(selectedBlog.content);                  
                     setTitle(selectedBlog.title);
                     handleFocus();
                 }
@@ -219,46 +186,15 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             </ul>
         );
     };
-    const checkLoginStatus = () => {
-        if (selectedBlog) {
-            if (!session?.user) {
-                alert('로그인을 하셔야 선택할 수 있습니다.');
-                return false;
-            }
-            else if (session.user.id === selectedBlog.author?.id) {
-                alert('작성자는 자기에게 좋아요를 선택할 수 없습니다.');
-                return false;
-            }
-        }
-        return true;
-    };
-    const handleVote = async (status: ThumbsStatus) => {
-        // if (selectedBlog && session?.user.id) {
-        //     const vote = getUserVote(selectedBlog.votes, session?.user.id)
-        //     const alreadyVoted = vote.thumbsStatus === status;
-        //     const changingVote = vote && vote.thumbsStatus !== status;
-        //     if (alreadyVoted) {
-        //         alert('1회만 참여 할 수 있습니다.');
-        //         return;
-        //     }
-        //     if (status === ThumbsStatus.ThumbsUp) {
-        //         setLikes((prev) => prev + 1);
-        //         if (changingVote && dislikes > 0) setDislikes((prev) => prev - 1);
-        //     } else if (status === ThumbsStatus.ThumbsDown) {
-        //         setDislikes((prev) => prev + 1);
-        //         if (changingVote && likes > 0) setLikes((prev) => prev - 1);
-        //     }
-        //     const result = await upsertVoteOnBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: status, forked: vote?.forked }) as Vote;
-        // }
-    }
-    const handleforked = async () => {
-        // if (checkLoginStatus() && userId) {
-        //     const result = await upsertVoteOnBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: vote?.thumbsStatus, forked: !forked }) as Vote;
-        //     setForked((prev) => !prev)
-        // }
-    };
+
     return (
         <div>
+            <div>
+                {viewMode}
+            </div>
+            <div>
+                {selectedBlog !== null && (selectedBlog.title)}
+            </div>
             <div className="d-flex justify-content-between align-items-center border-bottom p-2 sticky-child z-3">
                 {/* title */}
                 <div className="flex-grow-1 text-center">
@@ -325,7 +261,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                                     <Editor isReadOnly={false} initialData={selectedBlog.content} saveDocument={handleSaveEditedBlog} cancel={handleCancel} />
                                 </div>
                                 <div className='border-top'>
-                                    <BlogFooter handleVote={handleVote} handleforked={handleforked} blog={selectedBlog} userId={session?.user.id} />
+                                    <BlogFooter blog={selectedBlog} userId={session?.user.id} />
                                 </div>
                                 <BlogComment blog={selectedBlog} />
                             </div>
@@ -342,10 +278,10 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                                     </div>
                                 </div>
                                 <div className='mb-3'>
-                                    <Editor isReadOnly={true} initialData={selectedBlogContent} />
+                                    <Editor isReadOnly={true} initialData={selectedBlog.content} />
                                 </div>
                                 <div className='border-top'>
-                                    <BlogFooter handleVote={handleVote} handleforked={handleforked} blog={selectedBlog} userId={session?.user.id} />
+                                    <BlogFooter blog={selectedBlog} userId={session?.user.id} />
                                 </div>
                                 <BlogComment blog={selectedBlog} />
                             </div>
@@ -359,13 +295,13 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                     {viewType === "summary" && (
                         <div>
                             {paginatedBlogs.map((blog) => (
-                                <div key={blog.id} className={getSummaryClassName(blog.id)} onClick={() => onBlogSelected(blog)}>
+                                <div key={blog.id} className={getSummaryClassName(blog.id)} onClick={() => handleBlogSelectionChanged(blog)}>
                                     <h5>{blog.title}</h5>
                                     <strong>{blog.author.name}</strong> - <small>{blog.updatedAt.toKrDateString()}</small>
                                     <div className="lexical-editor-summaryview mb-3">
                                         <Editor isReadOnly={true} initialData={blog.content} />
                                     </div>
-                                    <BlogFooter handleVote={handleVote} handleforked={handleforked} blog={blog} userId={session?.user.id} />
+                                    <BlogFooter blog={blog} userId={session?.user.id} />
                                     <BlogComment blog={blog} />
                                 </div>
                             ))}
@@ -375,7 +311,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                     {viewType === "card" && (
                         <div className="row">
                             {paginatedBlogs.map((blog) => (
-                                <div key={blog.id} className="col-md-4 mb-3" onClick={() => onBlogSelected(blog)}>
+                                <div key={blog.id} className="col-md-4 mb-3" onClick={() => handleBlogSelectionChanged(blog)}>
                                     <div className={getCardClassName(blog.id) + ' w-100'}>
                                         <div className="card-header">
                                             <div className="fs-5 text-truncate">{`제목: ${blog.title}`}</div>
@@ -389,7 +325,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                                         </div>
 
                                         <div className="card-footer">
-                                            <BlogFooter handleVote={handleVote} handleforked={handleforked} blog={blog} userId={session?.user.id} />
+                                            <BlogFooter blog={blog} userId={session?.user.id} />
                                         </div>
                                     </div>
                                 </div>
@@ -412,7 +348,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                             </thead>
                             <tbody>
                                 {paginatedBlogs.map((blog) => (
-                                    <tr key={blog.id} className={getTableClassName(blog.id)} onClick={() => onBlogSelected(blog)}>
+                                    <tr key={blog.id} className={getTableClassName(blog.id)} onClick={() => handleBlogSelectionChanged(blog)}>
                                         <td>{blog.author.name}</td>
                                         <td>{blog.title}</td>
                                         <td>{blog.createdAt.toKrDateString()}</td>
