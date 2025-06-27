@@ -1,6 +1,6 @@
 'use server'
 import { revalidatePath } from "next/cache";
-import { createNewBlog, deleteSelectedBlog, getBlogs, recordBlogView, updateBlog, upsertBlogComment, upsertVoteOnBlog, voteOnComment } from "../services/blogService";
+import { createNewBlog, deleteSelectedBlog, getBlogs, recordBlogView, updateBlog, upsertBlogComment, upsertVoteOnBlog, upsertVoteOnBlogViewCount, voteOnComment } from "../services/blogService";
 import { Blog, ThumbsStatus } from "@prisma/client";
 
 export async function createNewBlogAction(userId: string, title: string, content: string) {
@@ -54,4 +54,15 @@ export async function voteOnCommentAction({ userId, commentId, blogId, thumbsSta
     revalidatePath('/bulletinBoard');
     return true;
 }
-
+export async function upsertVoteOnBlogAction({ userId, blogId, thumbsStatus, forked }: { userId: string; blogId: string; thumbsStatus: ThumbsStatus | undefined | null; forked: boolean | undefined }) {
+    const result = await upsertVoteOnBlog({ userId, blogId, thumbsStatus, forked });
+    // console.log('upsertVoteOnBlogAction: ', result)
+    revalidatePath('/bulletinBoard');
+    return result;
+}
+export async function upsertVoteOnBlogViewCountAction({ userId, blogId }: { userId: string; blogId: string }) {
+    const result = await upsertVoteOnBlogViewCount({ userId, blogId });
+    // console.log('upsertVoteOnBlogAction: ', result)
+    revalidatePath('/bulletinBoard');
+    return result;
+}

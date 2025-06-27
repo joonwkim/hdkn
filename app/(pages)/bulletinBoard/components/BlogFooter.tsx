@@ -9,8 +9,7 @@ import ThumbDown from '../../icons/thumbDown';
 import Fork from '../../icons/fork';
 import './styles.css'
 import { $Enums, ThumbsStatus, Vote } from '@prisma/client';
-import { updateUserOnSelectedBlogAction, upsertUserPreferenceForSelectedBlogAction } from '@/app/actions/userPreference';
-// import { upsertUserPreferenceForSelectedBlogAction, } from '@/app/actions/blog';
+import { upsertVoteOnBlogAction } from '@/app/actions/blog';
 
 export interface BlogFooterProps {
     blog: BlogWithRefTable,
@@ -76,14 +75,12 @@ const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
                 setDislikes((prev) => prev + 1);
                 if (changingVote && likes > 0) setLikes((prev) => prev - 1);
             }
-            const result = await upsertUserPreferenceForSelectedBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: status, forked: vote?.forked }) as Vote;
-            const user = await updateUserOnSelectedBlogAction(userId, blog.id);
+            const result = await upsertVoteOnBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: status, forked: vote?.forked }) as Vote;
         }
     }
     const handleforked = async () => {
         if (checkLoginStatus("forked") && userId) {
-            const result = await upsertUserPreferenceForSelectedBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: vote?.thumbsStatus, forked: !forked }) as Vote;
-            const user = await updateUserOnSelectedBlogAction(userId, blog.id);
+            const result = await upsertVoteOnBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: vote?.thumbsStatus, forked: !forked }) as Vote;
             setForked((prev) => !prev)
         }
     };

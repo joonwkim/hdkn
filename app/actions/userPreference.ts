@@ -15,7 +15,7 @@ export async function toggleTheme(current: "light" | "dark") {
     return nextTheme;
 
 }
-export async function updateUserOnSelectedBlogAction(userId: string, blogId: string | null, viewType: string) {
+export async function updateUserPreferenceForSelectedBlogAction(userId: string, blogId: string | null, viewType: string) {
     const result = await updateUserPreferenceForSelectedBlog(userId, blogId, viewType);
     revalidatePath('/bulletinBoard');
     return result;
@@ -83,10 +83,4 @@ export async function saveUserPreferenceAction({ userId, viewType, pageSize }: {
     // console.log('saveUserPreferenceAction userId: ', userId)
     await saveUserPreference({ userId, viewType, pageSize })
     revalidatePath('/');
-}
-export async function upsertUserPreferenceForSelectedBlogAction({ userId, blogId, thumbsStatus, forked }: { userId: string; blogId: string; thumbsStatus: ThumbsStatus | undefined | null; forked: boolean | undefined }) {
-    const result = await upsertVoteOnBlog({ userId, blogId, thumbsStatus, forked });
-    // console.log('upsertUserPreferenceForSelectedBlogAction: ', result)
-    revalidatePath('/bulletinBoard');
-    return result;
 }

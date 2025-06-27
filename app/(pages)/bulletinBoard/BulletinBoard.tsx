@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useSession } from "next-auth/react";
 import { BlogWithRefTable } from "@/app/services/blogService";
-import { createNewBlogAction, deleteSelectedBlogAction, updateBlogAction, } from "@/app/actions/blog";
+import { createNewBlogAction, deleteSelectedBlogAction, updateBlogAction, upsertVoteOnBlogViewCountAction, } from "@/app/actions/blog";
 import BlogFooter from "./components/BlogFooter";
 import BlogComment from "./components/BlogComment";
 import Editor from "@/app/components/lexicalEditor/Editor";
@@ -12,9 +12,9 @@ import { getDislikesCount, getLikesCount, getUserVote } from './utils/votes';
 import UserAvartar from '../icons/UserAvartar';
 import './styles.css'
 import '../../lib/date'
-import { ThumbsStatus } from '@prisma/client';
+import { ThumbsStatus, Vote } from '@prisma/client';
 import ThemeToggle from './components/ThemeToggle';
-import { updateUserOnSelectedBlogAction } from '@/app/actions/userPreference';
+import { updateUserPreferenceForSelectedBlogAction } from '@/app/actions/userPreference';
 
 type BlogsProps = {
     blogs: BlogWithRefTable[]
@@ -27,7 +27,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     const [commentInputs, setCommentInputs] = useState<{ [key: number]: string }>({});
     const [blogsPerPage, setBlogPerPage] = useState(50);
     const [currentPage, setCurrentPage] = useState(1);
-    const [viewType, setViewType] = useState<'summary' | 'card' | 'table'>('summary');
+    const [blogsViewType, setViewType] = useState<'summary' | 'card' | 'table'>('summary');
     const [viewMode, setViewMode] = useState<'view' | 'edit' | 'new'>('view')
     const [selectedBlog, setSelectedBlog] = useState<BlogWithRefTable | null | undefined>(null);
     const totalPages = Math.ceil(blogs.length / blogsPerPage) || 1;
@@ -49,7 +49,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
 
     useEffect(() => {
         if (session?.user.preference) {
-            setViewType(session?.user.preference.viewType);
+            setViewType(session?.user.preference.blogsViewType);
             setBlogPerPage(session?.user.preference.pageSize)
         } else {
             setViewType('card');
@@ -84,12 +84,13 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         } else {
             console.log('handleBlogSelectionChanged else')
         }
-        await updateUserOnSelectedBlogAction(session?.user.id, blog.id, viewType);
+        await updateUserPreferenceForSelectedBlogAction(session?.user.id, blog.id, blogsViewType);
+        const result = await upsertVoteOnBlogViewCountAction({ userId: session?.user.id, blogId: blog.id, }) as Vote;
         await update();
     }
-    const saveSelectedBlogId = async (blogId: string | null, viewType: string) => {
+    const saveSelectedBlogId = async (blogId: string | null, blogsViewType: string) => {
         if (session?.user && selectedBlog?.id !== blogId) {
-            const user = await updateUserOnSelectedBlogAction(session.user.id, blogId, viewType);
+            const user = await updateUserPreferenceForSelectedBlogAction(session.user.id, blogId, blogsViewType);
             await update();
         }
     }
@@ -208,6 +209,13 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     };
     return (
         <div>
+            <div>
+                {blogsViewType}
+            </div>
+            <div>
+                UserPreference blogsViewType: {JSON.stringify(session?.user.preference.blogsViewType, null, 2)}
+            </div>
+
             <div className="d-flex justify-content-between align-items-center border-bottom p-2 sticky-child z-3">
                 {/* title */}
                 <div className="flex-grow-1 text-center">
@@ -305,7 +313,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                 {/* Blogs 목록 보기 */}
                 <div className="mt-3">
                     {/* 요약보기 */}
-                    {viewType === "summary" && (
+                    {blogsViewType === "summary" && (
                         <div>
                             {paginatedBlogs.map((blog) => (
                                 <div key={blog.id} className={getSummaryClassName(blog.id)} onClick={() => handleBlogSelectionChanged(blog)}>
@@ -321,7 +329,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                         </div>
                     )}
                     {/* 카드보기 */}
-                    {viewType === "card" && (
+                    {blogsViewType === "card" && (
                         <div className="row">
                             {paginatedBlogs.map((blog) => (
                                 <div key={blog.id} className="col-md-4 mb-3" onClick={() => handleBlogSelectionChanged(blog)}>
@@ -347,7 +355,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                     )}
 
                     {/* 테이블보기 */}
-                    {viewType === "table" && (
+                    {blogsViewType === "table" && (
                         <table className="table">
                             <thead>
                                 <tr>

@@ -181,6 +181,30 @@ export async function upsertVoteOnBlog({ userId, blogId, thumbsStatus, forked }:
     return null;
   }
 }
+export async function upsertVoteOnBlogViewCount({ userId, blogId }: { userId: string; blogId: string }) {
+  try {
+    // console.log('upsertVoteOnBlog:', userId, blogId, thumbsStatus, forked)
+    const result = await prisma.vote.upsert({
+      where: {
+        voterId_blogId: { voterId: userId, blogId },
+      },
+      update: {
+
+      },
+      create: {
+        voterId: userId,
+        blogId,
+
+      },
+    });
+
+    console.log('upsertVoteOnBlogViewCount:', result)
+    return result;
+  } catch (err) {
+    console.error("voteOnBlog error:", err);
+    return null;
+  }
+}
 export async function recordBlogView({ userId, blogId, }: { userId: string; blogId: string; }) {
   try {
     const result = await prisma.blogView.upsert({
