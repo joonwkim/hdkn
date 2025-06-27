@@ -61,8 +61,9 @@ export async function upsertVoteOnBlogAction({ userId, blogId, thumbsStatus, for
     return result;
 }
 export async function upsertVoteOnBlogViewCountAction({ userId, blogId }: { userId: string; blogId: string }) {
-    const result = await upsertVoteOnBlogViewCount({ userId, blogId });
-    // console.log('upsertVoteOnBlogAction: ', result)
-    revalidatePath('/bulletinBoard');
-    return result;
+    if (userId) {
+        const result = await upsertVoteOnBlogViewCount({ userId, blogId });
+        revalidatePath('/bulletinBoard');
+        return result;
+    }
 }

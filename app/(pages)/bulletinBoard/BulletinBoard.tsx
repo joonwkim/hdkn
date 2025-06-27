@@ -85,7 +85,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             console.log('handleBlogSelectionChanged else')
         }
         await updateUserPreferenceForSelectedBlogAction(session?.user.id, blog.id, blogsViewType);
-        const result = await upsertVoteOnBlogViewCountAction({ userId: session?.user.id, blogId: blog.id, }) as Vote;
+        await upsertVoteOnBlogViewCountAction({ userId: session?.user.id, blogId: blog.id, });
         await update();
     }
     const saveSelectedBlogId = async (blogId: string | null, blogsViewType: string) => {
@@ -209,13 +209,6 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     };
     return (
         <div>
-            <div>
-                {blogsViewType}
-            </div>
-            <div>
-                UserPreference blogsViewType: {JSON.stringify(session?.user.preference.blogsViewType, null, 2)}
-            </div>
-
             <div className="d-flex justify-content-between align-items-center border-bottom p-2 sticky-child z-3">
                 {/* title */}
                 <div className="flex-grow-1 text-center">

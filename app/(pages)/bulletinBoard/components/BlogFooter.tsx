@@ -26,6 +26,7 @@ const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
     useEffect(() => {
         setLikes(getLikesCount(blog.votes));
         setDislikes(getDislikesCount(blog.votes));
+        setViewCount(blog.viewCount)
         if (userId) {
             const vt = getUserVote(blog.votes, userId)
             if (vt) {

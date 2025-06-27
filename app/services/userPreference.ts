@@ -14,7 +14,6 @@ export async function getUserPreferences() {
 
     return user?.preference;
 }
-
 export async function updateUserThemePreference(theme: "light" | "dark") {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) return null;
@@ -32,11 +31,14 @@ export async function updateUserThemePreference(theme: "light" | "dark") {
     });
 }
 export async function updateUserPreferenceForSelectedBlog(userId: string, selectedBlogId: string | null, blogsViewType: string) {
-    const preference = await prisma.userPreference.upsert({
-        where: { userId: userId },
-        update: { selectedBlogId, blogsViewType },
-        create: { selectedBlogId, userId: userId },
-    });
-    console.log('updateUserPreferenceForSelectedBlog: ', preference)
-    return preference;
+    if (userId) {
+        const preference = await prisma.userPreference.upsert({
+            where: { userId: userId },
+            update: { selectedBlogId, blogsViewType },
+            create: { selectedBlogId, userId: userId },
+        });
+        // console.log('updateUserPreferenceForSelectedBlog: ', preference)
+        return preference;
+    }
+
 }
