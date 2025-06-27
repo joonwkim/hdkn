@@ -39,9 +39,9 @@ const InsertImageFileModal = ({ onClick }: { onClick: (payload: InsertImagePaylo
                             width: ci.width,
                             height: ci.height,
                             position: position,
-                            formData: formData,                           
+                            formData: formData,
                         };
-                        console.log('payload:', payload)
+                        // console.log('payload:', payload)
                         onClick(payload)
                     }
                 } catch (error) {

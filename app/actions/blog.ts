@@ -1,7 +1,5 @@
 'use server'
 import { revalidatePath } from "next/cache";
-// import { setNodeSelected, updateExpandStatus } from "../services/menu";
-// import { TreeNode } from "../types/treeMenu";
 import { createNewBlog, deleteSelectedBlog, getBlogs, recordBlogView, updateBlog, upsertBlogComment, upsertVoteOnBlog, voteOnComment } from "../services/blogService";
 import { Blog, ThumbsStatus } from "@prisma/client";
 
@@ -45,24 +43,6 @@ export async function deleteSelectedBlogAction(blog: Blog) {
     }
 }
 
-// export async function voteOnBlogAction({ userId, blogId, thumbsStatus, }: { userId: string; blogId: string; thumbsStatus: ThumbsStatus; }) {
-//     const result = await voteOnBlog({ userId, blogId, thumbsStatus, });
-//     revalidatePath('/bulletinBoard');
-//     return true;
-// }
-
-export async function upsertVoteOnBlogAction({ userId, blogId, thumbsStatus, forked }: { userId: string; blogId: string; thumbsStatus: ThumbsStatus | undefined | null; forked: boolean | undefined }) {
-    const result = await upsertVoteOnBlog({ userId, blogId, thumbsStatus, forked });
-    revalidatePath('/bulletinBoard');
-    return result;
-}
-
-// export async function forkBlogAction({ userId, blogId, }: { userId: string; blogId: string; }) {
-//     const result = await forkBlog({ userId, blogId, });
-//     revalidatePath('/bulletinBoard');
-//     return true;
-// }
-
 export async function recordBlogViewAction({ userId, blogId, }: { userId: string; blogId: string; }) {
     const result = await recordBlogView({ userId, blogId, });
     revalidatePath('/bulletinBoard');
@@ -74,3 +54,4 @@ export async function voteOnCommentAction({ userId, commentId, blogId, thumbsSta
     revalidatePath('/bulletinBoard');
     return true;
 }
+

@@ -127,7 +127,7 @@ export async function resizeCloudinaryImage(resizedImage: ResizedImage) {
           folder: 'hdkn',
         });
         await cloudinary.uploader.destroy(publicId);
-        console.log('uploadResult', uploadResult)
+        // console.log('uploadResult', uploadResult)
         return uploadResult;
       }
     }

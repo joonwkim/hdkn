@@ -8,9 +8,9 @@ import Thumbup from '../../icons/thumbUp';
 import ThumbDown from '../../icons/thumbDown';
 import Fork from '../../icons/fork';
 import './styles.css'
-import { ThumbsStatus, Vote } from '@prisma/client';
-import { upsertVoteOnBlogAction } from '@/app/actions/blog';
-// import { upsertVoteOnBlogAction, } from '@/app/actions/blog';
+import { $Enums, ThumbsStatus, Vote } from '@prisma/client';
+import { updateUserOnSelectedBlogAction, upsertUserPreferenceForSelectedBlogAction } from '@/app/actions/userPreference';
+// import { upsertUserPreferenceForSelectedBlogAction, } from '@/app/actions/blog';
 
 export interface BlogFooterProps {
     blog: BlogWithRefTable,
@@ -32,8 +32,8 @@ const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
             if (vt) {
                 setThumbsStatus(vt.thumbsStatus);
                 setForked(vt.forked);
+                setVote(vt);
             }
-            setVote(vt);
         }
     }, [userId, blog.votes])
 
@@ -48,14 +48,16 @@ const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
         }
         return (<>{mins} <span className='fs-7'>분전</span></>);
     };
-    const checkLoginStatus = () => {
+    const checkLoginStatus = (forked?: string | undefined) => {
         if (!userId) {
             alert('로그인을 하셔야 선택할 수 있습니다.');
             return false;
         }
         else if (userId === blog.author?.id) {
-            alert('작성자는 자기에게 좋아요를 선택할 수 없습니다.');
-            return false;
+            if (!forked) {
+                alert('작성자는 자기에게 좋아요를 선택할 수 없습니다.');
+                return false;
+            }
         }
         return true;
     };
@@ -74,12 +76,14 @@ const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
                 setDislikes((prev) => prev + 1);
                 if (changingVote && likes > 0) setLikes((prev) => prev - 1);
             }
-            const result = await upsertVoteOnBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: status, forked: vote?.forked }) as Vote;
+            const result = await upsertUserPreferenceForSelectedBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: status, forked: vote?.forked }) as Vote;
+            const user = await updateUserOnSelectedBlogAction(userId, blog.id);
         }
     }
     const handleforked = async () => {
-        if (checkLoginStatus() && userId) {
-            const result = await upsertVoteOnBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: vote?.thumbsStatus, forked: !forked }) as Vote;
+        if (checkLoginStatus("forked") && userId) {
+            const result = await upsertUserPreferenceForSelectedBlogAction({ userId: userId, blogId: blog.id, thumbsStatus: vote?.thumbsStatus, forked: !forked }) as Vote;
+            const user = await updateUserOnSelectedBlogAction(userId, blog.id);
             setForked((prev) => !prev)
         }
     };
@@ -106,3 +110,5 @@ const BlogFooter = ({ blog, userId }: BlogFooterProps) => {
     );
 }
 export default BlogFooter
+
+

@@ -1,10 +1,11 @@
 'use server';
 import { revalidatePath } from "next/cache";
-import { createUser, getUserByEmail, saveUserPreference, updateUser, updateUserPassword } from "../services/userService";
+import { createUser, getUserByEmail, updateUser, updateUserPassword } from "../services/userService";
 import { generateRandomPassword, getHashedPassword, } from "../lib/password";
 import { sendMail } from "../lib/mailServer";
 import { RegisterForm } from "../auth/types";
-import { Prisma, } from "@prisma/client";
+import { Prisma, ThumbsStatus, } from "@prisma/client";
+import { upsertVoteOnBlog } from "../services/blogService";
 
 export async function createUserAction(input: RegisterForm) {
     try {
@@ -58,8 +59,3 @@ export async function updateUserAction(id: string, input: Prisma.UserCreateInput
     revalidatePath('/');
 }
 
-export async function saveUserPreferenceAction({ userId, viewType, pageSize }: { userId: string, viewType: string, pageSize: number }) {
-    // console.log('saveUserPreferenceAction userId: ', userId)
-    await saveUserPreference({ userId, viewType, pageSize })
-    revalidatePath('/');
-}

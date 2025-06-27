@@ -1,7 +1,7 @@
 import { DEFAULT_SETTINGS, INITIAL_SETTINGS, SettingName } from './appSettings';
 
 import * as React from 'react';
-import { createContext, ReactNode, useCallback, useContext, useMemo, useState, } from 'react';
+import { createContext, JSX, ReactNode, useCallback, useContext, useMemo, useState, } from 'react';
 
 type SettingsContextShape = {
   setOption: (name: SettingName, value: boolean) => void;

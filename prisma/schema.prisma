@@ -79,7 +79,8 @@ model User {
   membershipProcessedBys MembershipRequest[] @relation("membershipProcessedBys")
   membershipRequestedBys MembershipRequest[] @relation("membershipRequestedBys")
 
-  blogs    Blog[]
+  blogs Blog[] @relation("BlogAuthor")
+
   votes    Vote[]
   comments Comment[]
   views    BlogView[]
@@ -96,13 +97,19 @@ model User {
 }
 
 model UserPreference {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String  @unique @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
   viewType  String  @default("card") // 'card' | 'table' 
   pageSize  Int     @default(10)
   sortOrder String  @default("createdAt_desc")
   theme     String? // optional: "light" | "dark"
-  user      User    @relation(fields: [userId], references: [id])
+
+  selectedBlogId String? @db.ObjectId
+
+  blogsViewType String @default("table")
+
+  userId String @unique @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model UserRole {
@@ -198,6 +205,8 @@ model Vote {
   Comment   Comment? @relation(fields: [commentId], references: [id])
   commentId String?  @db.ObjectId
 
+  viewCount Int @default(0)
+
   @@unique([voterId, blogId])
 }
 
@@ -231,7 +240,7 @@ model Blog {
   content           String
   viewCount         Int                 @default(0)
   isPublic          Boolean             @default(true)
-  author            User                @relation(fields: [authorId], references: [id])
+  author            User                @relation("BlogAuthor", fields: [authorId], references: [id])
   authorId          String              @db.ObjectId
   categories        Category[]
   isGroupType       Boolean             @default(false)
@@ -247,7 +256,6 @@ model Blog {
   votes             Vote[]
   views             BlogView[]
   selected          Boolean             @default(false)
-  // forks             BlogFork[]
 
   // @@unique([title, authorId])
   @@index([title])

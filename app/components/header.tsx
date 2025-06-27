@@ -4,11 +4,11 @@ import { Container, Dropdown, Nav, Navbar } from 'react-bootstrap';
 import { useSession, signIn, signOut, } from "next-auth/react";
 import Image from "next/image";
 import GoogleLogin from '../(pages)/icons/GoogleLogin';
-import { saveUserPreferenceAction } from '../actions/userAction';
+import { saveUserPreferenceAction } from '../actions/userPreference';
 
 interface ThemeProps {
     theme: 'light' | 'dark' | 'auto';
-    onThemeChange: (theme: 'light' | 'dark' | 'auto') => void;
+    onThemeChange: (theme: 'light' | 'dark') => void;
     onWidowSidbarBtnClick: () => void;
     sidebarOpen: boolean;
 }
@@ -26,7 +26,6 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
                 setShowPopover(false);
             }
         }
-
         window.addEventListener('click', handleWindowClick);
 
         return () => {
@@ -134,9 +133,9 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
                                 <Dropdown.Item onClick={() => onThemeChange('dark')} active={theme === 'dark'}>
                                     <i className="bi bi-moon-stars-fill"></i> Dark
                                 </Dropdown.Item>
-                                <Dropdown.Item onClick={() => onThemeChange('auto')} active={theme === 'auto'}>
+                                {/* <Dropdown.Item onClick={() => onThemeChange('auto')} active={theme === 'auto'}>
                                     <i className="bi bi-circle-half"></i> Auto
-                                </Dropdown.Item>
+                                </Dropdown.Item> */}
                             </Dropdown.Menu>
                         </Dropdown>
                     </Nav>

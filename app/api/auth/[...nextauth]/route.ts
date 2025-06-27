@@ -24,7 +24,6 @@ export const authOptions: NextAuthOptions = {
                     provider: 'google',
                     googleLogin: true
                 };
-
                 await findUpdateGoogleUser(user.email, googleUser);
             }
             else if (account?.provider === 'credentials') {
@@ -34,7 +33,7 @@ export const authOptions: NextAuthOptions = {
 
         async session({ session, token }) {
             if (token) {
-                // console.log('token:', token)
+                // console.log('token in session:', token)
                 session.user = {
                     id: token.id,
                     name: token.name,
@@ -53,26 +52,19 @@ export const authOptions: NextAuthOptions = {
         },
         async jwt({ token, user }) {
             if (user) {
-                // console.log("Adding user data to token!!!");
                 token.id = user.id;
             }
-
             if (token.email) {
                 const sessionUser = await getSessionUserByEmail(token.email);
-                // console.log('session User: ', sessionUser)
                 if (sessionUser) {
-                    const nt = {
-                        ...token,
+                    return {
                         id: sessionUser.id,
+                        name: sessionUser.name,
+                        email: sessionUser.email,
+                        picture: sessionUser.image,
                         roles: sessionUser.roles || [],
                         preference: sessionUser.preference || undefined,
-                        // notificationCount: sessionUser.notificationCount || 0,
-                        // membershipProcessedBys: sessionUser.membershipProcessedBys || [],
-                        // membershipRequestedBys: sessionUser.membershipRequestedBys || [],
                     };
-                    // console.log('new token: ', nt)
-                    // console.log('new token: ', Object.keys(nt));
-                    return nt;
                 }
             }
             return token;

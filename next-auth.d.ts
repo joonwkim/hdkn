@@ -21,6 +21,7 @@ declare module "next-auth" {
                 pageSize: number;
                 sortOrder: string;
                 theme?: string;
+                selectedBlogId: string;
             };
         }
     }

@@ -183,7 +183,7 @@ export async function updateUserPassword(email: string, password: string) {
             return false;
         }
     } catch (error) {
-        console.log('')
+        console.log('updateUserPassword:', error)
         return ({ error });
     }
 }
@@ -271,63 +271,3 @@ export async function getOrCreateUserPreferences(userId: string) {
         },
     });
 }
-
-export async function saveUserPreference({ userId, viewType, pageSize }: { userId: string, viewType: string, pageSize: number }) {
-    try {
-        // console.log('saveUserPreference viewType: ', userId, viewType, pageSize)
-        let result;
-        const up = await prisma.userPreference.findFirst({ where: { userId: userId } })
-        if (!up) {
-            result = await prisma.userPreference.create({
-                data: {
-                    userId: userId,
-                    viewType: viewType,
-                    pageSize: pageSize,
-                }
-            })
-            // console.log('saveUserPreference userPreference created: ', result)
-        } else {
-            result = await prisma.userPreference.update({
-                where: {
-                    userId: userId,
-                },
-                data: {
-                    viewType: viewType,
-                    pageSize: pageSize,
-                }
-            })
-            // console.log('saveUserPreference userPreference updated: ', result)
-        }
-        // console.log('saveUserPreference result:', result)
-        const session = await getServerSession(authOptions);
-        if (!session?.user?.email) {
-            throw new Error('Unauthorized');
-        }
-        return result;
-    } catch (error) {
-        console.log('saveUserPreference error: ', error)
-    }
-
-
-    // const result = await prisma.userPreference.update({
-    //     where: {
-    //         userId: userId,
-    //     },
-    //     data: {
-    //         viewType: viewType,
-    //         pageSize: pageSize,
-    //     }
-    // })
-
-    // console.log('saveUserPreference:', result)
-
-    // console.log('session user: ', session.user.preference)
-
-    // await prisma.user.update({
-    //     where: { email: session.user.email },
-    //     data: { preference: { ...result } },
-    // });
-
-
-}
-

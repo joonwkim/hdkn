@@ -44,15 +44,15 @@ export default function RootLayout({
       }
     }
   }
-  const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>('light');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-  const applyTheme = useCallback((newTheme: 'light' | 'dark' | 'auto') => {
+  const applyTheme = useCallback((newTheme: 'light' | 'dark') => {
     document.documentElement.setAttribute('data-bs-theme', newTheme);
     setEditorCaretColor(newTheme);
   }, [])
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem(THEME_KEY) as 'light' | 'dark' | 'auto';
+    const savedTheme = localStorage.getItem(THEME_KEY) as 'light' | 'dark';
     if (savedTheme) {
       setTheme(savedTheme);
       applyTheme(savedTheme);
@@ -62,11 +62,12 @@ export default function RootLayout({
     }
   }, [applyTheme]);
 
-  const handleThemeChange = (newTheme: 'light' | 'dark' | 'auto') => {
+  const handleThemeChange = (newTheme: 'light' | 'dark') => {
     setTheme(newTheme);
-    localStorage.setItem(THEME_KEY, newTheme);
+    // localStorage.setItem(THEME_KEY, newTheme);
 
     applyTheme(newTheme)
+
   };
 
   //#endregion

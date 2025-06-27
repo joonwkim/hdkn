@@ -1,5 +1,5 @@
 import { $getNodeByKey, $getSelection, $isNodeSelection, $isRangeSelection, $setSelection, BaseSelection, CLICK_COMMAND, COMMAND_PRIORITY_LOW, createCommand, DRAGSTART_COMMAND, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, KEY_ENTER_COMMAND, KEY_ESCAPE_COMMAND, LexicalCommand, LexicalEditor, LineBreakNode, NodeKey, ParagraphNode, RootNode, SELECTION_CHANGE_COMMAND, TextNode } from 'lexical';
-import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import React, { JSX, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { $isImageNode, Position, } from './ImageNode';
 // import { $isImageNode, Position, ResizedImage } from './ImageNode';
 import { mergeRegister } from '@lexical/utils';
@@ -339,7 +339,7 @@ const ImageComponent = ({ src, altText, nodeKey, width, height, maxWidth, resiza
             const node = $getNodeByKey(nodeKey);
             if ($isImageNode(node)) {
                 node.setWidthAndHeight(nextWidth, nextHeight);
-                console.log('resized node:', node)
+                // console.log('resized node:', node)
                 // if (updateResizedImage) {
                 //     const resized: ResizedImage = {
                 //         resizedWidth: nextWidth,
@@ -371,16 +371,16 @@ const ImageComponent = ({ src, altText, nodeKey, width, height, maxWidth, resiza
 
                     ) : (<>
                         <LazyImage
-                                className={isFocused ? `image-container focused ${$isNodeSelection(selection) ? 'draggable' : ''}` : 'image-container'}
+                            className={isFocused ? `image-container focused ${$isNodeSelection(selection) ? 'draggable' : ''}` : 'image-container'}
                             src={src}
                             altText={altText}
-                                imageRef={imageRef}
-                                width={width}
-                                height={height}
+                            imageRef={imageRef}
+                            width={width}
+                            height={height}
                             maxWidth={maxWidth}
-                                onError={() => setIsLoadError(true)}
+                            onError={() => setIsLoadError(true)}
                         />
-                        </>
+                    </>
                     )}
                 </div>
                 {showCaption && (

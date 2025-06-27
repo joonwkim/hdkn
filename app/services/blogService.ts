@@ -112,7 +112,6 @@ export async function updateBlog({ blogId, content }: { blogId: string, content:
     return null;
   }
 }
-
 export async function upsertBlogComment({ id, commenterId, blogId, comment, }: UpsertCommentInput) {
   try {
     if (id) {
@@ -142,7 +141,6 @@ export async function upsertBlogComment({ id, commenterId, blogId, comment, }: U
     return null;
   }
 }
-
 export async function deleteSelectedBlog(blog: Blog) {
   try {
     // console.log("delte blog...");
@@ -158,7 +156,6 @@ export async function deleteSelectedBlog(blog: Blog) {
     return false;
   }
 }
-
 export async function upsertVoteOnBlog({ userId, blogId, thumbsStatus, forked }: { userId: string; blogId: string; thumbsStatus: ThumbsStatus | undefined | null; forked: boolean | undefined }) {
   try {
     // console.log('upsertVoteOnBlog:', userId, blogId, thumbsStatus, forked)
@@ -177,14 +174,13 @@ export async function upsertVoteOnBlog({ userId, blogId, thumbsStatus, forked }:
         forked,
       },
     });
-    // console.log('voteOnBlog:', result)
+
     return result;
   } catch (err) {
     console.error("voteOnBlog error:", err);
     return null;
   }
 }
-
 export async function recordBlogView({ userId, blogId, }: { userId: string; blogId: string; }) {
   try {
     const result = await prisma.blogView.upsert({
@@ -205,7 +201,6 @@ export async function recordBlogView({ userId, blogId, }: { userId: string; blog
     return null;
   }
 }
-
 export async function voteOnComment({ userId, commentId, blogId, thumbsStatus, }: { userId: string; commentId: string; blogId: string; thumbsStatus: ThumbsStatus; }) {
   try {
     const result = await prisma.vote.upsert({
@@ -229,5 +224,3 @@ export async function voteOnComment({ userId, commentId, blogId, thumbsStatus, }
     return null;
   }
 }
-
-

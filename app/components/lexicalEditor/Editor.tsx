@@ -58,7 +58,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({ cancel, saveDocument, is
             let serialized = '';
             if (toolbarPluginRef.current) {
                 serialized = await toolbarPluginRef.current.getSerializedState();
-                console.log('useImperativeHandle, getSerializedState:', serialized)
+                // console.log('useImperativeHandle, getSerializedState:', serialized)
             }
             return serialized;
         },

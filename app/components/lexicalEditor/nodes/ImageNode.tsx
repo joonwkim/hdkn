@@ -1,6 +1,6 @@
 import { $applyNodeReplacement, createEditor, DecoratorNode, DOMConversionMap, DOMConversionOutput, DOMExportOutput, EditorConfig, LexicalEditor, LexicalNode, NodeKey, SerializedEditor, SerializedLexicalNode, Spread } from "lexical";
 import * as React from 'react';
-import { Suspense } from "react";
+import { JSX, Suspense } from "react";
 // import { Position } from "./InlineImageNode";
 import debounce from 'lodash-es/debounce';
 import dynamic from 'next/dynamic';
@@ -261,7 +261,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
                         position={this.__position}
                         captionsEnabled={this.__captionsEnabled}
                         resizable={true}
-                        // updateResizedImage={this.__updateResizedImage}
+                    // updateResizedImage={this.__updateResizedImage}
                     />
                 </ErrorBoundary>
             </Suspense>
@@ -272,7 +272,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 // export function $createImageNode({ altText, height, maxWidth, captionsEnabled, src, width, showCaption, caption, key, position, formData, updateResizedImage }: ImagePayload): ImageNode {
 export function $createImageNode({ altText, height, maxWidth, captionsEnabled, src, width, showCaption, caption, key, position, formData, }: ImagePayload): ImageNode {
     return $applyNodeReplacement(new ImageNode(src, altText, maxWidth, width, height, showCaption, caption, captionsEnabled, key, position, formData,));
-// return $applyNodeReplacement(new ImageNode(src, altText, maxWidth, width, height, showCaption, caption, captionsEnabled, key, position, formData, updateResizedImage));
+    // return $applyNodeReplacement(new ImageNode(src, altText, maxWidth, width, height, showCaption, caption, captionsEnabled, key, position, formData, updateResizedImage));
 }
 
 export function $isImageNode(node: LexicalNode | null | undefined,): node is ImageNode {

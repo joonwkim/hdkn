@@ -13,6 +13,8 @@ import UserAvartar from '../icons/UserAvartar';
 import './styles.css'
 import '../../lib/date'
 import { ThumbsStatus } from '@prisma/client';
+import ThemeToggle from './components/ThemeToggle';
+import { updateUserOnSelectedBlogAction } from '@/app/actions/userPreference';
 
 type BlogsProps = {
     blogs: BlogWithRefTable[]
@@ -20,22 +22,30 @@ type BlogsProps = {
 
 const BulletinBoard = ({ blogs }: BlogsProps) => {
     //#region session and state
-    const { data: session, status } = useSession();
+    const { data: session, status, update } = useSession();
     const [title, setTitle] = useState("");
     const [commentInputs, setCommentInputs] = useState<{ [key: number]: string }>({});
     const [blogsPerPage, setBlogPerPage] = useState(50);
     const [currentPage, setCurrentPage] = useState(1);
-    const [viewType, setViewType] = useState("summary");
-    const [selectedBlog, setSelectedBlog] = useState<BlogWithRefTable | null>(null);
-    // const [initialDataForUpdate, setInitialDateForUpdate] = useState<string>('')
+    const [viewType, setViewType] = useState<'summary' | 'card' | 'table'>('summary');
+    const [viewMode, setViewMode] = useState<'view' | 'edit' | 'new'>('view')
+    const [selectedBlog, setSelectedBlog] = useState<BlogWithRefTable | null | undefined>(null);
     const totalPages = Math.ceil(blogs.length / blogsPerPage) || 1;
     const startIndex = (currentPage - 1) * blogsPerPage;
     const paginatedBlogs = blogs.slice(startIndex, startIndex + blogsPerPage);
     const router = useRouter();
     const [isAuthor, setIsAuthor] = useState(false);
-    const [showBlog, setShowBlog] = useState(false);
-    const [viewMode, setViewMode] = useState<'view' | 'edit' | 'new'>('view')
     //#endregion
+
+    useEffect(() => {
+        console.log('session?.user.preference', JSON.stringify(session?.user.preference, null, 2))
+        const blog = blogs.find((blog) => blog.id === session?.user.preference.selectedBlogId);
+        setSelectedBlog(blog);
+        if (blog?.authorId === session?.user.id) {
+            setViewMode('edit')
+        }
+
+    }, [session?.user.preference.selectedBlogId])
 
     useEffect(() => {
         if (session?.user.preference) {
@@ -59,18 +69,29 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
         }
     };
-    const handleBlogSelectionChanged = (blog: BlogWithRefTable) => {
+    const handleBlogSelectionChanged = async (blog: BlogWithRefTable) => {
         if (selectedBlog?.id !== blog.id) {
             setSelectedBlog(blog);
             const author = blog.authorId === session?.user.id;
             setIsAuthor(author);
             setViewMode(author ? 'edit' : 'view');
+
             const element = document.querySelector('.blog-content');
             if (element) {
                 element.scrollTop = 0;
             }
-        }
 
+        } else {
+            console.log('handleBlogSelectionChanged else')
+        }
+        await updateUserOnSelectedBlogAction(session?.user.id, blog.id, viewType);
+        await update();
+    }
+    const saveSelectedBlogId = async (blogId: string | null, viewType: string) => {
+        if (session?.user && selectedBlog?.id !== blogId) {
+            const user = await updateUserOnSelectedBlogAction(session.user.id, blogId, viewType);
+            await update();
+        }
     }
     const handleAddNewBlogClick = () => {
         if (!session?.user) {
@@ -165,36 +186,28 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
 
             pages.push(totalPages); // Always show last page
         }
-
         return (
             <ul className="pagination justify-content-center">
                 <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                    <button className="page-link" onClick={() => { setCurrentPage(currentPage - 1); setShowBlog(false) }} title="이전으로 가기"><i className="bi bi-chevron-double-left"></i></button>
+                    <button className="page-link" onClick={() => { setCurrentPage(currentPage - 1) }} title="이전으로 가기"><i className="bi bi-chevron-double-left"></i></button>
                 </li>
                 {pages.map((page, index) => (
                     <li key={index} className={`page-item ${page === currentPage ? "active" : ""}`}>
                         {typeof page === "number" ? (
-                            <button className="page-link" onClick={() => { setCurrentPage(page), setShowBlog(false) }}>{page}</button>
+                            <button className="page-link" onClick={() => { setCurrentPage(page) }}>{page}</button>
                         ) : (
                             <span className="page-link">...</span> // Ellipsis
                         )}
                     </li>
                 ))}
                 <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                    <button className="page-link" onClick={() => { setCurrentPage(currentPage + 1), setShowBlog(false) }} title="다음으로"><i className="bi bi-chevron-double-right"></i></button>
+                    <button className="page-link" onClick={() => { setCurrentPage(currentPage + 1) }} title="다음으로"><i className="bi bi-chevron-double-right"></i></button>
                 </li>
             </ul>
         );
     };
-
     return (
         <div>
-            <div>
-                {viewMode}
-            </div>
-            <div>
-                {selectedBlog !== null && (selectedBlog.title)}
-            </div>
             <div className="d-flex justify-content-between align-items-center border-bottom p-2 sticky-child z-3">
                 {/* title */}
                 <div className="flex-grow-1 text-center">
@@ -221,13 +234,13 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                             <i className="bi bi-trash"></i>
                         </button>
                     </div>
-                    <button className="btn btn-outline-secondary btn-sm me-2" title="요약형태보기" onClick={() => { setViewType("summary"); setSelectedBlog(null) }}>
+                    <button className="btn btn-outline-secondary btn-sm me-2" title="요약형태보기" onClick={() => { setViewType("summary"); setSelectedBlog(null); saveSelectedBlogId(null, 'summary') }}>
                         <i className="bi bi-view-stacked"></i>
                     </button>
-                    <button className="btn btn-outline-secondary btn-sm me-2" title="카드형태보기" onClick={() => { setViewType("card"); setSelectedBlog(null) }}>
+                    <button className="btn btn-outline-secondary btn-sm me-2" title="카드형태보기" onClick={() => { setViewType("card"); setSelectedBlog(null); saveSelectedBlogId(null, 'card') }}>
                         <i className="bi bi-grid"></i>
                     </button>
-                    <button className="btn btn-outline-secondary btn-sm me-2" title="카드형태보기" onClick={() => { setViewType("table"); setSelectedBlog(null) }}>
+                    <button className="btn btn-outline-secondary btn-sm me-2" title="카드형태보기" onClick={() => { setViewType("table"); setSelectedBlog(null); saveSelectedBlogId(null, 'table') }}>
                         <i className="bi bi-table"></i>
                     </button>
                 </div>
