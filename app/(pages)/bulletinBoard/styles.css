@@ -18,3 +18,13 @@
     max-height: 150px;
     overflow-y: hidden;
 }
+
+.modal-fit-content {
+    max-width: 20px;
+    /* max-width: 100%; */
+    /* margin: auto; */
+}
+
+.blogs-per-page {
+    max-width: 40px;
+}

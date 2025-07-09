@@ -99,10 +99,11 @@ model User {
 model UserPreference {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  viewType  String  @default("card") // 'card' | 'table' 
-  pageSize  Int     @default(10)
-  sortOrder String  @default("createdAt_desc")
-  theme     String? // optional: "light" | "dark"
+  viewType     String  @default("card") // 'card' | 'table' 
+  blogsPerPage Int     @default(10)
+  currentPage  Int     @default(1)
+  sortOrder    String  @default("createdAt_desc")
+  theme        String? // optional: "light" | "dark"
 
   selectedBlogId String? @db.ObjectId
 

@@ -35,24 +35,24 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
 
     useEffect(() => {
         setViewType(session?.user.preference.viewType)
-        setBlogPerPage(session?.user.preference.pageSize)
+        setBlogPerPage(session?.user.preference.blogsPerPage)
     }, [session?.user.preference])
 
     const googleLogin = () => {
         signIn('google', { callbackUrl: '/' });
     };
 
-    const saveViewMode = async (viewType: string) => {
-        await saveUserPreferenceAction({ userId: session?.user.id, viewType, pageSize: blogsPerPage })
-        setViewType(viewType);
-        update();
-    }
+    // const saveViewMode = async (viewType: string) => {
+    //     await saveUserPreferenceAction({ userId: session?.user.id, viewType, blogsPerPage: blogsPerPage })
+    //     setViewType(viewType);
+    //     update();
+    // }
 
-    const saveBlogPerPage = async (pageSize: number) => {
-        await saveUserPreferenceAction({ userId: session?.user.id, viewType: viewType, pageSize })
-        setBlogPerPage(pageSize);
-        update();
-    }
+    // const saveBlogPerPage = async (blogsPerPage: number) => {
+    //     await saveUserPreferenceAction({ userId: session?.user.id, viewType: viewType, blogsPerPage })
+    //     setBlogPerPage(blogsPerPage);
+    //     update();
+    // }
 
     return (
         <Navbar className='sticky-top' expand="lg" bg={theme === 'dark' ? 'dark' : 'light'} variant={theme === 'dark' ? 'dark' : 'light'}>
@@ -79,7 +79,7 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
                             {session?.user?.image ? (
                                 <div className="position-relative">
                                     <button className="btn p-0 border-0 bg-transparent" type="button" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-html="true" title="Preferences" data-bs-content="" id="userPreferencesTrigger1" onClick={(e) => { e.stopPropagation(); setShowPopover((prev) => !prev) }}>
-                                        <Image className='ms-3' id="userpicture" unoptimized src={session.user?.image} alt='' title='클릭하셔서 사용자 선호를 저장하세요' width="30" height="30" style={{ borderRadius: '50%', maxWidth: "100%", height: "auto" }} />
+                                        <Image className='ms-3' id="userpicture" unoptimized src={session.user?.image} alt='' title='사용자 정보를 변경을 위하여 준비되었습니다.' width="30" height="30" style={{ borderRadius: '50%', maxWidth: "100%", height: "auto" }} />
                                     </button>
                                     {showPopover && (
                                         <div className="popover bs-popover-bottom show position-absolute mt-1 fit-width"
@@ -90,7 +90,8 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
                                                 <div>@{session?.user.email.split("@")[1]}</div>
                                             </div>
                                             <div className="popover-body">
-                                                <div className="mb-2">
+                                                <div>사용자 정보 수정을 위한 화면을 준비중입니다.</div>
+                                                {/* <div className="mb-2">
                                                     <div>보기형태:</div>
                                                     <div className="ms-2 d-flex gap-2">
                                                         <button className={`btn btn-sm ${viewType === "summary" ? "btn-secondary" : "btn-outline-secondary"}`} title="요약형태보기" onClick={() => saveViewMode("summary")}>
@@ -107,7 +108,7 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
                                                 <div className="my-2">
                                                     <div className="mt-2 popover-pagesize">페이지당 게시글 수:</div>
                                                     <input type="number" title="blogsetting" className="form-control form-control-sm input-xs" value={blogsPerPage} onChange={(e) => saveBlogPerPage(Number(e.target.value))} />
-                                                </div>
+                                                </div> */}
                                             </div>
                                         </div>
                                     )}

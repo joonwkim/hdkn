@@ -18,7 +18,7 @@ declare module "next-auth" {
             roles: Role[];
             preference?: {
                 viewType: string;
-                pageSize: number;
+                blogsPerPage: number;
                 sortOrder: string;
                 theme?: string;
                 selectedBlogId: string;

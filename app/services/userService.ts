@@ -266,7 +266,7 @@ export async function getOrCreateUserPreferences(userId: string) {
         data: {
             userId,
             viewType: 'card',
-            pageSize: 10,
+            blogsPerPage: 10,
             sortOrder: 'updatedAt_desc',
         },
     });

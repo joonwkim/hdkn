@@ -64,10 +64,7 @@ export default function RootLayout({
 
   const handleThemeChange = (newTheme: 'light' | 'dark') => {
     setTheme(newTheme);
-    // localStorage.setItem(THEME_KEY, newTheme);
-
     applyTheme(newTheme)
-
   };
 
   //#endregion
