@@ -183,7 +183,7 @@ export async function upsertVoteOnBlog({ userId, blogId, thumbsStatus, forked }:
 }
 export async function upsertVoteOnBlogViewCount({ userId, blogId }: { userId: string; blogId: string }) {
   try {
-    // console.log('upsertVoteOnBlog:', userId, blogId, thumbsStatus, forked)
+    console.log('upsertVoteOnBlog:', userId, blogId,)
     const vote = await prisma.vote.findUnique({
       where: {
         voterId_blogId: { voterId: userId, blogId },
@@ -208,10 +208,16 @@ export async function upsertVoteOnBlogViewCount({ userId, blogId }: { userId: st
           }
         }
       })
-      console.log('viewcount added: ', blog.viewCount)
+      // console.log('viewcount added: ', blog.viewCount)
     }
     else {
-      console.log('viewCount added already!')
+      const preference = await prisma.userPreference.upsert({
+        where: { userId: userId },
+        update: { selectedBlogId: blogId },
+        create: { userId: userId, selectedBlogId: blogId },
+      });
+
+      // console.log('viewCount added already!', preference)
     }
 
   } catch (err) {

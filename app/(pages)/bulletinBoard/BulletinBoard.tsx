@@ -40,17 +40,23 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     //#endregion
 
     useEffect(() => {
-        if (session?.user) {
-            // console.log('session?.user.preference', JSON.stringify(session?.user.preference, null, 2))
-            const blog = blogs.find((blog) => blog.id === session?.user.preference.selectedBlogId);
-            setSelectedBlog(blog);
-            setViewType(session.user.preference.blogsViewType)
-            setCurrentPage(session.user.preference.currentPage);
-            setBlogPerPage(session.user.preference.blogsPerPage)
-            if (blog?.authorId === session?.user.id) {
-                setViewMode('edit')
+        try {
+            if (session?.user && session.user.preference) {
+                if (session.user.preference.selectedBlogId !== null) {
+                    const blog = blogs.find((blog) => blog.id === session?.user.preference.selectedBlogId);
+                    setSelectedBlog(blog);
+                    setViewType(session.user.preference.blogsViewType)
+                    setCurrentPage(session.user.preference.currentPage);
+                    setBlogPerPage(session.user.preference.blogsPerPage);
+                    if (blog?.authorId === session?.user.id) {
+                        setViewMode('edit')
+                    }
+                }
             }
+        } catch (error) {
+            alert(error)
         }
+
     }, [session?.user])
 
     const resetAll = () => {
@@ -76,13 +82,12 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             if (element) {
                 element.scrollTop = 0;
             }
+            await upsertVoteOnBlogViewCountAction({ userId: session?.user.id, blogId: blog.id, });
+            update();
 
         } else {
             console.log('handleBlogSelectionChanged else')
         }
-        // await updateUserPreferenceForSelectedBlogAction(session?.user.id, blog.id, blogsViewType, currentPage);
-        // await upsertVoteOnBlogViewCountAction({ userId: session?.user.id, blogId: blog.id, });
-        // await update();
     }
     const saveUserPreference = async (selectedBlogId: string | null, blogsViewType: string, newBlogsPerPage: number) => {
         if (session?.user) {

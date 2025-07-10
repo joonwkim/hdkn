@@ -34,9 +34,13 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
     }, []);
 
     useEffect(() => {
-        setViewType(session?.user.preference.viewType)
-        setBlogPerPage(session?.user.preference.blogsPerPage)
-    }, [session?.user.preference])
+        // alert('theme: ' + session?.user.preference.theme)
+        // setViewType(session?.user.preference.viewType)
+        // setBlogPerPage(session?.user.preference.blogsPerPage)
+        if (session?.user.preference.theme) {
+            onThemeChange(session.user.preference.theme);
+        }
+    }, [session?.user.preference.theme])
 
     const googleLogin = () => {
         signIn('google', { callbackUrl: '/' });
@@ -122,24 +126,9 @@ const Header = ({ theme, onThemeChange, onWidowSidbarBtnClick, sidebarOpen }: Th
                     ) : (
                         <GoogleLogin />
                     )}
-                    <Nav className="ml-auto ms-2">
-                        <Dropdown>
-                            <Dropdown.Toggle variant={theme === 'dark' ? 'dark' : 'light'} id="dropdown-theme-toggle">
-                                {theme === 'light' ? <i className="bi bi-sun"></i> : theme === 'dark' ? <i className="bi bi-moon-stars-fill"></i> : <i className="bi bi-circle-half"></i>}
-                            </Dropdown.Toggle>
-                            <Dropdown.Menu>
-                                <Dropdown.Item onClick={() => onThemeChange('light')} active={theme === 'light'}>
-                                    <i className="bi bi-sun"></i> Light
-                                </Dropdown.Item>
-                                <Dropdown.Item onClick={() => onThemeChange('dark')} active={theme === 'dark'}>
-                                    <i className="bi bi-moon-stars-fill"></i> Dark
-                                </Dropdown.Item>
-                                {/* <Dropdown.Item onClick={() => onThemeChange('auto')} active={theme === 'auto'}>
-                                    <i className="bi bi-circle-half"></i> Auto
-                                </Dropdown.Item> */}
-                            </Dropdown.Menu>
-                        </Dropdown>
-                    </Nav>
+                    <button className="btn border border-0 me-3" onClick={() => onThemeChange(theme === 'light' ? 'dark' : 'light')} title='Theme'>
+                        {theme === 'light' ? <i className="bi bi-moon-stars-fill"></i> : theme === 'dark' ? <i className="bi bi-sun"></i> : <i className="bi bi-circle-half"></i>}
+                    </button>
                 </Navbar.Collapse>
             </Container>
         </Navbar>
