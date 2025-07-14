@@ -49,7 +49,7 @@ export async function saveUserPreference(userId: any, blogsViewType: string, cur
             update: { blogsViewType, currentPage, blogsPerPage: blogsPerPage, selectedBlogId },
             create: { userId: userId, blogsViewType, currentPage, blogsPerPage: blogsPerPage, selectedBlogId },
         });
-        // console.log('saveUserPreference: ', preference)
+        console.log('saveUserPreference: ', preference)
         return preference;
     }
 }

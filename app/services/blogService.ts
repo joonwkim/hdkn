@@ -183,7 +183,7 @@ export async function upsertVoteOnBlog({ userId, blogId, thumbsStatus, forked }:
 }
 export async function upsertVoteOnBlogViewCount({ userId, blogId }: { userId: string; blogId: string }) {
   try {
-    console.log('upsertVoteOnBlog:', userId, blogId,)
+    // console.log('upsertVoteOnBlog:', userId, blogId,)
     const vote = await prisma.vote.findUnique({
       where: {
         voterId_blogId: { voterId: userId, blogId },
