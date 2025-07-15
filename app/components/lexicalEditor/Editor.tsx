@@ -146,7 +146,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({ cancel, saveDocument, is
                                         }}
                                     />
                                 )}
-                                {!isReadOnly && <TreeViewPlugin />}
+                                {/* {!isReadOnly && <TreeViewPlugin />} */}
                             </div>
                         </div>
                         {/* <ExportToHtmlButton /> */}

@@ -483,12 +483,14 @@
 }
 
 .editor-tableCellHeader {
-  background-color: #f2f3f5;
+  background-color: var(--bs-tertiary-bg);
+  /* background-color: #f2f3f5; */
   text-align: start;
 }
 
 .editor-tableCellSelected {
-  background-color: #c9dbf0;
+  background-color: var(--bs-tertiary-bg);
+  /* background-color: #c9dbf0; */
 }
 
 .editor-tableCellPrimarySelected {

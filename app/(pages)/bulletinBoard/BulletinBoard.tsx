@@ -50,6 +50,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                     }
 
                     if (blog?.authorId === session?.user.id) {
+                        setIsAuthor(true)
                         setViewMode('edit')
                     }
                 }
@@ -61,7 +62,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         } catch (error) {
             alert(error)
         }
-    }, [session?.user])
+    }, [session?.user.preference])
 
     const resetAll = () => {
         setTitle("");
@@ -127,11 +128,16 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         }
     };
     const handleDeleteBlogClick = async () => {
+        alert('delete')
         if (selectedBlog) {
             await deleteSelectedBlogAction(selectedBlog);
         }
     };
     const handleSaveNewBlog = async (content: string) => {
+        if (!title) {
+            alert('제목을 입력하세요');
+            return;
+        }
         const result = await createNewBlogAction(session?.user.id, title, content)
         if (result) {
             console.log(`title: ${title} added`);
@@ -140,7 +146,6 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         }
     };
     const handleSaveEditedBlog = async (content: string) => {
-        alert('handleSaveEditedBlog')
         if (selectedBlog) {
             const result = await updateBlogAction(selectedBlog.id, content)
             if (result) {
@@ -150,7 +155,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             }
             setSelectedBlog(null);
             await saveUserPreferenceAction(session?.user.id, blogsViewType, currentPage, blogsPerPage, null);
-            await update();
+            // await update();
         }
     };
     const handleCancel = () => {
@@ -221,6 +226,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
 
     return (
         <div>
+            {`작성자: ${isAuthor}`}
             <div className="d-flex justify-content-between align-items-center border-bottom p-2 sticky-child z-3">
                 {/* title */}
                 <div className="flex-grow-1 text-center">

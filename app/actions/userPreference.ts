@@ -22,5 +22,5 @@ export async function updateUserPreferenceForSelectedBlogAction(userId: string, 
 }
 export async function saveUserPreferenceAction(userId: any, blogsViewType: string, currentPage: number, blogsPerPage: number, selectedBlogId?: string | null) {
     await saveUserPreference(userId, blogsViewType, currentPage, blogsPerPage, selectedBlogId);
-    revalidatePath('/bulletinBoard');
+    // revalidatePath('/bulletinBoard');
 }
