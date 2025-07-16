@@ -34,7 +34,7 @@ const EditorTheme = {
   tableCellActionButton: 'editor-tableCellActionButton',
   tableCellActionButtonContainer: 'editor-tableCellActionButtonContainer',
   tableCellEditing: 'editor-tableCellEditing',
-  tableCellHeader: 'editor-tableCellHeader',
+  tableCellHeader: 'table-cell-header',
   tableCellPrimarySelected: 'editor-tableCellPrimarySelected',
   tableCellResizer: 'editor-tableCellResizer',
   tableCellSelected: 'editor-tableCellSelected',

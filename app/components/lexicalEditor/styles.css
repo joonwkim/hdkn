@@ -482,12 +482,6 @@
   top: 0;
 }
 
-.editor-tableCellHeader {
-  background-color: var(--bs-tertiary-bg);
-  /* background-color: #f2f3f5; */
-  text-align: start;
-}
-
 .editor-tableCellSelected {
   background-color: var(--bs-tertiary-bg);
   /* background-color: #c9dbf0; */

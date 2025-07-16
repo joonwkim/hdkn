@@ -329,7 +329,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                 )}
 
                 {/* Blogs 목록 보기 */}
-                <div className="mt-3">
+                <div className="mt-0">
                     {/* 요약보기 */}
                     {blogsViewType === "summary" && (
                         <div>
@@ -377,12 +377,12 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>작성자</th>
-                                    <th>Title</th>
-                                    <th>작성일</th>
-                                    <th>조회</th>
-                                    <th>좋아요</th>
-                                    <th>실어요</th>
+                                    <th className='table-cell-header'>작성자</th>
+                                    <th className='table-cell-header'>Title</th>
+                                    <th className='table-cell-header'>작성일</th>
+                                    <th className='table-cell-header'>조회</th>
+                                    <th className='table-cell-header'>좋아요</th>
+                                    <th className='table-cell-header'>실어요</th>
                                 </tr>
                             </thead>
                             <tbody>

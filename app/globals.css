@@ -48,3 +48,9 @@ body {
 .fs-7 {
   font-size: .7rem;
 }
+
+.table-cell-header {
+  background-color: var(--bs-tertiary-bg) !important;
+  /* background-color: #f2f3f5; */
+  text-align: start;
+}
