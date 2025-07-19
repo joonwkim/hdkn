@@ -7,6 +7,7 @@ import { SessionUser } from '../lib/types';
 import { use } from 'react';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../api/auth/[...nextauth]/route';
+import { getUserPreferences } from './userPreference';
 
 export async function getUsers() {
     try {
@@ -270,4 +271,8 @@ export async function getOrCreateUserPreferences(userId: string) {
             sortOrder: 'updatedAt_desc',
         },
     });
+}
+export async function getUserSelectedBlogId() {
+    const prefs = await getUserPreferences();
+    return prefs?.selectedBlogId;
 }

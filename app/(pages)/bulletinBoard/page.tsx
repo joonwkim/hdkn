@@ -3,6 +3,7 @@ import { getBlogs } from "@/app/services/blogService";
 import BulletinBoard from "./BulletinBoard";
 import { getUserPreferences } from "@/app/services/userPreference";
 import ThemeToggle from "./components/ThemeToggle";
+import { getUserSelectedBlogId } from "@/app/services/userService";
 
 const Page = async () => {
   const blogsData = await getBlogs();
@@ -16,6 +17,7 @@ const Page = async () => {
   }
 
   const prefs = await getUserPreferences();
+  const blogId = await getUserSelectedBlogId();
   const rawTheme = prefs?.theme;
   const theme: "light" | "dark" = isValidTheme(rawTheme) ? rawTheme : "light";
 
@@ -25,8 +27,10 @@ const Page = async () => {
       {/* <h1>Settings</h1>
       <ThemeToggle currentTheme={theme} />
       <div>prefs:{JSON.stringify(prefs, null, 2)}</div>
-      <div></div> */}
-      <BulletinBoard key={Date.now()} blogs={blogsData.props} />
+      <div>
+        {prefs?.selectedBlogId}
+      </div> */}
+      <BulletinBoard key={Date.now()} blogs={blogsData.props} selectedBlogId={prefs?.selectedBlogId} />
     </div>
 
   );

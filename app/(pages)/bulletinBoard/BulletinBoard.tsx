@@ -16,12 +16,15 @@ import { ThumbsStatus, Vote } from '@prisma/client';
 import ThemeToggle from './components/ThemeToggle';
 import { saveUserPreferenceAction } from '@/app/actions/userPreference';
 import { curry } from 'lodash-es';
+import { getUserSelectedBlogId } from '@/app/services/userService';
+import { getContent } from '@/app/components/lexicalEditor/utils/getSelectedNode';
 
 type BlogsProps = {
-    blogs: BlogWithRefTable[]
+    blogs: BlogWithRefTable[];
+    selectedBlogId: string | null | undefined;
 }
 
-const BulletinBoard = ({ blogs }: BlogsProps) => {
+const BulletinBoard = ({ blogs, selectedBlogId }: BlogsProps) => {
     //#region session and state
     const { data: session, status, update } = useSession();
     const [title, setTitle] = useState("");
@@ -40,35 +43,22 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     //#endregion
 
     useEffect(() => {
-        try {
-            if (session?.user && session.user.preference) {
-                if (session.user.preference.selectedBlogId !== null) {
-                    const blog = blogs.find((blog) => blog.id === session?.user.preference.selectedBlogId);
-                    if (blog) {
-                        console.log('')
-                        setSelectedBlog(blog);
-                    }
-
-                    if (blog?.authorId === session?.user.id) {
-                        setIsAuthor(true)
-                        setViewMode('edit')
-                    }
+        if (session?.user) {
+            if (selectedBlogId) {
+                const blog = blogs.find((blog) => blog.id === selectedBlogId);
+                if (blog) {
+                    console.log('blog selected');
+                    setSelectedBlog(blog);
                 }
-                setBlogsViewType(session.user.preference.blogsViewType)
-                setCurrentPage(session.user.preference.currentPage);
-                setBlogPerPage(session.user.preference.blogsPerPage);
             }
-
-        } catch (error) {
-            alert(error)
+            const pref = session.user.preference;
+            setBlogsViewType(pref.blogsViewType);
+            setCurrentPage(pref.currentPage);
+            setBlogPerPage(pref.blogsPerPage);
         }
-    }, [session?.user.preference])
+    }, [session?.user.preference, blogs]);
 
-    const resetAll = () => {
-        setTitle("");
-        setViewMode('view');
-        setSelectedBlog(null);
-    }
+
     const handleFocus = () => {
         const inputElement = document.getElementById("contentTextarea") as HTMLInputElement;
         if (inputElement) {
@@ -79,15 +69,15 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     const handleBlogSelectionChanged = async (blog: BlogWithRefTable) => {
         if (selectedBlog?.id !== blog.id) {
             setSelectedBlog(blog);
-            const author = blog.authorId === session?.user.id;
-            setIsAuthor(author);
-            setViewMode(author ? 'edit' : 'view');
+            // const author = blog.authorId === session?.user.id;
+            // setIsAuthor(author);
+            // setViewMode(author ? 'edit' : 'view');
             const element = document.querySelector('.blog-content');
             if (element) {
                 element.scrollTop = 0;
             }
-            await upsertVoteOnBlogViewCountAction({ userId: session?.user.id, blogId: blog.id, });
-            update();
+            // await upsertVoteOnBlogViewCountAction({ userId: session?.user.id, blogId: blog.id, });
+            // update();
 
         } else {
             console.log('handleBlogSelectionChanged else')
@@ -106,7 +96,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             alert('로그인 사용자만 게시판 글을 작성할 수 있습니다.')
         } else {
             setViewMode('new')
-            setSelectedBlog(null)
+            // setSelectedBlog(null)
             setTitle('')
         }
     };
@@ -119,7 +109,9 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                 if (selectedBlog.authorId !== session.user.id) {
                     alert('작성자만 수정할 수 있습니다.')
                 } else {
+
                     setTitle(selectedBlog.title);
+                    setViewMode('edit')
                     handleFocus();
                 }
             } else {
@@ -140,27 +132,30 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
         }
         const result = await createNewBlogAction(session?.user.id, title, content)
         if (result) {
-            console.log(`title: ${title} added`);
+            // console.log(`title: ${title} added`);
             router.refresh();
-            resetAll();
+            // resetAll();
         }
     };
     const handleSaveEditedBlog = async (content: string) => {
         if (selectedBlog) {
             const result = await updateBlogAction(selectedBlog.id, content)
-            if (result) {
-                console.log(`title: ${title} added`);
-                router.refresh();
-                resetAll();
-            }
-            setSelectedBlog(null);
-            await saveUserPreferenceAction(session?.user.id, blogsViewType, currentPage, blogsPerPage, null);
+            // if (result) {
+            //     console.log(`title: ${title} added`);
+            //     router.refresh();
+            //     resetAll();
+            // }
+            // setSelectedBlog(null);
+            // await saveUserPreferenceAction(session?.user.id, blogsViewType, currentPage, blogsPerPage, selectedBlog.id);
+            setViewMode('view')
             // await update();
         }
     };
     const handleCancel = () => {
-        resetAll();
+        setViewMode('view')
+        // resetAll();
     };
+
     const handleCommentChange = (blogId: number, value: string) => {
         setCommentInputs({ ...commentInputs, [blogId]: value });
     };
@@ -173,7 +168,6 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
     const getTableClassName = (id: string) => {
         return `${id === selectedBlog?.id ? 'border-primary border-2' : ''}`;
     }
-
     const renderPagination = () => {
         const maxVisiblePages = 5; // Adjust this to show more/less pages around the current one
         const pages = [];
@@ -189,6 +183,7 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             let end = Math.min(totalPages - 1, currentPage + 2);
 
             if (start > 2) {
+                ``
                 pages.push("..."); // Add ellipsis if skipping pages
             }
 
@@ -222,8 +217,6 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
             </ul>
         );
     };
-
-
     return (
         <div>
             {`작성자: ${isAuthor}`}
@@ -244,12 +237,12 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                         </button>
                     </div>
                     <div title={isAuthor ? "글 수정" : "작성자 만 수정할 수 있습니다."}>
-                        <button className="btn btn-outline-secondary btn-sm me-2" title="글 수정" onClick={handleEditBlogClick} disabled={!isAuthor}>
+                        <button className="btn btn-outline-secondary btn-sm me-2" title="글 수정" onClick={handleEditBlogClick} >
                             <i className="bi bi-pencil"></i>
                         </button>
                     </div>
                     <div title={isAuthor ? "글 삭제" : "작성자 만 삭제할 수 있습니다."}>
-                        <button className="btn btn-outline-secondary btn-sm me-2" title="글 삭제" onClick={handleDeleteBlogClick} disabled={!isAuthor}>
+                        <button className="btn btn-outline-secondary btn-sm me-2" title="글 삭제" onClick={handleDeleteBlogClick}>
                             <i className="bi bi-trash"></i>
                         </button>
                     </div>
@@ -337,9 +330,10 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                                 <div key={blog.id} className={getSummaryClassName(blog.id)} onClick={() => handleBlogSelectionChanged(blog)}>
                                     <h5>{blog.title}</h5>
                                     <strong>{blog.author.name}</strong> - <small>{blog.updatedAt.toKrDateString()}</small>
-                                    <div className="lexical-editor-summaryview mb-3">
+                                    <div className="lexical-editor-summaryview">
                                         <Editor isReadOnly={true} initialData={blog.content} />
                                     </div>
+                                    <div className='ps-2 mb-3' title='자세히 보기'>...</div>
                                     <BlogFooter blog={blog} userId={session?.user.id} />
                                     <BlogComment blog={blog} />
                                 </div>
@@ -356,13 +350,12 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                                             <div className="fs-5 text-truncate">{`제목: ${blog.title}`}</div>
                                             <div className="fs-7 text-truncate">{`작성자: ${blog.author.name}`}</div>
                                         </div>
-
                                         <div className="card-body">
                                             <div className="lexical-editor-cardview">
                                                 <Editor isReadOnly={true} initialData={blog.content} />
                                             </div>
+                                            <div className='ps-2 mb-3' title='자세히 보기'>...</div>
                                         </div>
-
                                         <div className="card-footer">
                                             <BlogFooter blog={blog} userId={session?.user.id} />
                                         </div>
@@ -371,7 +364,6 @@ const BulletinBoard = ({ blogs }: BlogsProps) => {
                             ))}
                         </div>
                     )}
-
                     {/* 테이블보기 */}
                     {blogsViewType === "table" && (
                         <table className="table">

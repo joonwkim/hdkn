@@ -105,7 +105,16 @@ export async function updateBlog({ blogId, content }: { blogId: string, content:
         content: content,
       }
     })
-    // console.log("upsert blog result:", result);
+
+    const user = await prisma.userPreference.update({
+      where: {
+        userId: result.authorId
+      },
+      data: {
+        selectedBlogId: blogId,
+      }
+    })
+    console.log("upsert blog result:", user);
     return result;
   } catch (error) {
     console.log('upsertBlog error:', error)

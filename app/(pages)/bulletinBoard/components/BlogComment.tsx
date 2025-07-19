@@ -23,7 +23,7 @@ const BlogComment = ({ blog }: BlogCommentProps) => {
     const [comments, setComments] = useState(blog.comments)
     const [isAddingComment, setIsAddingComment] = useState(false)
     const [isAsce, setIsAsce] = useState(true);
-    const [showPopover, setShowPopover] = useState(false);
+    const [showPopover, setShowPopover] = useState(true);
 
     const addComment = async () => {
         if (session?.user) {
@@ -56,6 +56,12 @@ const BlogComment = ({ blog }: BlogCommentProps) => {
         }
     }
 
+    const handleEditCommand = (comment: any) => {
+        alert(JSON.stringify(comment, null, 2));
+    }
+    const handleDeleteCommand = (comment: any) => {
+        alert(JSON.stringify(comment, null, 2));
+    }
     return (
         <small className="text-muted mt-2">
             <div className="d-flex align-items-center">
@@ -147,10 +153,13 @@ const BlogComment = ({ blog }: BlogCommentProps) => {
                                 <div className='d-flex justify-content-between'>
                                     <div className='fs-7'>{comment.commenter.name}</div>
                                     <div>
-                                        <i className="bi bi-three-dots"></i>
+                                        {!showPopover && (
+                                            <i className="bi bi-three-dots"></i>
+                                        )}
                                         {showPopover && (
-                                            <div>
-                                                test
+                                            <div className='fs-7 d-flex gap-3'>
+                                                <div onClick={() => handleEditCommand(comment)}>수정</div>
+                                                <div onClick={() => handleDeleteCommand(comment)}>삭제</div>
                                             </div>
                                         )}
                                     </div>
